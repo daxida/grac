@@ -1,0 +1,22 @@
+[package]
+name = "grac"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "grac"
+path = "src/main.rs"
+
+[dependencies]
+unicode-normalization = "0.1.24"
+
+[dev-dependencies]
+criterion = "0.5.1"
+
+[[bench]]
+name = "benchmark"
+harness = false
+
+# Only use this when profiling via "cargo flamegraph"
+# [profile.release]
+# debug = true
