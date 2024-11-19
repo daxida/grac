@@ -13,7 +13,7 @@ fn read_file(file_path: &str) -> io::Result<String> {
 }
 
 pub fn benchmark_syllabify_file(c: &mut Criterion) {
-    let file_path = "t1.txt";
+    let file_path = "dump.txt";
     let content = read_file(file_path).unwrap();
     let words: Vec<&str> = content.split_whitespace().collect();
 
