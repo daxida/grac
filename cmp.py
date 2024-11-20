@@ -20,6 +20,13 @@ def timeit(fn, words, version, ref_elapsed=0.0):
     return res, elapsed
 
 
+def split_words(text: str) -> list[str]:
+    words = []
+    for line in text.splitlines():
+        words.extend(line.split(" "))
+    return words
+
+
 def main():
     start_time = time.time()
 
@@ -28,7 +35,7 @@ def main():
         text = f.read()
 
     for times in (10,):
-        words = (text * times).split(" ")
+        words = split_words((text * times))
         print(f"Testing with {len(words)} words")
 
         for _ in range(1):

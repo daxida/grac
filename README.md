@@ -1,4 +1,4 @@
-Port of [greek-accentuation](https://github.com/jtauber/greek-accentuation) to rust / python via PyO3 + madurin.
+Port of [greek-accentuation](https://github.com/jtauber/greek-accentuation) to rust / python via PyO3 + maturin.
 
 WIP: Finish modern greek syllabification (with no support for synizesis)
 

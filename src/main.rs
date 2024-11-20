@@ -24,8 +24,8 @@ fn main() {
             let clean_words: Vec<String> = words.iter().map(|&word| clean_word(word)).collect();
 
             let start_syllabify = Instant::now();
-            let _syllabified_words: Vec<Vec<String>> =
-                clean_words.iter().map(|cword| syllabify_3(cword)).collect();
+            let _syllabified_words: Vec<Vec<_>> =
+                clean_words.iter().map(|cword| syllabify_2(cword)).collect();
             let duration_syllabify = start_syllabify.elapsed();
             println!(
                 "Total time for syllabification + allocation: {:?}",
