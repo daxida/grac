@@ -2,6 +2,7 @@ from greek_accentuation.syllabify import syllabify as syl1
 from grac import syllabify as syl2
 from grac import syllabify_2 as syl3
 from grac import syllabify_3 as syl4
+from grac import syllables as syl5
 from pathlib import Path
 import time
 
@@ -43,17 +44,21 @@ def main():
             res1, _ = timeit(syl2, words, "1", el1)
             res2, _ = timeit(syl3, words, "2", el1)
             res3, _ = timeit(syl4, words, "3", el1)
+            res4, _ = timeit(syl5, words, "4", el1)
         for a, b, w in zip(ref, res1, words):
             if a != b:
                 print(f"{a} {b} '{w}' [comparing ref, res1]")
                 assert False
-        for a, b, c, d, w in zip(ref, res1, res2, res3, words):
+        for a, b, c, d, e, w in zip(ref, res1, res2, res3, res4, words):
             assert a == b
             if a != c and c:
                 print(f"{a} {c} '{w}' [comparing ref res2]")
                 assert False
             if a != d and d:
                 print(f"{a} {d} '{w}' [comparing ref res3]")
+                assert False
+            if a != e and e:
+                print(f"{a} {e} '{w}' [comparing ref res4]")
                 assert False
 
     elapsed = time.time() - start_time

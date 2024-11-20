@@ -138,17 +138,31 @@ pub fn syllabify(word: &str) -> Vec<String> {
 }
 
 #[inline(always)]
-fn dump(chars: &[char], fr: usize, to: &mut usize, result: &mut Vec<String>) {
-    result.push(chars[fr..*to].iter().collect::<String>());
+fn dump<'a>(
+    chars: &[char],
+    fr: usize,
+    to: &mut usize,
+    result: &mut Vec<&'a str>,
+    original: &'a str,
+) {
+    let start = chars[..fr].iter().map(|c| c.len_utf8()).sum::<usize>();
+    let end = chars[..*to].iter().map(|c| c.len_utf8()).sum::<usize>();
+    result.push(&original[start..end]);
 }
 
 #[inline(always)]
-fn dumpmove(chars: &[char], fr: usize, to: &mut usize, result: &mut Vec<String>) {
-    dump(chars, fr, to, result);
+fn dumpmove<'a>(
+    chars: &[char],
+    fr: usize,
+    to: &mut usize,
+    result: &mut Vec<&'a str>,
+    original: &'a str,
+) {
+    dump(chars, fr, to, result, original);
     *to = fr;
 }
 
-pub fn syllabify_2(word: &str) -> Vec<String> {
+pub fn syllabify_2(word: &str) -> Vec<&str> {
     let mut result = Vec::new();
     let mut state = 0;
     let chars: Vec<char> = word.chars().collect();
@@ -168,12 +182,12 @@ pub fn syllabify_2(word: &str) -> Vec<String> {
                         if chars.get(fr + 2) == Some(&'ι') {
                             // Dump only the part after the iota
                             if fr + 2 < to {
-                                dump(&chars, fr + 2, &mut to, &mut result);
+                                dump(&chars, fr + 2, &mut to, &mut result, word);
                                 to = fr + 2;
                             }
                         }
                     } else {
-                        dumpmove(&chars, fr + 1, &mut to, &mut result);
+                        dumpmove(&chars, fr + 1, &mut to, &mut result, word);
                     }
                 } else {
                     state = 2;
@@ -181,10 +195,10 @@ pub fn syllabify_2(word: &str) -> Vec<String> {
             }
             2 => {
                 if is_vowel(ch) {
-                    dumpmove(&chars, fr + 1, &mut to, &mut result);
+                    dumpmove(&chars, fr + 1, &mut to, &mut result, word);
                     state = 1;
                 } else if !is_valid_consonant_cluster_chars(&chars[fr..to]) {
-                    dumpmove(&chars, fr + 1, &mut to, &mut result);
+                    dumpmove(&chars, fr + 1, &mut to, &mut result, word);
                     state = 0;
                 }
             }
@@ -193,19 +207,19 @@ pub fn syllabify_2(word: &str) -> Vec<String> {
     }
 
     if 0 < to {
-        dump(&chars, 0, &mut to, &mut result);
+        dump(&chars, 0, &mut to, &mut result, word);
     }
 
     result.reverse();
     result
 }
 
-pub fn syllabify_3(word: &str) -> Vec<String> {
+pub fn syllabify_3(word: &str) -> Vec<&str> {
     let chars: Vec<char> = word.chars().collect();
     let mut pos = chars.len();
     let mut result = Vec::new();
 
-    while let Some(syllable) = parse_syllable(&chars, &mut pos) {
+    while let Some(syllable) = parse_syllable(word, &chars, &mut pos) {
         result.push(syllable);
     }
 
@@ -213,17 +227,17 @@ pub fn syllabify_3(word: &str) -> Vec<String> {
     result
 }
 
-fn parse_syllable(chars: &[char], pos: &mut usize) -> Option<String> {
+fn parse_syllable<'a>(word: &'a str, chars: &[char], pos: &mut usize) -> Option<&'a str> {
     let to = *pos;
 
     move_coda(chars, pos);
     move_nucleus(chars, pos);
     move_onset(chars, pos);
 
-    let syllable = chars[*pos..to].iter().collect::<String>();
-
-    if !syllable.is_empty() {
-        Some(syllable)
+    if *pos < to {
+        let fr_byte = chars[..*pos].iter().map(|c| c.len_utf8()).sum::<usize>();
+        let to_byte = chars[..to].iter().map(|c| c.len_utf8()).sum::<usize>();
+        Some(&word[fr_byte..to_byte])
     } else {
         None
     }
@@ -269,11 +283,12 @@ mod tests {
 
     #[test]
     fn test_full_syllable() {
-        let chars: Vec<char> = "στρες".chars().collect();
+        let word = "στρες";
+        let chars: Vec<char> = word.chars().collect();
         let mut pos = chars.len();
 
-        let syllable = parse_syllable(&chars, &mut pos);
-        assert_eq!(syllable, Some("στρες".to_string()));
+        let syllable = parse_syllable(word, &chars, &mut pos);
+        assert_eq!(syllable, Some("στρες"));
     }
 
     #[test]

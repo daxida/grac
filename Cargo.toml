@@ -8,6 +8,7 @@ name = "grac"
 path = "src/main.rs"
 
 [dependencies]
+greek-syllables = "0.1.4"
 unicode-normalization = "0.1.24"
 
 [dev-dependencies]
@@ -18,5 +19,5 @@ name = "benchmark"
 harness = false
 
 # Only use this when profiling via "cargo flamegraph"
-# [profile.release]
-# debug = true
+[profile.release]
+debug = true
