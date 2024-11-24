@@ -1,34 +1,20 @@
-use grac::{is_diphthong, syllabify, syllabify_2, syllabify_3};
+use grac::{syllabify, syllabify_ref};
 use paste::paste;
 use quickcheck::quickcheck;
-
-#[test]
-fn test_is_diphthong() {
-    assert_eq!(is_diphthong("αι"), true);
-    assert_eq!(is_diphthong("αε"), false);
-    assert_eq!(is_diphthong("αϋ"), false);
-}
 
 macro_rules! mktest {
     ($input:expr, $expected:expr) => {
         paste! {
             #[test]
-            fn [<syllabify_1_$input:lower>]() {
+            fn [<syllabify_ref_$input:lower>]() {
+                let result = [<syllabify_ref>]($input);
+                assert_eq!(result, $expected);
+            }
+        }
+        paste! {
+            #[test]
+            fn [<syllabify_$input:lower>]() {
                 let result = [<syllabify>]($input);
-                assert_eq!(result, $expected);
-            }
-        }
-        paste! {
-            #[test]
-            fn [<syllabify_2_$input:lower>]() {
-                let result = [<syllabify_2>]($input);
-                assert_eq!(result, $expected);
-            }
-        }
-        paste! {
-            #[test]
-            fn [<syllabify_3_$input:lower>]() {
-                let result = [<syllabify_3>]($input);
                 assert_eq!(result, $expected);
             }
         }
@@ -82,9 +68,8 @@ impl quickcheck::Arbitrary for GreekWord {
 
 quickcheck! {
     fn test_syllabify_equality(word: GreekWord) -> bool {
-        let result_1 = syllabify(&word.0);
-        let result_2 = syllabify_2(&word.0);
-        let result_3 = syllabify_3(&word.0);
-        result_1 == result_2 && result_2 == result_3
+        let result_1 = syllabify_ref(&word.0);
+        let result_2 = syllabify(&word.0);
+        result_1 == result_2
     }
 }

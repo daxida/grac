@@ -1,5 +1,5 @@
 #[allow(unused_imports)]
-use grac::{syllabify, syllabify_2, syllabify_3};
+use grac::{syllabify, syllabify_ref};
 use std::fs::File;
 use std::io::{self, Read};
 use std::time::Instant;
@@ -25,7 +25,7 @@ fn main() {
 
             let start_syllabify = Instant::now();
             let _syllabified_words: Vec<Vec<_>> =
-                clean_words.iter().map(|cword| syllabify_2(cword)).collect();
+                clean_words.iter().map(|cword| syllabify(cword)).collect();
             let duration_syllabify = start_syllabify.elapsed();
             println!(
                 "Total time for syllabification + allocation: {:?}",
