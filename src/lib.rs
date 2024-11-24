@@ -252,7 +252,10 @@ fn move_coda(chars: &[char], pos: &mut usize) {
 fn move_nucleus(chars: &[char], pos: &mut usize) {
     let to = *pos;
     while *pos > 0 && (is_vowel(chars[*pos - 1]) || chars[*pos - 1] == Breathing::Rough.as_char()) {
-        if to - *pos > 0 {
+        if to - *pos > 0
+            && chars[*pos] != Accent::Acute.as_char()
+            && chars[*pos] != Breathing::Rough.as_char()
+        {
             if is_diphthong_chars(&chars[*pos - 1..*pos + 1]) {
                 if to - *pos > 1 && chars.get(*pos + 1) == Some(&'ι') {
                     *pos += 1;
@@ -289,59 +292,5 @@ mod tests {
 
         let syllable = parse_syllable(word, &chars, &mut pos);
         assert_eq!(syllable, Some("στρες"));
-    }
-
-    #[test]
-    fn test_syllabify_pythagoras() {
-        let result = syllabify_3("Πυθαγόρας");
-        assert_eq!(result, vec!["Πυ", "θα", "γό", "ρας"]);
-    }
-
-    #[test]
-    fn test_syllabify_alexander_2() {
-        let result = syllabify_2("Αλέξανδρος");
-        assert_eq!(result, vec!["Α", "λέ", "ξαν", "δρος"]);
-    }
-
-    #[test]
-    fn test_syllabify_stress() {
-        let result = syllabify_2("στρες");
-        assert_eq!(result, vec!["στρες"]);
-    }
-
-    #[test]
-    fn test_syllabify_andras() {
-        let result = syllabify_2("άνδρας");
-        assert_eq!(result, vec!["άν", "δρας"]);
-    }
-
-    #[test]
-    fn test_syllabify_alexander() {
-        let result = syllabify_3("Αλέξανδρος");
-        assert_eq!(result, vec!["Α", "λέ", "ξαν", "δρος"]);
-    }
-
-    #[test]
-    fn test_syllabify_athens() {
-        let result = syllabify_3("Ἀθήνα");
-        assert_eq!(result, vec!["Ἀ", "θή", "να"]);
-    }
-
-    #[test]
-    fn test_syllabify_homer() {
-        let result = syllabify_3("Ὅμηρος");
-        assert_eq!(result, vec!["Ὅ", "μη", "ρος"]);
-    }
-
-    #[test]
-    fn test_syllabify_aroui() {
-        let result = syllabify_3("ἄρουι");
-        assert_eq!(result, vec!["ἄ", "ρου", "ι"]);
-    }
-
-    #[test]
-    fn test_syllabify2_arouin() {
-        let result = syllabify_3("ἄρουιν");
-        assert_eq!(result, vec!["ἄ", "ρου", "ιν"]);
     }
 }

@@ -9,6 +9,7 @@ path = "src/main.rs"
 
 [dependencies]
 greek-syllables = "0.1.4"
+paste = "1.0.15"
 unicode-normalization = "0.1.24"
 
 [dev-dependencies]
