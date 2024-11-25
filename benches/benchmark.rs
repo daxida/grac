@@ -1,8 +1,5 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use grac::syllabify;
-use grac::syllabify_2;
-use grac::syllabify_3;
-use greek_syllables::syllables;
+use grac::{syllabify, syllabify_ref};
 use std::fs::File;
 use std::io::{self, Read};
 
@@ -27,23 +24,9 @@ pub fn benchmark_syllabify_file(c: &mut Criterion) {
         })
     });
 
-    group.bench_function("syllabify2", |b| {
+    group.bench_function("syllabify_ref", |b| {
         b.iter(|| {
-            let result: Vec<_> = words.iter().map(|word| syllabify_2(word)).collect();
-            black_box(result);
-        })
-    });
-
-    group.bench_function("syllabify3", |b| {
-        b.iter(|| {
-            let result: Vec<_> = words.iter().map(|word| syllabify_3(word)).collect();
-            black_box(result);
-        })
-    });
-
-    group.bench_function("syllables", |b| {
-        b.iter(|| {
-            let result: Vec<_> = words.iter().map(|word| syllables(word)).collect();
+            let result: Vec<_> = words.iter().map(|word| syllabify_ref(word)).collect();
             black_box(result);
         })
     });
