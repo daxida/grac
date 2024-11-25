@@ -1,4 +1,5 @@
-use crate::chars::{base_lower, diaeresis, Accent, Breathing};
+use crate::accents::{diaeresis, Accent, Breathing};
+use crate::chars::base_lower;
 
 // By frequency: https://www.sttmedia.com/characterfrequency-greek
 #[rustfmt::skip]

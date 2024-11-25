@@ -1,3 +1,4 @@
+mod accents;
 mod chars;
 mod syllabify;
 
