@@ -10,4 +10,3 @@ crate-type = ["cdylib"]
 [dependencies]
 pyo3 = { version = "0.23.0", features = ["extension-module"] }
 grac = { version = "0.1.0", path = "../" }
-greek-syllables = "0.1.4"

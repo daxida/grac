@@ -32,14 +32,16 @@ mktest!("Ὅμηρος", vec!["Ὅ", "μη", "ρος"]);
 
 mktest!("στρες", vec!["στρες"]);
 mktest!("άνδρας", vec!["άν", "δρας"]);
+
 mktest!("ἄρουι", vec!["ἄ", "ρου", "ι"]);
 mktest!("ἄρουιν", vec!["ἄ", "ρου", "ιν"]);
-// mktest!("ἄρουιν_", vec!["ἄ", "ρου", "ιν_"]);
-mktest!("english", vec!["english"]);
 
 mktest!("Ἀχαιιά", vec!["Ἀ", "χαι", "ι", "ά"]);
 mktest!("Ἠελίοιο", vec!["Ἠ", "ε", "λί", "οι", "ο"]);
 mktest!("Θρήικι", vec!["Θρή", "ι", "κι"]);
+mktest!("Ἠοῖα", vec!["Ἠ", "οῖ", "α"]);
+
+mktest!("english", vec!["english"]);
 
 const GREEK_LETTERS: &[(u32, u32)] = &[
     (0x0370, 0x03FF), // Basic Greek and Coptic

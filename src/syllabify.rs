@@ -116,8 +116,7 @@ fn move_onset(chars: &[char], pos: &mut usize) {
     let to = *pos;
     while *pos > 0
         && !is_vowel(chars[*pos - 1])
-        // Invalid consonant cluster
-        && !(to - *pos > 0 && !is_consonant_cluster(&chars[*pos - 1..to]))
+        && (to == *pos || is_consonant_cluster(&chars[*pos - 1..to]))
     {
         *pos -= 1;
     }
