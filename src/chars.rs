@@ -16,10 +16,9 @@ pub fn base(ch: char) -> char {
 
 pub fn base_lower(ch: char) -> char {
     if is_modern_lower_greek(ch) {
-        // Cheap function
+        // Fast path for most of the chars
         ch
     } else {
-        // Expensive function
         base(ch).to_lowercase().next().unwrap_or(ch)
     }
 }
