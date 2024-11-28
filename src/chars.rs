@@ -1,5 +1,7 @@
 use unicode_normalization::char::decompose_canonical;
 
+// TODO: Do stemming instead of using unicode_normalization
+
 // Doing this instead of ranges allows for const, but does not account for char gaps.
 const fn is_modern_lower_greek(ch: char) -> bool {
     ch >= '\u{03B1}' && ch <= '\u{03C9}'
