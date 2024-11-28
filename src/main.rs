@@ -15,7 +15,7 @@ fn clean_word(word: &str) -> String {
     word.chars().filter(|c| c.is_alphanumeric()).collect()
 }
 
-fn main() {
+fn simple_benchmark() {
     let file_path = "dump.txt";
 
     match read_file(file_path) {
@@ -36,4 +36,8 @@ fn main() {
         }
         Err(e) => eprintln!("Error reading file {}: {}", file_path, e),
     }
+}
+
+fn main() {
+    simple_benchmark();
 }
