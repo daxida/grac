@@ -1,7 +1,7 @@
 use grac::{syllabify_el, syllabify_gr, syllabify_gr_ref};
 use quickcheck::quickcheck;
 
-macro_rules! mktests_gr {
+macro_rules! mktest_gr {
     ($group_name:ident, $([$input:expr, $expected:expr]),* $(,)?) => {
         #[test]
         fn $group_name() {
@@ -24,7 +24,7 @@ macro_rules! mktests_gr {
     };
 }
 
-macro_rules! mktests_el {
+macro_rules! mktest_el {
     ($group_name:ident, $([$input:expr, $expected:expr]),* $(,)?) => {
         #[test]
         fn $group_name() {
@@ -43,7 +43,7 @@ macro_rules! mktests_el {
     };
 }
 
-mktests_gr!(
+mktest_gr!(
     syllabify_gr_basic,
     ["γυναικός", "γυ-ναι-κός"],
     ["φῡ́ω", "φῡ́-ω"],
@@ -59,7 +59,7 @@ mktests_gr!(
     ["κόσμος", "κό-σμος"],
 );
 
-mktests_gr!(
+mktest_gr!(
     syllabify_gr_names,
     ["Πυθαγόρας", "Πυ-θα-γό-ρας"],
     ["Αλέξανδρος", "Α-λέ-ξαν-δρος"],
@@ -67,20 +67,30 @@ mktests_gr!(
     ["Ὅμηρος", "Ὅ-μη-ρος"],
 );
 
-mktests_el!(
+mktest_el!(
     syllabify_el_basic,
     ["ἄρουιν", "ἄ-ρου-ιν"],
     ["οιωνός", "οι-ω-νός"],
+    // ["Δαυίδ", "Δαυ-ίδ"], // Hard
 );
 
-mktests_el!(
+// I have not decided yet on left punctuation...
+mktest_el!(
+    syllabify_el_punct,
+    // ["«τὸ", "«το"],
+    ["Αθήνα.", "Α-θή-να."],
+    ["φιλοσοφία,", "φι-λο-σο-φί-α,"],
+    ["παιδεία;", "παι-δεί-α;"],
+);
+
+mktest_el!(
     syllabify_el_double_cons_same,
     ["μέλισσα", "μέ-λισ-σα"],
     ["θάλασσα", "θά-λασ-σα"],
     ["Ελλάδα", "Ελ-λά-δα"],
 );
 
-mktests_el!(
+mktest_el!(
     syllabify_el_double_cons,
     ["κόσμος", "κό-σμος"],
     ["δεσμός", "δε-σμός"],
@@ -93,9 +103,11 @@ mktests_el!(
     // χν
     ["χνούδι", "χνού-δι"],
     ["αχνός", "α-χνός"],
+    ["χθες", "χθες"],
+    ["βγη", "βγη"],
 );
 
-mktests_el!(
+mktest_el!(
     syllabify_el_triple_cons,
     ["εχθρός", "ε-χθρός"],
     ["άσπρος", "ά-σπρος"],
@@ -103,7 +115,7 @@ mktests_el!(
 );
 
 // Diaeresis
-mktests_el!(
+mktest_el!(
     syllabify_el_diaeresis,
     ["Αγλαΐα", "Α-γλα-ΐ-α"],
     ["αδενοϋπόφυση", "α-δε-νο-ϋ-πό-φυ-ση"]
@@ -120,7 +132,7 @@ mktests_el!(
 
 // http://ebooks.edu.gr/ebooks/v/html/8547/2009/Grammatiki_E-ST-Dimotikou_html-apli/index_B4a.html
 // https://melobytes.gr/el/app/syllavismos
-mktests_el!(
+mktest_el!(
     syllabify_el_dimotiko,
     // Rule 1: A consonant between two vowels is grouped with the second vowel.
     ["έχω", "έ-χω"],
@@ -143,7 +155,7 @@ mktests_el!(
     ["σύννεφο", "σύν-νε-φο"],
 );
 
-mktests_el!(
+mktest_el!(
     syllabify_el_sivas_grammar,
     // Rule 3: Three or more consonants between vowels
     ["αισχός", "αι-σχός"],
@@ -159,8 +171,32 @@ mktests_el!(
     ["μουγκρίζω", "μου-γκρί-ζω"],
 );
 
+// https://www.patakis.gr/files/1186890.pdf
+mktest_el!(
+    syllabify_el_patakis,
+    ["γάτα", "γά-τα"],
+    ["αγκάθι", "α-γκά-θι"],
+    ["κουλούρι", "κου-λού-ρι"],
+    ["μπουκάλι", "μπου-κά-λι"],
+    ["δέντρο", "δέ-ντρο"],
+    ["κόμπρα", "κό-μπρα"],
+    ["ψάρι", "ψά-ρι"],
+    ["μπαξές", "μπα-ξές"],
+    ["άντρας", "ά-ντρας"],
+    ["ντουλάπι", "ντου-λά-πι"],
+    ["δόντι", "δό-ντι"],
+    ["τούμπα", "τού-μπα"],
+    ["μαγκούρα", "μα-γκού-ρα"],
+    ["μυρμήγκι", "μυρ-μή-γκι"],
+    ["ψάξε", "ψά-ξε"],
+    ["αγκίστρι", "α-γκί-στρι"],
+    ["άντεξα", "ά-ντε-ξα"],
+    ["μπρίκι", "μπρί-κι"],
+    ["ομπρέλα", "ο-μπρέ-λα"],
+);
+
 // https://github.com/datio/grhyph/blob/master/grhyph_test.go
-mktests_el!(
+mktest_el!(
     syllabify_el_grhyph,
     ["άκαμπτος", "ά-κα-μπτος"],
     ["άλμπατρος", "άλ-μπα-τρος"],

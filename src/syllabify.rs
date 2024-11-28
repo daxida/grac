@@ -52,9 +52,9 @@ const DIPHTHONGS_EL: [(char, char); 8] = [
 
 // TODO: Sort me
 #[rustfmt::skip]
-const CONS_CLUSTERS_EL: [(char, char); 44] = [
-    ('β', 'δ'), ('β', 'λ'), ('β', 'ρ'),
-    ('γ', 'κ'), ('γ', 'λ'), ('γ', 'ν'), ('γ', 'ρ'), 
+const CONS_CLUSTERS_EL: [(char, char); 45] = [
+    ('β', 'δ'), ('β', 'λ'), ('β', 'ρ'), ('β', 'γ'),
+    ('γ', 'κ'), ('γ', 'λ'), ('γ', 'ν'), ('γ', 'ρ'),
     ('δ', 'ρ'),
     ('θ', 'λ'), ('θ', 'ν'), ('θ', 'ρ'),
     ('κ', 'λ'), ('κ', 'ν'), ('κ', 'ρ'), ('κ', 'τ'),
@@ -119,6 +119,11 @@ fn is_consonant_cluster(chs: &[char], lang: &Lang) -> bool {
     }
 }
 
+#[inline]
+fn get_byte_offset(pos: usize, chars: &[char]) -> usize {
+    chars[..pos].iter().map(|c| c.len_utf8()).sum::<usize>()
+}
+
 fn syllabify_lang<'a>(word: &'a str, lang: &Lang) -> Vec<&'a str> {
     let chars: Vec<char> = word.chars().collect();
     let mut pos = chars.len();
@@ -145,8 +150,8 @@ fn parse_syllable<'a>(
     move_onset(chars, pos, lang);
 
     if *pos < to {
-        let fr_byte = chars[..*pos].iter().map(|c| c.len_utf8()).sum::<usize>();
-        let to_byte = chars[..to].iter().map(|c| c.len_utf8()).sum::<usize>();
+        let fr_byte = get_byte_offset(*pos, chars);
+        let to_byte = get_byte_offset(to, chars);
         Some(&word[fr_byte..to_byte])
     } else {
         None
@@ -272,8 +277,8 @@ fn dump<'a>(
     result: &mut Vec<&'a str>,
     original: &'a str,
 ) {
-    let start = chars[..fr].iter().map(|c| c.len_utf8()).sum::<usize>();
-    let end = chars[..*to].iter().map(|c| c.len_utf8()).sum::<usize>();
+    let start = get_byte_offset(fr, chars);
+    let end = get_byte_offset(*to, chars);
     result.push(&original[start..end]);
 }
 
