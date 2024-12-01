@@ -1,6 +1,23 @@
 use grac::{syllabify_el, syllabify_gr, syllabify_gr_ref};
 use quickcheck::quickcheck;
 
+/// More informative than a simple "assert_eq"
+macro_rules! assert_eq_dbg {
+    ($result:expr, $expected:expr, $input:expr) => {
+        assert_eq!(
+            $result,
+            $expected,
+            "\nMismatch for: '{}'\n'{:?}'\n'{:?}'",
+            $input,
+            $input.chars(),
+            $input
+                .chars()
+                .map(|c| format!("U+{:04X}", c as u32))
+                .collect::<Vec<_>>(),
+        );
+    };
+}
+
 macro_rules! mktest_gr {
     ($group_name:ident, $([$input:expr, $expected:expr]),* $(,)?) => {
         #[test]
@@ -14,11 +31,11 @@ macro_rules! mktest_gr {
             for (input, expected) in test_cases {
                 let result = syllabify_gr(input);
                 let tc_expected = expected.split('-').collect::<Vec<_>>();
-                assert_eq!(result, tc_expected);
+                assert_eq_dbg!(result, tc_expected, input);
 
                 let result = syllabify_gr_ref(input);
                 let tc_expected = expected.split('-').collect::<Vec<_>>();
-                assert_eq!(result, tc_expected);
+                assert_eq_dbg!(result, tc_expected, input);
             }
         }
     };
@@ -37,7 +54,7 @@ macro_rules! mktest_el {
             for (input, expected) in test_cases {
                 let result = syllabify_el(input);
                 let tc_expected = expected.split('-').collect::<Vec<_>>();
-                assert_eq!(result, tc_expected);
+                assert_eq_dbg!(result, tc_expected, input);
             }
         }
     };

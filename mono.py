@@ -24,7 +24,8 @@ def main():
     fpath = sys.argv[1]
 
     with open(fpath, "r") as f:
-        content = f.read()
+        lines = f.readlines()
+        content = "".join(line for line in lines if not line.startswith("---"))
 
     cont = content.split()
     poly = tm(poly2mono, content).split()
