@@ -126,33 +126,33 @@ fn get_byte_offset(pos: usize, chars: &[char]) -> usize {
 
 fn syllabify_lang<'a>(word: &'a str, lang: &Lang) -> Vec<&'a str> {
     let chars: Vec<char> = word.chars().collect();
-    let mut pos = chars.len();
-    let mut result = Vec::new();
+    let mut fr = chars.len();
+    let mut fr_byte = get_byte_offset(fr, &chars);
+    let mut syllables = Vec::new();
 
-    while let Some(syllable) = parse_syllable(word, &chars, &mut pos, lang) {
-        result.push(syllable);
+    while let Some(to) = parse_syllable_break(&chars, fr, lang) {
+        let to_byte = get_byte_offset(to, &chars);
+
+        let syllable = &word[to_byte..fr_byte];
+        syllables.push(syllable);
+
+        fr = to;
+        fr_byte = to_byte;
     }
 
-    result.reverse();
-    result
+    syllables.reverse();
+    syllables
 }
 
-fn parse_syllable<'a>(
-    word: &'a str,
-    chars: &[char],
-    pos: &mut usize,
-    lang: &Lang,
-) -> Option<&'a str> {
-    let to = *pos;
+fn parse_syllable_break<'a>(chars: &[char], fr: usize, lang: &Lang) -> Option<usize> {
+    let mut to = fr;
 
-    move_coda(chars, pos, lang);
-    move_nucleus(chars, pos, lang);
-    move_onset(chars, pos, lang);
+    move_coda(chars, &mut to, lang);
+    move_nucleus(chars, &mut to, lang);
+    move_onset(chars, &mut to, lang);
 
-    if *pos < to {
-        let fr_byte = get_byte_offset(*pos, chars);
-        let to_byte = get_byte_offset(to, chars);
-        Some(&word[fr_byte..to_byte])
+    if fr > to {
+        Some(to)
     } else {
         None
     }
@@ -354,10 +354,10 @@ mod tests {
     fn test_full_syllable() {
         let word = "στρες";
         let chars: Vec<char> = word.chars().collect();
-        let mut pos = chars.len();
+        let pos = chars.len();
 
-        let syllable = parse_syllable(word, &chars, &mut pos, &GR);
-        assert_eq!(syllable, Some("στρες"));
+        let syllable_break = parse_syllable_break(&chars, pos, &GR);
+        assert_eq!(syllable_break, Some(0));
     }
 
     #[test]
