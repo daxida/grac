@@ -2,36 +2,28 @@ use unicode_normalization::UnicodeNormalization;
 
 use crate::syllabify::syllabify_el;
 
-/// - `ACUTE`          (U+0301):  ́         OXIA
-/// - `GRAVE`          (U+0300):  ̀         VARIA
-/// - `CIRCUMFLEX`     (U+0342):  ͂         PERISPOMENI
-/// - `IOTA_SUBSCRIPT` (U+0345):  ͅ         YPOGEGRAMMENI
-/// - `DIAERESIS`      (U+0308):  ̈         None
 pub struct Accent;
 
 impl Accent {
+    // [  ́ ] U+0301: οξεία (oxia)
     pub const ACUTE: char = '\u{0301}';
+    // [  ̀ ] U+0300: βαρεία (varia)
     pub const GRAVE: char = '\u{0300}';
+    // [  ͂ ] U+0342: περισπωμένη (perispomeni)
     pub const CIRCUMFLEX: char = '\u{0342}';
+    // [  ͅ ] U+0345: υπογεγραμμένη (ypogegrammeni)
     pub const IOTA_SUBSCRIPT: char = '\u{0345}';
+    // [  ̈ ] U+0308: διαλυτικά (diaeresis)
     pub const DIAERESIS: char = '\u{0308}';
-    // Greek aliases
-    pub const OXIA: char = Self::ACUTE;
-    pub const VARIA: char = Self::GRAVE;
-    pub const PERISPOMENI: char = Self::CIRCUMFLEX;
-    pub const YPOGEGRAMMENI: char = Self::IOTA_SUBSCRIPT;
 }
 
-/// - `SMOOTH` (U+0313):  ̓         PSILI
-/// - `ROUGH`  (U+0314):  ̔         DASIA
 pub struct Breathing;
 
 impl Breathing {
+    // [  ̓ ] U+0313: ψιλή (psili)
     pub const SMOOTH: char = '\u{0313}';
+    // [  ̔ ] U+0314: δασεία (dasia)
     pub const ROUGH: char = '\u{0314}';
-    // Greek aliases
-    pub const PSILI: char = Self::SMOOTH;
-    pub const DASIA: char = Self::ROUGH;
 }
 
 const fn extract_diacritic(diacritic: char) -> impl Fn(char) -> Option<char> {
