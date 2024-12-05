@@ -24,15 +24,15 @@ impl Breathing {
     pub const ROUGH: char = '\u{0314}';
 }
 
-fn extract_diacritic(ch: char, diacritic: char) -> Option<char> {
-    ch.nfd().find(|&c| c == diacritic)
+fn has_diacritic(ch: char, diacritic: char) -> bool {
+    ch.nfd().find(|&c| c == diacritic).is_some()
 }
 
-pub fn diaeresis(ch: char) -> Option<char> {
-    extract_diacritic(ch, Accent::DIAERESIS)
+pub fn has_diaeresis(ch: char) -> bool {
+    has_diacritic(ch, Accent::DIAERESIS)
 }
 
-fn remove_diacritics(text: &str, diacritics: &[char]) -> String {
+fn _remove_diacritics(text: &str, diacritics: &[char]) -> String {
     text.nfd()
         .filter(|ch| !diacritics.contains(ch))
         .collect::<String>()
@@ -40,6 +40,38 @@ fn remove_diacritics(text: &str, diacritics: &[char]) -> String {
         .to_string()
 }
 
-pub fn remove_accents(text: &str) -> String {
-    remove_diacritics(text, &[Accent::CIRCUMFLEX, Accent::ACUTE, Accent::GRAVE])
+/// Remove all diacritics from a string.
+///
+/// ```
+/// use grac::remove_diacritics;
+///
+/// let homer = "τὴν δ᾽ ἐγὼ οὐ λύσω: πρίν μιν καὶ γῆρας ἔπεισιν\n
+///              ἡμετέρῳ ἐνὶ οἴκῳ ἐν Ἄργεϊ τηλόθι πάτρης";
+/// assert_eq!(remove_diacritics(homer),
+///             "την δ᾽ εγω ου λυσω: πριν μιν και γηρας επεισιν\n
+///              ημετερω ενι οικω εν Αργει τηλοθι πατρης");
+/// ```
+pub fn remove_diacritics(text: &str) -> String {
+    _remove_diacritics(
+        text,
+        &[
+            Accent::CIRCUMFLEX,
+            Accent::ACUTE,
+            Accent::GRAVE,
+            Accent::IOTA_SUBSCRIPT,
+            Accent::DIAERESIS,
+            Breathing::SMOOTH,
+            Breathing::ROUGH,
+        ],
+    )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_remove_diacritics() {
+        assert_eq!(remove_diacritics("λόγος ὁράω όι"), "λογος οραω οι");
+    }
 }

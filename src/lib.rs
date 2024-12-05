@@ -4,7 +4,7 @@ mod monotonic;
 mod syllabify;
 mod synizesis;
 
-pub use accents::remove_accents;
+pub use accents::remove_diacritics;
 pub use monotonic::to_mono;
 
 pub use syllabify::syllabify_el;

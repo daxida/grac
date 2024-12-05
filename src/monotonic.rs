@@ -1,6 +1,6 @@
 use unicode_normalization::UnicodeNormalization;
 
-use crate::accents::remove_accents;
+use crate::accents::remove_diacritics;
 use crate::accents::Accent;
 use crate::accents::Breathing;
 use crate::chars::is_greek_char;
@@ -236,7 +236,7 @@ fn to_mono_word(word: &str) -> String {
                     out
                 } else {
                     log("Monosyllable no accent", "Removing accents");
-                    remove_accents(&out)
+                    remove_diacritics(&out)
                 }
             } else {
                 log("Word keeps accents", &out);
@@ -246,7 +246,7 @@ fn to_mono_word(word: &str) -> String {
         [.., syl1, syl2] => {
             if MONOSYL_REMOVE_ACCENT.contains(&out.as_str()) {
                 log("Word in NOT_ACCENTED list", "Removing accents");
-                remove_accents(&out)
+                remove_diacritics(&out)
             } else if has_acute(syl1) && has_acute(syl2) {
                 log("Two acute accents in two syllables", "Removing last acute");
                 remove_last_acute(&out)
@@ -278,11 +278,6 @@ fn to_mono_word(word: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_remove_accents() {
-        assert_eq!(remove_accents("λόγος ὁράω όι"), "λογος ὁραω οι");
-    }
 
     macro_rules! mktest_mono {
         ($group_name:ident, $([$input:expr, $expected:expr]),* $(,)?) => {

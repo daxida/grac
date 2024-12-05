@@ -1,4 +1,4 @@
-use crate::accents::{diaeresis, Accent, Breathing};
+use crate::accents::{has_diaeresis, Accent, Breathing};
 use crate::chars::base_lower;
 use crate::synizesis::lookup_synizesis;
 
@@ -108,7 +108,7 @@ fn is_diphthong(chs: &[char], lang: &Lang) -> bool {
     match chs {
         [a, b] => {
             let pair = (base_lower(*a), base_lower(*b));
-            lang.diphthongs.contains(&pair) && diaeresis(*b).is_none()
+            lang.diphthongs.contains(&pair) && !has_diaeresis(*b)
         }
         _ => false,
     }
