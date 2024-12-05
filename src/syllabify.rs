@@ -91,7 +91,7 @@ pub fn syllabify_gr(word: &str) -> Vec<&str> {
 
 pub fn syllabify_el(word: &str) -> Vec<&str> {
     if let Some(res) = lookup_synizesis(word) {
-        return res;
+        return res.to_vec();
     }
     syllabify_lang(word, &EL, false)
 }
