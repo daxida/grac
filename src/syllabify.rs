@@ -1,5 +1,6 @@
 use crate::accents::{diaeresis, Accent, Breathing};
 use crate::chars::base_lower;
+use crate::synizesis::lookup_synizesis;
 
 // By frequency: https://www.sttmedia.com/characterfrequency-greek
 #[rustfmt::skip]
@@ -85,11 +86,18 @@ const EL: Lang = Lang {
 };
 
 pub fn syllabify_gr(word: &str) -> Vec<&str> {
-    syllabify_lang(word, &GR)
+    syllabify_lang(word, &GR, false)
 }
 
 pub fn syllabify_el(word: &str) -> Vec<&str> {
-    syllabify_lang(word, &EL)
+    if let Some(res) = lookup_synizesis(word) {
+        return res;
+    }
+    syllabify_lang(word, &EL, false)
+}
+
+pub fn syllabify_el_syn(word: &str) -> Vec<&str> {
+    syllabify_lang(word, &EL, true)
 }
 
 fn is_vowel(ch: char, lang: &Lang) -> bool {
@@ -121,13 +129,13 @@ fn get_byte_offset(pos: usize, chars: &[char]) -> usize {
     chars[..pos].iter().map(|c| c.len_utf8()).sum::<usize>()
 }
 
-fn syllabify_lang<'a>(word: &'a str, lang: &Lang) -> Vec<&'a str> {
+fn syllabify_lang<'a>(word: &'a str, lang: &Lang, synizesis: bool) -> Vec<&'a str> {
     let chars: Vec<char> = word.chars().collect();
     let mut fr = chars.len();
     let mut fr_byte = get_byte_offset(fr, &chars);
     let mut syllables = Vec::new();
 
-    while let Some(to) = parse_syllable_break(&chars, fr, lang) {
+    while let Some(to) = parse_syllable_break(&chars, fr, lang, synizesis) {
         let to_byte = get_byte_offset(to, &chars);
 
         let syllable = &word[to_byte..fr_byte];
@@ -141,11 +149,11 @@ fn syllabify_lang<'a>(word: &'a str, lang: &Lang) -> Vec<&'a str> {
     syllables
 }
 
-fn parse_syllable_break(chars: &[char], fr: usize, lang: &Lang) -> Option<usize> {
+fn parse_syllable_break(chars: &[char], fr: usize, lang: &Lang, synizesis: bool) -> Option<usize> {
     let mut to = fr;
 
     move_coda(chars, &mut to, lang);
-    move_nucleus(chars, &mut to, lang);
+    move_nucleus(chars, &mut to, lang, synizesis);
     move_onset(chars, &mut to, lang);
 
     if fr > to {
@@ -161,7 +169,7 @@ fn move_coda(chars: &[char], pos: &mut usize, lang: &Lang) {
     }
 }
 
-fn move_nucleus(chars: &[char], pos: &mut usize, lang: &Lang) {
+fn move_nucleus(chars: &[char], pos: &mut usize, lang: &Lang, synizesis: bool) {
     let to = *pos;
     while *pos > 0 && (is_vowel(chars[*pos - 1], lang) || chars[*pos - 1] == Breathing::ROUGH) {
         if to - *pos > 0 && chars[*pos] != Accent::ACUTE && chars[*pos] != Breathing::ROUGH {
@@ -170,6 +178,7 @@ fn move_nucleus(chars: &[char], pos: &mut usize, lang: &Lang) {
                     *pos += 1;
                     break;
                 }
+            } else if synizesis && chars.get(*pos - 1) == Some(&'ι') {
             } else {
                 break;
             }
@@ -289,9 +298,26 @@ mod tests {
         let word = "στρες";
         let chars: Vec<char> = word.chars().collect();
         let pos = chars.len();
-
-        let syllable_break = parse_syllable_break(&chars, pos, &GR);
+        let syllable_break = parse_syllable_break(&chars, pos, &GR, false);
         assert_eq!(syllable_break, Some(0));
+    }
+
+    #[test]
+    fn test_mia_syllable_syn_true() {
+        let word = "μια";
+        let chars: Vec<char> = word.chars().collect();
+        let pos = chars.len();
+        let syllable_break = parse_syllable_break(&chars, pos, &GR, true);
+        assert_eq!(syllable_break, Some(0));
+    }
+
+    #[test]
+    fn test_mia_syllable_syn_false() {
+        let word = "μια";
+        let chars: Vec<char> = word.chars().collect();
+        let pos = chars.len();
+        let syllable_break = parse_syllable_break(&chars, pos, &GR, false);
+        assert_eq!(syllable_break, Some(2));
     }
 
     #[test]

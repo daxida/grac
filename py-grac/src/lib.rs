@@ -7,6 +7,11 @@ fn syllabify_el(word: &str) -> PyResult<Vec<&str>> {
 }
 
 #[pyfunction]
+fn syllabify_el_syn(word: &str) -> PyResult<Vec<&str>> {
+    Ok(_grac::syllabify_el_syn(word))
+}
+
+#[pyfunction]
 fn syllabify_gr(word: &str) -> PyResult<Vec<&str>> {
     Ok(_grac::syllabify_gr(word))
 }
@@ -29,6 +34,7 @@ fn to_mono(word: &str) -> PyResult<String> {
 #[pymodule]
 fn grac(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(syllabify_el, m)?)?;
+    m.add_function(wrap_pyfunction!(syllabify_el_syn, m)?)?;
     m.add_function(wrap_pyfunction!(syllabify_gr, m)?)?;
     m.add_function(wrap_pyfunction!(syllabify_gr_ref, m)?)?;
     m.add_function(wrap_pyfunction!(remove_accents, m)?)?;
