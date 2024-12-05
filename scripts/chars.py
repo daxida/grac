@@ -1,3 +1,5 @@
+"""Used to generate code for chars.rs."""
+
 import unicodedata
 
 
