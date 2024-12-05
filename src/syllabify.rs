@@ -50,7 +50,6 @@ const DIPHTHONGS_EL: [(char, char); 8] = [
     ('υ', 'ι'),
 ];
 
-// TODO: Sort me
 #[rustfmt::skip]
 const CONS_CLUSTERS_EL: [(char, char); 45] = [
     ('β', 'δ'), ('β', 'λ'), ('β', 'ρ'), ('β', 'γ'),
@@ -85,9 +84,7 @@ const EL: Lang = Lang {
     cons_clusters: &CONS_CLUSTERS_EL,
 };
 
-// NOTE: This is likely slower than just duplicating the code for both languages.
 pub fn syllabify_gr(word: &str) -> Vec<&str> {
-    // syllabify_gr_(word)
     syllabify_lang(word, &GR)
 }
 
@@ -191,69 +188,6 @@ fn move_onset(chars: &[char], pos: &mut usize, lang: &Lang) {
         *pos -= 1;
     }
 }
-
-// fn syllabify_gr_(word: &str) -> Vec<&str> {
-//     let chars: Vec<char> = word.chars().collect();
-//     let mut pos = chars.len();
-//     let mut result = Vec::new();
-//
-//     while let Some(syllable) = parse_syllable_(word, &chars, &mut pos) {
-//         result.push(syllable);
-//     }
-//
-//     result.reverse();
-//     result
-// }
-//
-// fn parse_syllable_<'a>(word: &'a str, chars: &[char], pos: &mut usize) -> Option<&'a str> {
-//     let to = *pos;
-//
-//     move_coda_(chars, pos);
-//     move_nucleus_(chars, pos);
-//     move_onset_(chars, pos);
-//
-//     if *pos < to {
-//         let fr_byte = chars[..*pos].iter().map(|c| c.len_utf8()).sum::<usize>();
-//         let to_byte = chars[..to].iter().map(|c| c.len_utf8()).sum::<usize>();
-//         Some(&word[fr_byte..to_byte])
-//     } else {
-//         None
-//     }
-// }
-//
-// fn move_coda_(chars: &[char], pos: &mut usize) {
-//     while *pos > 0 && !is_vowel_gr(chars[*pos - 1]) {
-//         *pos -= 1;
-//     }
-// }
-//
-// fn move_nucleus_(chars: &[char], pos: &mut usize) {
-//     let to = *pos;
-//     while *pos > 0 && (is_vowel_gr(chars[*pos - 1]) || chars[*pos - 1] == Breathing::ROUGH) {
-//         if to - *pos > 0 && chars[*pos] != Accent::ACUTE && chars[*pos] != Breathing::ROUGH {
-//             if is_diphthong_gr(&chars[*pos - 1..*pos + 1]) {
-//                 if to - *pos > 1 && chars.get(*pos + 1) == Some(&'ι') {
-//                     *pos += 1;
-//                     break;
-//                 }
-//             } else {
-//                 break;
-//             }
-//         }
-//         *pos -= 1;
-//     }
-// }
-//
-// fn move_onset_(chars: &[char], pos: &mut usize) {
-//     let to = *pos;
-//     while *pos > 0
-//         && !is_vowel_gr(chars[*pos - 1])
-//         // If we reach a consonant cluster we keep moving
-//         && (to == *pos || is_consonant_cluster_gr(&chars[*pos - 1..to] ))
-//     {
-//         *pos -= 1;
-//     }
-// }
 
 ///////////// Oracle reference. Not intended for use.
 
