@@ -1,5 +1,6 @@
 use unicode_normalization::UnicodeNormalization;
 
+use crate::chars::is_greek_char;
 use crate::syllabify::syllabify_el;
 
 pub struct Accent;
@@ -26,140 +27,93 @@ impl Breathing {
     pub const ROUGH: char = '\u{0314}';
 }
 
-const fn extract_diacritic(diacritic: char) -> impl Fn(char) -> Option<char> {
-    move |ch: char| ch.nfd().find(|&c| diacritic == c)
+fn extract_diacritic(ch: char, diacritic: char) -> Option<char> {
+    ch.nfd().find(|&c| c == diacritic)
 }
 
-// TODO: make this const
 pub fn diaeresis(ch: char) -> Option<char> {
-    let diaeresis = extract_diacritic(Accent::DIAERESIS);
-    diaeresis(ch)
+    extract_diacritic(ch, Accent::DIAERESIS)
 }
 
-const ACUTE_TO_DIAERESIS: [(&str, &str); 5] = [
-    ("όι", "οϊ"),
-    ("άι", "αϊ"),
-    ("έι", "εϊ"),
-    ("ύι", "υϊ"),
-    ("όυ", "οϋ"),
-];
-
-// use aho_corasick::AhoCorasick;
-// const ACUTE_FR: [&str; 5] = ["όι", "άι", "έι", "ύι", "όυ"];
-// const DIAERESIS_TO: [&str; 5] = ["οϊ", "αϊ", "εϊ", "υϊ", "οϋ"];
-
-pub fn acute_to_diaeresis(text: &str) -> String {
-    // let ac = AhoCorasick::new(ACUTE_FR).unwrap();
-    // ac.replace_all(text, &DIAERESIS_TO)
-    let mut ntext = text.to_string();
-    for (from, to) in ACUTE_TO_DIAERESIS {
-        ntext = ntext.replace(from, to)
+fn replace_from_str_ary(text: &str, replacements: &[(&str, &str)]) -> String {
+    let mut result = text.to_string();
+    for &(from, to) in replacements {
+        result = result.replace(from, to);
     }
-    ntext
+    result
 }
 
-const SUPERFLUOUS_DIAERESES: [(&str, &str); 6] = [
-    ("άϊ", "άι"),
-    ("άϋ", "άυ"),
-    ("έϊ", "έι"),
-    ("έϋ", "έυ"),
-    ("όϊ", "όι"),
-    ("ούϊ", "ούι"),
-];
+// fn replace_from_char_ary(text: &str, replacements: &[(char, char)]) -> String {
+//     text.chars()
+//         .map(|x| {
+//             replacements
+//                 .iter()
+//                 .find(|&&(from, _)| from == x)
+//                 .map_or(x, |&(_, to)| to)
+//         })
+//         .collect()
+// }
 
-pub fn remove_superfluous_diaereses(text: &str) -> String {
-    let mut ntext = text.to_string();
-    for (from, to) in SUPERFLUOUS_DIAERESES {
-        ntext = ntext.replace(from, to)
-    }
-    ntext
+fn remove_superfluous_diaereses(text: &str) -> String {
+    const SUPERFLUOUS_DIAERESES: [(&str, &str); 6] = [
+        ("άϊ", "άι"),
+        ("άϋ", "άυ"),
+        ("έϊ", "έι"),
+        ("έϋ", "έυ"),
+        ("όϊ", "όι"),
+        ("ούϊ", "ούι"),
+    ];
+    replace_from_str_ary(text, &SUPERFLUOUS_DIAERESES)
 }
 
-/// Factory function for customizing functions that remove accents.
-pub const fn remove_diacritics(
-    diacritics: &[char],
-    diaeresis: bool,
-) -> impl Fn(&str) -> String + '_ {
-    move |text: &str| -> String {
-        let mut text = text.to_string();
-        if diaeresis {
-            // why?
-            text = acute_to_diaeresis(&text)
-        }
-        text.nfd()
-            .filter(|ch| !diacritics.contains(ch))
-            .collect::<String>()
-            .nfc()
-            .to_string()
-    }
+fn remove_diacritics(text: &str, diacritics: &[char]) -> String {
+    text.nfd()
+        .filter(|ch| !diacritics.contains(ch))
+        .collect::<String>()
+        .nfc()
+        .to_string()
 }
 
-/// ```
-/// use grac::remove_accents;
-///
-/// let input = "λόγος ὁράω όι άι έι ύι όυ";
-/// let result = remove_accents(input);
-/// assert_eq!(result, "λογος ὁραω οϊ αϊ εϊ υϊ οϋ");
-/// ```
-// FIXME: How to make const? With a macro maybeh
 pub fn remove_accents(text: &str) -> String {
-    remove_diacritics(&[Accent::CIRCUMFLEX, Accent::ACUTE, Accent::GRAVE], true)(text)
+    remove_diacritics(text, &[Accent::CIRCUMFLEX, Accent::ACUTE, Accent::GRAVE])
 }
 
-pub fn remove_non_accent_diacritics_without_dieresis(text: &str) -> String {
-    remove_diacritics(
-        &[Accent::IOTA_SUBSCRIPT, Breathing::ROUGH, Breathing::SMOOTH],
-        false,
-    )(text)
-}
-
-// FIXME: be less fugly
-pub fn grave_circumflex_to_acute(text: &str) -> String {
-    let mut ntext = text.to_string();
-    ntext = ntext.replace(Accent::GRAVE, &Accent::ACUTE.to_string());
-    ntext = ntext.replace(Accent::CIRCUMFLEX, &Accent::ACUTE.to_string());
-    ntext
-}
-
-// I've experienced issues with alternative characters
-// for spaces, namely U+2009. Splitting by lines does only
-// partially solve the issue (and it makes it slower...).
+/// Convert polytonic to monotonic Greek.
+///
+/// Leaves non greek words unchanged.
+///
+/// ```
+/// use grac::*;
+///
+/// let input = "Ἑλλάς καὶ κόσμος.\r\n...ἄνθρωπος.";
+/// let result = to_mono(input);
+/// assert_eq!(result, "Ελλάς και κόσμος.\r\n...άνθρωπος.");
+/// ```
 pub fn to_mono(text: &str) -> String {
-    text.lines()
-        .map(|line| {
-            line.split_inclusive([' ', '-'])
-                .map(to_mono_word)
-                .collect::<Vec<_>>()
-                .join("")
-        })
-        .collect::<Vec<_>>()
-        .join("\n")
+    text.split_inclusive(|c: char| c.is_whitespace() || c == '-')
+        .map(to_mono_word)
+        .collect()
 }
 
-// HACK: Not a big fan
 fn split_word_punctuation(word: &str) -> (&str, &str, &str) {
-    let mut start = 0;
-    let mut end = word.len();
+    let start = word
+        .char_indices()
+        .find(|&(_, c)| c.is_alphabetic())
+        .map(|(i, _)| i);
 
-    for (i, c) in word.char_indices() {
-        if c.is_alphanumeric() {
-            start = i;
-            break;
-        }
+    let end = word
+        .char_indices()
+        .rev()
+        .find(|&(_, c)| c.is_alphabetic())
+        .map(|(i, c)| i + c.len_utf8());
+
+    if let Some(start) = start {
+        let end = end.unwrap();
+        (&word[..start], &word[start..end], &word[end..])
+    } else {
+        // If the word has not a single alphabetic char...
+        (word, "", "")
     }
-
-    for (i, c) in word.char_indices().rev() {
-        if c.is_alphanumeric() {
-            end = i + c.len_utf8();
-            break;
-        }
-    }
-
-    let left_punct = &word[..start];
-    let core_word = &word[start..end];
-    let right_punct = &word[end..];
-
-    (left_punct, core_word, right_punct)
 }
 
 // FIX: Does not belong here
@@ -169,19 +123,6 @@ const ACUTE_VOWELS_LOWER: [char; 7] = ['ά', 'έ', 'ή', 'ί', 'ό', 'ύ', 'ώ']
 /// Assumes a normalized string as input.
 fn has_acute(s: &str) -> bool {
     s.chars().any(|c| ACUTE_VOWELS_LOWER.contains(&c))
-}
-
-// FIX: Does not belong here
-const CONSONANTS: [char; 35] = [
-    // Lowercase
-    'β', 'γ', 'δ', 'ζ', 'θ', 'κ', 'λ', 'μ', 'ν', 'ξ', 'π', 'ρ', 'σ', 'ς', 'τ', 'φ', 'χ', 'ψ', 'Β',
-    // Uppercase
-    'Γ', 'Δ', 'Ζ', 'Θ', 'Κ', 'Λ', 'Μ', 'Ν', 'Ξ', 'Π', 'Ρ', 'Σ', 'Τ', 'Φ', 'Χ', 'Ψ',
-];
-
-/// Extract vowels from an assumed well formed lowercase syllable.
-fn syllable_vowels(syl: &str) -> String {
-    syl.chars().filter(|ch| !CONSONANTS.contains(ch)).collect()
 }
 
 /// Remove last acute accent (lowercase) if any.
@@ -202,6 +143,17 @@ fn remove_last_acute(word: &str) -> String {
     }
 
     chars.into_iter().collect()
+}
+
+/// Extract vowels from an assumed well formed lowercase syllable.
+fn extract_vowels(s: &str) -> String {
+    const CONSONANTS: [char; 35] = [
+        // Lowercase
+        'β', 'γ', 'δ', 'ζ', 'θ', 'κ', 'λ', 'μ', 'ν', 'ξ', 'π', 'ρ', 'σ', 'ς', 'τ', 'φ', 'χ', 'ψ',
+        // Uppercase
+        'Β', 'Γ', 'Δ', 'Ζ', 'Θ', 'Κ', 'Λ', 'Μ', 'Ν', 'Ξ', 'Π', 'Ρ', 'Σ', 'Τ', 'Φ', 'Χ', 'Ψ',
+    ];
+    s.chars().filter(|ch| !CONSONANTS.contains(ch)).collect()
 }
 
 // These are monosyllables from which we do not want to remove the accent
@@ -253,8 +205,16 @@ const MONOSYL_REMOVE_ACCENT: [&str; 36] = [
     "Πιές",
 ];
 
-// FIX: This does not belong here
-const ACCENTED_DIPHTHONGS: [&str; 6] = ["όι", "Όι", "έι", "Έι", "άι", "Άι"];
+fn ends_in_diphthong(s: &str) -> bool {
+    ["όι", "Όι", "έι", "Έι", "άι", "Άι"]
+        .iter()
+        .any(|&e| s.ends_with(e))
+}
+
+fn is_greek_word(word: &str) -> bool {
+    word.chars()
+        .all(|ch| !ch.is_alphabetic() || is_greek_char(ch))
+}
 
 #[allow(unused_variables)]
 fn log(label: &str, value: impl std::fmt::Debug) {
@@ -265,6 +225,12 @@ fn to_mono_word(word: &str) -> String {
     // For debug: ignore empty words
     if word.is_empty() {
         return String::new();
+    }
+
+    // Do not remove accents if the word is not greek
+    if !is_greek_word(word) {
+        log("Not a greek word!", word);
+        return word.to_string();
     }
 
     // Strip punct
@@ -289,17 +255,18 @@ fn to_mono_word(word: &str) -> String {
         return format!("{}{}{}", left_punct, s, right_punct);
     }
 
-    let mut out = remove_non_accent_diacritics_without_dieresis(word);
-    log("Non-accent diacritics removed", &out);
-
-    out = out.nfd().to_string();
-    log("Normalized to NFD", &out);
-
-    out = grave_circumflex_to_acute(&out);
-    log("Grave/circumflex to acute", &out);
-
-    out = out.nfc().to_string();
-    log("Re-normalized to NFC", &out);
+    // Remove ancient diacritics and convert grave and circumflex to acute
+    let mut out = word
+        .nfd()
+        // Remove ancient diacritics
+        .filter(|c| ![Accent::IOTA_SUBSCRIPT, Breathing::ROUGH, Breathing::SMOOTH].contains(c))
+        // Grave and circumflex to acute
+        .map(|c| match c {
+            Accent::GRAVE | Accent::CIRCUMFLEX => Accent::ACUTE,
+            _ => c,
+        })
+        .nfc()
+        .collect::<String>();
 
     let syllables = syllabify_el(&out);
     log("Syllabified word", &syllables);
@@ -316,8 +283,7 @@ fn to_mono_word(word: &str) -> String {
                 && ABBREVIATION_MARKS.chars().all(|ch| fst_rpunct != Some(ch))
             {
                 // Do not change σόι, Κάιν
-                let syl_vows = syllable_vowels(syl);
-                if ACCENTED_DIPHTHONGS.iter().any(|&e| syl_vows.ends_with(e)) {
+                if ends_in_diphthong(&extract_vowels(syl)) {
                     log("Monosyllable ending in diphthong", "Keeps accents");
                     out
                 } else {
@@ -363,9 +329,12 @@ fn to_mono_word(word: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use crate::accents::to_mono;
-
     use super::*;
+
+    #[test]
+    fn test_remove_accents() {
+        assert_eq!(remove_accents("λόγος ὁράω όι"), "λογος ὁραω οι");
+    }
 
     macro_rules! mktest_mono {
         ($group_name:ident, $([$input:expr, $expected:expr]),* $(,)?) => {
@@ -419,6 +388,27 @@ mod tests {
         ["ἄϋλος", "άυλος"],
         ["φαΐ", "φαΐ"],
         ["ἀρχαϊκάς", "αρχαϊκάς"],
+    );
+
+    mktest_mono!(
+        mono_not_greek,
+        ["1808·", "1808·"],
+        [
+            "Le Poète est semblable au prince des nuées",
+            "Le Poète est semblable au prince des nuées"
+        ],
+        [
+            "Qui hante la tempête et se rit de l'archer;",
+            "Qui hante la tempête et se rit de l'archer;"
+        ],
+        [
+            "Exilé sur le sol au milieu des huées,",
+            "Exilé sur le sol au milieu des huées,"
+        ],
+        [
+            "Ses ailes de géant l'empêchent de marcher.",
+            "Ses ailes de géant l'empêchent de marcher."
+        ],
     );
 
     mktest_mono!(
@@ -507,10 +497,4 @@ mod tests {
         ],
         ["ἀρχαϊκάς", "αρχαϊκάς"],
     );
-
-    #[test]
-    fn test_remove_diacritics() {
-        assert_eq!(remove_accents("όι άι έι ύι όυ"), "οϊ αϊ εϊ υϊ οϋ");
-        assert_eq!(remove_accents("λόγος ὁράω"), "λογος ὁραω");
-    }
 }

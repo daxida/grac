@@ -1,5 +1,5 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use grac::{syllabify_gr, syllabify_gr_ref};
+use grac::{syllabify_gr, syllabify_gr_ref, to_mono};
 use std::fs::File;
 use std::io::{self, Read};
 
@@ -16,7 +16,7 @@ pub fn benchmark_syllabify_file(c: &mut Criterion) {
     let words: Vec<&str> = content.split_whitespace().collect();
 
     let mut group = c.benchmark_group("group");
-    group.sample_size(100);
+    group.sample_size(40);
     group.bench_function("syllabify_gr", |b| {
         b.iter(|| {
             let result: Vec<_> = words.iter().map(|word| syllabify_gr(word)).collect();
@@ -27,6 +27,13 @@ pub fn benchmark_syllabify_file(c: &mut Criterion) {
     group.bench_function("syllabify_gr_ref", |b| {
         b.iter(|| {
             let result: Vec<_> = words.iter().map(|word| syllabify_gr_ref(word)).collect();
+            black_box(result);
+        })
+    });
+
+    group.bench_function("to_mono", |b| {
+        b.iter(|| {
+            let result = to_mono(&content);
             black_box(result);
         })
     });

@@ -144,7 +144,7 @@ fn syllabify_lang<'a>(word: &'a str, lang: &Lang) -> Vec<&'a str> {
     syllables
 }
 
-fn parse_syllable_break<'a>(chars: &[char], fr: usize, lang: &Lang) -> Option<usize> {
+fn parse_syllable_break(chars: &[char], fr: usize, lang: &Lang) -> Option<usize> {
     let mut to = fr;
 
     move_coda(chars, &mut to, lang);

@@ -1,5 +1,5 @@
 #[allow(unused_imports)]
-use grac::{syllabify_gr, syllabify_gr_ref};
+use grac::{syllabify_gr, syllabify_gr_ref, to_mono};
 use std::fs::File;
 use std::io::{self, Read};
 use std::time::Instant;
@@ -11,6 +11,7 @@ fn read_file(file_path: &str) -> io::Result<String> {
     Ok(content)
 }
 
+#[allow(dead_code)]
 fn clean_word(word: &str) -> String {
     word.chars().filter(|c| c.is_alphanumeric()).collect()
 }
@@ -20,14 +21,15 @@ fn simple_benchmark() {
 
     match read_file(file_path) {
         Ok(content) => {
-            let words: Vec<&str> = content.split_whitespace().collect();
-            let clean_words: Vec<String> = words.iter().map(|&word| clean_word(word)).collect();
+            // let words: Vec<&str> = content.split_whitespace().collect();
+            // let clean_words: Vec<String> = words.iter().map(|&word| clean_word(word)).collect();
 
             let start_syllabify = Instant::now();
-            let _syllabified_words: Vec<Vec<_>> = clean_words
-                .iter()
-                .map(|cword| syllabify_gr(cword))
-                .collect();
+            // let _syllabified_words: Vec<Vec<_>> = clean_words
+            //     .iter()
+            //     .map(|cword| syllabify_gr(cword))
+            //     .collect();
+            let _mono = to_mono(&content);
             let duration_syllabify = start_syllabify.elapsed();
             println!(
                 "Total time for syllabification + allocation: {:?}",
