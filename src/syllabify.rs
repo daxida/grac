@@ -1,4 +1,4 @@
-use crate::accents::{has_diaeresis, Accent, Breathing};
+use crate::accents::{has_diaeresis, Diacritic};
 use crate::chars::base_lower;
 use crate::synizesis::lookup_synizesis;
 
@@ -6,7 +6,7 @@ use crate::synizesis::lookup_synizesis;
 #[rustfmt::skip]
 const VOWELS_GR: [char; 9] = [
     'α', 'ο', 'ε', 'ι', 'η', 'υ', 'ω',
-    '~', Accent::ACUTE,
+    '~', Diacritic::ACUTE,
 ];
 
 const DIPHTHONGS_GR: [(char, char); 8] = [
@@ -89,16 +89,36 @@ pub fn syllabify_gr(word: &str) -> Vec<&str> {
     syllabify_lang(word, &GR, false)
 }
 
+/// Syllabify a modern Greek word.
+///
+/// Automatically detects synizesis.
+///
+/// ```
+/// use grac::syllabify_el;
+/// assert_eq!(syllabify_el("αρρώστια"), vec!["αρ", "ρώ", "στια"]);
+/// ```
 pub fn syllabify_el(word: &str) -> Vec<&str> {
-    if let Some(res) = lookup_synizesis(word) {
-        return res.to_vec();
+    match lookup_synizesis(word) {
+        Some(res) => res.to_vec(),
+        _ => syllabify_lang(word, &EL, false),
     }
-    syllabify_lang(word, &EL, false)
 }
 
-pub fn syllabify_el_syn(word: &str) -> Vec<&str> {
-    syllabify_lang(word, &EL, true)
+/// Syllabify a modern Greek word.
+///
+/// Accepts a boolean flag to either always apply synizesis or to
+/// never apply it.
+///
+/// ```
+/// use grac::syllabify_el_mode;
+/// assert_eq!(syllabify_el_mode("αρρώστια", true), vec!["αρ", "ρώ", "στια"]);
+/// assert_eq!(syllabify_el_mode("αρρώστια", false), vec!["αρ", "ρώ", "στι", "α"]);
+/// ```
+pub fn syllabify_el_mode(word: &str, synizesis: bool) -> Vec<&str> {
+    syllabify_lang(word, &EL, synizesis)
 }
+
+/////////////////////////////////////////////
 
 fn is_vowel(ch: char, lang: &Lang) -> bool {
     lang.vowels.contains(&base_lower(ch))
@@ -171,8 +191,8 @@ fn move_coda(chars: &[char], pos: &mut usize, lang: &Lang) {
 
 fn move_nucleus(chars: &[char], pos: &mut usize, lang: &Lang, synizesis: bool) {
     let to = *pos;
-    while *pos > 0 && (is_vowel(chars[*pos - 1], lang) || chars[*pos - 1] == Breathing::ROUGH) {
-        if to - *pos > 0 && chars[*pos] != Accent::ACUTE && chars[*pos] != Breathing::ROUGH {
+    while *pos > 0 && (is_vowel(chars[*pos - 1], lang) || chars[*pos - 1] == Diacritic::ROUGH) {
+        if to - *pos > 0 && chars[*pos] != Diacritic::ACUTE && chars[*pos] != Diacritic::ROUGH {
             if is_diphthong(&chars[*pos - 1..*pos + 1], lang) {
                 if to - *pos > 1 && chars.get(*pos + 1) == Some(&'ι') {
                     *pos += 1;
@@ -199,6 +219,10 @@ fn move_onset(chars: &[char], pos: &mut usize, lang: &Lang) {
 }
 
 ///////////// Oracle reference. Not intended for use.
+
+pub fn is_vowel_el(ch: char) -> bool {
+    is_vowel(ch, &EL)
+}
 
 fn is_vowel_gr(ch: char) -> bool {
     is_vowel(ch, &GR)
@@ -247,10 +271,10 @@ pub fn syllabify_gr_ref(word: &str) -> Vec<&str> {
         match state {
             0 if is_vowel_gr(ch) => state = 1,
             1 => {
-                if is_vowel_gr(ch) || ch == Breathing::ROUGH {
+                if is_vowel_gr(ch) || ch == Diacritic::ROUGH {
                     let prev = chars[fr + 1];
 
-                    if prev == Accent::ACUTE || prev == Breathing::ROUGH {
+                    if prev == Diacritic::ACUTE || prev == Diacritic::ROUGH {
                         // Do nothing
                     } else if is_diphthong_gr(&chars[fr..fr + 2]) {
                         // Two consecutive overlapping diphthongs?

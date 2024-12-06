@@ -7,8 +7,8 @@ fn syllabify_el(word: &str) -> PyResult<Vec<&str>> {
 }
 
 #[pyfunction]
-fn syllabify_el_syn(word: &str) -> PyResult<Vec<&str>> {
-    Ok(_grac::syllabify_el_syn(word))
+fn syllabify_el_mode(word: &str, synizesis: bool) -> PyResult<Vec<&str>> {
+    Ok(_grac::syllabify_el_mode(word, synizesis))
 }
 
 #[pyfunction]
@@ -22,8 +22,8 @@ fn syllabify_gr_ref(word: &str) -> PyResult<Vec<&str>> {
 }
 
 #[pyfunction]
-fn remove_accents(word: &str) -> PyResult<String> {
-    Ok(_grac::remove_accents(word))
+fn remove_all_diacritics(word: &str) -> PyResult<String> {
+    Ok(_grac::remove_all_diacritics(word))
 }
 
 #[pyfunction]
@@ -34,10 +34,10 @@ fn to_mono(word: &str) -> PyResult<String> {
 #[pymodule]
 fn grac(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(syllabify_el, m)?)?;
-    m.add_function(wrap_pyfunction!(syllabify_el_syn, m)?)?;
+    m.add_function(wrap_pyfunction!(syllabify_el_mode, m)?)?;
     m.add_function(wrap_pyfunction!(syllabify_gr, m)?)?;
     m.add_function(wrap_pyfunction!(syllabify_gr_ref, m)?)?;
-    m.add_function(wrap_pyfunction!(remove_accents, m)?)?;
+    m.add_function(wrap_pyfunction!(remove_all_diacritics, m)?)?;
     m.add_function(wrap_pyfunction!(to_mono, m)?)?;
     Ok(())
 }

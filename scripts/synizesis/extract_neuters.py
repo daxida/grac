@@ -10,7 +10,7 @@ https://el.wiktionary.org/wiki/Κατηγορία:Ουσιαστικά_που_κ
 import re
 from pathlib import Path
 
-from grac import syllabify_el_mode
+from grac import syllabify_el_syn
 
 VOWEL_ACCENTED = re.compile(r"[έόίύάήώ]")
 
@@ -53,7 +53,7 @@ def filter_neuter(words: list[str]) -> list[str]:
         plural = word + "α"
         if plural not in words_set:
             continue
-        syllables = syllabify_el_mode(plural, False)
+        syllables = syllabify_el_syn(plural)
         if len(syllables) < 3 or not VOWEL_ACCENTED.search(syllables[-3]):
             continue
         neuter_words.append(plural)

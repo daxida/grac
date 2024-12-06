@@ -1,8 +1,7 @@
 use unicode_normalization::UnicodeNormalization;
 
-use crate::accents::remove_diacritics;
-use crate::accents::Accent;
-use crate::accents::Breathing;
+use crate::accents::remove_all_diacritics;
+use crate::accents::Diacritic;
 use crate::chars::is_greek_char;
 use crate::syllabify::syllabify_el;
 
@@ -207,10 +206,17 @@ fn to_mono_word(word: &str) -> String {
     let mut out = word
         .nfd()
         // Remove ancient diacritics
-        .filter(|c| ![Accent::IOTA_SUBSCRIPT, Breathing::ROUGH, Breathing::SMOOTH].contains(c))
+        .filter(|c| {
+            ![
+                Diacritic::IOTA_SUBSCRIPT,
+                Diacritic::ROUGH,
+                Diacritic::SMOOTH,
+            ]
+            .contains(c)
+        })
         // Grave and circumflex to acute
         .map(|c| match c {
-            Accent::GRAVE | Accent::CIRCUMFLEX => Accent::ACUTE,
+            Diacritic::GRAVE | Diacritic::CIRCUMFLEX => Diacritic::ACUTE,
             _ => c,
         })
         .nfc()
@@ -236,7 +242,7 @@ fn to_mono_word(word: &str) -> String {
                     out
                 } else {
                     log("Monosyllable no accent", "Removing accents");
-                    remove_diacritics(&out)
+                    remove_all_diacritics(&out)
                 }
             } else {
                 log("Word keeps accents", &out);
@@ -246,7 +252,7 @@ fn to_mono_word(word: &str) -> String {
         [.., syl1, syl2] => {
             if MONOSYL_REMOVE_ACCENT.contains(&out.as_str()) {
                 log("Word in NOT_ACCENTED list", "Removing accents");
-                remove_diacritics(&out)
+                remove_all_diacritics(&out)
             } else if has_acute(syl1) && has_acute(syl2) {
                 log("Two acute accents in two syllables", "Removing last acute");
                 remove_last_acute(&out)
