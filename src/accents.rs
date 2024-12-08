@@ -1,3 +1,4 @@
+use crate::syllabify::{is_vowel_el, syllabify_el};
 use unicode_normalization::UnicodeNormalization;
 
 pub struct Diacritic;
@@ -34,11 +35,10 @@ pub fn has_diaeresis(ch: char) -> bool {
 /// ```
 /// use grac::{remove_diacritics, Diacritic};
 ///
+/// let diacritics = [Diacritic::GRAVE, Diacritic::SMOOTH];
 /// let text = "ἄνθρωπος ἐστὶ";
-/// assert_eq!(
-///     remove_diacritics(text, &[Diacritic::GRAVE, Diacritic::SMOOTH]),
-///     "άνθρωπος εστι"
-/// );
+/// let res  = "άνθρωπος εστι";
+/// assert_eq!(remove_diacritics(text, &diacritics), res);
 /// ```
 pub fn remove_diacritics(text: &str, diacritics: &[char]) -> String {
     text.nfd()
@@ -76,12 +76,10 @@ pub fn remove_all_diacritics(text: &str) -> String {
     )
 }
 
-use crate::syllabify::is_vowel_el;
-use crate::syllabify_el;
-
 /// Add an acute accent to the specified syllable of a word.
 ///
-/// The position is counted from the end of the word (in syllables). Starts at 1.
+/// The position is counted from the end of the word (in syllables).
+/// Starts at 1.
 ///
 /// # Examples
 ///
@@ -92,6 +90,10 @@ use crate::syllabify_el;
 /// assert_eq!(add_acute("ανθρωπος", 2), "ανθρώπος");
 /// assert_eq!(add_acute("ανθρωπος", 3), "άνθρωπος");
 /// assert_eq!(add_acute("ανθρωπος", 4), "ανθρωπος");
+///
+/// // It may not yield the expected result based on the
+/// // syllabification of the word.
+/// assert_eq!(add_acute("σοι", 1), "σοί");
 /// ```
 pub fn add_acute(word: &str, pos: usize) -> String {
     let syllables = syllabify_el(word);
@@ -116,7 +118,8 @@ pub fn add_acute(word: &str, pos: usize) -> String {
 }
 
 /// Add acute to the first vowel from the end.
-/// NOTE: This is not ideal and could not yield the expected result.
+///
+/// This is not ideal and could not yield the expected result.
 fn add_acute_to_syllable(syllable: &str) -> String {
     let mut chars: Vec<char> = syllable.chars().collect();
     if let Some(pos) = chars.iter().rposition(|ch| is_vowel_el(*ch)) {
@@ -137,5 +140,6 @@ mod tests {
     fn test_add_acute() {
         assert_eq!(add_diacritic('α', Diacritic::ACUTE), 'ά');
         assert_eq!(add_diacritic('Ω', Diacritic::GRAVE), 'Ὼ');
+        assert_eq!(add_diacritic('ά', Diacritic::ACUTE), 'ά');
     }
 }
