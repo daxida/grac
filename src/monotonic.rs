@@ -102,6 +102,28 @@ fn dbg_bytes(word: &str) {
     );
 }
 
+/// Remove ancient diacritics and convert grave and circumflex to acute
+/// in a single pass.
+///
+/// filter_map was performing a bit worse but remains to be tested.
+fn convert_to_acute(word: &str) -> String {
+    word.nfd()
+        .filter(|c| {
+            ![
+                Diacritic::IOTA_SUBSCRIPT,
+                Diacritic::ROUGH,
+                Diacritic::SMOOTH,
+            ]
+            .contains(c)
+        })
+        .map(|c| match c {
+            Diacritic::GRAVE | Diacritic::CIRCUMFLEX => Diacritic::ACUTE,
+            _ => c,
+        })
+        .nfc()
+        .collect::<String>()
+}
+
 /// Convert a word from polytonic to monotonic Greek.
 fn to_mono_word(word: &str) -> String {
     // If the word is empty our segmentation logic is probably wrong.
@@ -132,26 +154,7 @@ fn to_mono_word(word: &str) -> String {
     log("Input word", core);
     dbg_bytes(core);
 
-    // Remove ancient diacritics and convert grave and circumflex to acute.
-    // filter_map was performing a bit worse but remains to be tested.
-    let mut out = core
-        .nfd()
-        // Remove ancient diacritics
-        .filter(|c| {
-            ![
-                Diacritic::IOTA_SUBSCRIPT,
-                Diacritic::ROUGH,
-                Diacritic::SMOOTH,
-            ]
-            .contains(c)
-        })
-        // Grave and circumflex to acute
-        .map(|c| match c {
-            Diacritic::GRAVE | Diacritic::CIRCUMFLEX => Diacritic::ACUTE,
-            _ => c,
-        })
-        .nfc()
-        .collect::<String>();
+    let mut out = convert_to_acute(core);
 
     let syllables = syllabify_el(&out);
     log("Syllabified word", &syllables);
@@ -238,6 +241,7 @@ mod tests {
 
     mktest_mono!(
         mono_hard_to_fix,
+        // These require a better syllabify logic...
         // ["χλιός", "χλιος"],
         // ["Δαυίδ", "Δαυίδ"],
         ["δύο-τρεῖς", "δύο-τρεις"],
@@ -301,14 +305,14 @@ mod tests {
     // Happens in words that preceed stress-less words: τι, ποτε...
     mktest_mono!(
         mono_double_accents,
-        // νὰ εἶναί τις Βενετός...
-        // τὸν οἶκόν του μηδὲ στιγμὴν ἀναπαύσεως...
-        // βαστάζοντες πρᾶγμά τι μακρὸν...
         ["εἶναί", "είναι"],
         ["οἶκόν", "οίκον"],
         ["πρᾶγμά", "πράγμα"],
-        ["οἱ ὡραῖοί σου ὀδόντες,", "οι ωραίοι σου οδόντες,"],
         ["σφαγεῖόν", "σφαγείον"],
+        ["νὰ εἶναί τις Βενετός...", "να είναι τις Βενετός..."],
+        ["τὸν οἶκόν του μηδὲ...", "τον οίκον του μηδέ..."],
+        ["βαστάζοντες πρᾶγμά τι...", "βαστάζοντες πράγμα τι..."],
+        ["οἱ ὡραῖοί σου ὀδόντες,", "οι ωραίοι σου οδόντες,"],
     );
 
     mktest_mono!(
@@ -317,26 +321,16 @@ mod tests {
         ["τὸν σύζυγόν της", "τον σύζυγόν της"],
     );
 
+    // Word ending punctuation
+    // Do not treat abbreviation as monosyllables
     mktest_mono!(
-        mono_punct,
-        // Do not treat abbreviation as monosyllables
+        mono_ending_punct,
         ["Ὅλ᾽", "Όλ᾽"],
         ["ὅλ᾿ αἱ", "όλ᾿ αι"],
         ["ἔτσ᾿ εἶναι", "έτσ᾿ είναι"],
         ["έτσ' είναι", "έτσ' είναι"],
         ["οὔτ᾿ ἐνθύμηση", "ούτ᾿ ενθύμηση"],
         ["Τί κάν᾽ ἡ λεχώνα;", "Τι κάν᾽ η λεχώνα;"],
-        // Starting punctuation
-        ["«τὸ", "«το"],
-        ["―Σπαργανίσαμε*", "―Σπαργανίσαμε*"],
-        ["διηγῆται:\n\n―\u{2009}Τὴν", "διηγήται:\n\n―\u{2009}Την"],
-        ["ἐμάλωσες·", "εμάλωσες·"],
-        // Punctuation inside
-        // ["Ναί…ναί…", "Ναι…ναι…"],
-        // Others
-        ["ὅ,τι", "ό,τι"],
-        ["Ὅ,τι τοῦ τύχῃ", "Ό,τι του τύχη"],
-        ["Ό,τ᾿ είναι", "Ό,τ᾿ είναι"],
         // We can not guess before elipsis: it may be either an actual
         // monosyllable or a truncated word.
         // We decide to go with the removal because it is more likely
@@ -345,15 +339,32 @@ mod tests {
         ["Ναί… ναί…", "Ναι… ναι…"],
     );
 
+    // Starting punctuation
+    mktest_mono!(
+        mono_starting_punct,
+        ["«τὸ", "«το"],
+        ["―Σπαργανίσαμε*", "―Σπαργανίσαμε*"],
+        ["διηγῆται:\n\n―\u{2009}Τὴν", "διηγήται:\n\n―\u{2009}Την"],
+        ["ἐμάλωσες·", "εμάλωσες·"],
+    );
+
+    // Inner punctuation
+    mktest_mono!(
+        mono_inner_punct,
+        // ["Ναί…ναί…", "Ναι…ναι…"],
+        // oti variants
+        ["ὅ,τι", "ό,τι"],
+        ["Ὅ,τι τοῦ τύχῃ", "Ό,τι του τύχη"],
+        ["Ό,τ᾿ είναι", "Ό,τ᾿ είναι"],
+    );
+
     mktest_mono!(
         mono_names,
         ["Τζὼν", "Τζων"],
         ["Μέυναρντ", "Μέυναρντ"],
         ["Κέϋνς", "Κέυνς"],
-        [
-            "Σὲρ Ἄρθουρ Ἰγνάτιος Κόναν Ντόϊλ",
-            "Σερ Άρθουρ Ιγνάτιος Κόναν Ντόιλ"
-        ],
+        ["Σὲρ Ἄρθουρ Ἰγνάτιος", "Σερ Άρθουρ Ιγνάτιος"],
+        ["Κόναν Ντόϊλ", "Κόναν Ντόιλ"],
     );
 
     mktest_mono!(
