@@ -4,8 +4,10 @@ mod monotonic;
 mod syllabify;
 mod synizesis;
 
-pub use accents::add_acute;
+pub use accents::add_acute_at;
+pub use accents::has_diacritic;
 pub use accents::remove_all_diacritics;
+pub use accents::remove_diacritic_at;
 pub use accents::remove_diacritics;
 pub use accents::Diacritic;
 

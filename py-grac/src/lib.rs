@@ -32,8 +32,8 @@ fn to_mono(word: &str) -> PyResult<String> {
 }
 
 #[pyfunction]
-fn add_acute(word: &str, pos: usize) -> PyResult<String> {
-    Ok(_grac::add_acute(word, pos))
+fn add_acute_at(word: &str, pos: usize) -> PyResult<String> {
+    Ok(_grac::add_acute_at(word, pos))
 }
 
 #[pymodule]
@@ -44,6 +44,6 @@ fn grac(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(syllabify_gr_ref, m)?)?;
     m.add_function(wrap_pyfunction!(remove_all_diacritics, m)?)?;
     m.add_function(wrap_pyfunction!(to_mono, m)?)?;
-    m.add_function(wrap_pyfunction!(add_acute, m)?)?;
+    m.add_function(wrap_pyfunction!(add_acute_at, m)?)?;
     Ok(())
 }
