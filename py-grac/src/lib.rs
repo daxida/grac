@@ -36,6 +36,11 @@ fn add_acute_at(word: &str, pos: usize) -> PyResult<String> {
     Ok(_grac::add_acute_at(word, pos))
 }
 
+#[pyfunction]
+fn remove_diacritic_at(word: &str, pos: usize, diacritic: char) -> PyResult<String> {
+    Ok(_grac::remove_diacritic_at(word, pos, diacritic))
+}
+
 #[pymodule]
 fn grac(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(syllabify_el, m)?)?;
@@ -45,5 +50,6 @@ fn grac(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(remove_all_diacritics, m)?)?;
     m.add_function(wrap_pyfunction!(to_mono, m)?)?;
     m.add_function(wrap_pyfunction!(add_acute_at, m)?)?;
+    m.add_function(wrap_pyfunction!(remove_diacritic_at, m)?)?;
     Ok(())
 }

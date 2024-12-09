@@ -1,7 +1,4 @@
-"""Create rust code to deal with synizesis.
-
-https://github.com/daxida/greek-double-accents/blob/master/greek_double_accents/constants.py
-"""
+"""Create rust code to deal with synizesis."""
 
 from pathlib import Path
 
