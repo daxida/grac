@@ -12,6 +12,16 @@ def _add_endings(lemmas: list[str], endings: str) -> list[str]:
     return [f"{lemma}{ending}" for lemma in lemmas for ending in endings.split()]
 
 
+MONOSYLLABLES = [
+    "πιο",
+    "πια",
+    "μια",
+    "μιας",
+    "για",
+    "γεια",
+]
+
+
 # Nouns ending in ια (singular in ια, genitive in ιας).
 # Ex. αρρώστια
 #
@@ -69,6 +79,7 @@ SYNIZESIS = [
     "χούγια",
     # Other ια (singular)
     "ίσια",
+    *MONOSYLLABLES,
     *IA_NOUN,
     *IA_ADJ,
     *IO_IA_NOUN,

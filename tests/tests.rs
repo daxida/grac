@@ -138,6 +138,14 @@ mktest_el!(
     ["αδενοϋπόφυση", "α-δε-νο-ϋ-πό-φυ-ση"]
 );
 
+// Synizesis
+mktest_el!(
+    syllabify_el_synizesis,
+    ["μια", "μια"],
+    ["για", "για"],
+    ["πια", "πια"]
+);
+
 // Depends on the speaker. This can not be a general rule.
 // https://teachergeorgiasclass.weebly.com/uploads/4/5/0/7/45072177/Κάτω_απ_το_χιόνι_2.pdf
 // mktests_el!(
