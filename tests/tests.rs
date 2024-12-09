@@ -143,7 +143,17 @@ mktest_el!(
     syllabify_el_synizesis,
     ["μια", "μια"],
     ["για", "για"],
-    ["πια", "πια"]
+    ["πια", "πια"],
+);
+
+mktest_el!(
+    syllabify_paroxytone_ypsilon,
+    // https://el.wiktionary.org/wiki/Παράρτημα:Ουσιαστικά_(νέα_ελληνικά)/ουδέτερα#-υ_ουδέτερα
+    ["δάκρυα", "δά-κρυ-α"],
+    ["δίκτυα", "δί-κτυ-α"], // from καθ. δίκτυο
+    ["βράδια", "βρά-δια"],
+    ["δίχτυα", "δί-χτυα"],
+    ["στάχυα", "στά-χυα"],
 );
 
 // Depends on the speaker. This can not be a general rule.
