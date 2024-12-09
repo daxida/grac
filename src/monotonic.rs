@@ -1,8 +1,10 @@
 use unicode_normalization::UnicodeNormalization;
 
-use crate::accents::remove_all_diacritics;
+use crate::accents::has_acute;
+use crate::accents::remove_acute;
+use crate::accents::remove_diacritic_at;
 use crate::accents::Diacritic;
-use crate::chars::is_greek_char;
+use crate::chars::{ends_in_diphthong, is_greek_word};
 use crate::syllabify::syllabify_el;
 
 fn replace_from_str_ary(text: &str, replacements: &[(&str, &str)]) -> String {
@@ -25,15 +27,15 @@ fn remove_superfluous_diaereses(text: &str) -> String {
     replace_from_str_ary(text, &SUPERFLUOUS_DIAERESES)
 }
 
-/// Convert polytonic to monotonic Greek.
+/// Convert text from polytonic to monotonic Greek.
 ///
 /// Leaves non greek words unchanged.
 ///
 /// ```
 /// use grac::*;
 ///
-/// let input = "Ἑλλάς καὶ κόσμος.\r\n...ἄνθρωπος.";
-/// let result = to_mono(input);
+/// let text = "Ἑλλάς καὶ κόσμος.\r\n...ἄνθρωπος.";
+/// let result = to_mono(text);
 /// assert_eq!(result, "Ελλάς και κόσμος.\r\n...άνθρωπος.");
 /// ```
 pub fn to_mono(text: &str) -> String {
@@ -42,6 +44,7 @@ pub fn to_mono(text: &str) -> String {
         .collect()
 }
 
+/// Split word into (left_punct, word, right_punct)
 fn split_word_punctuation(word: &str) -> (&str, &str, &str) {
     let start = word
         .char_indices()
@@ -63,116 +66,46 @@ fn split_word_punctuation(word: &str) -> (&str, &str, &str) {
     }
 }
 
-// FIX: Does not belong here
-const ACUTE_VOWELS_LOWER: [char; 7] = ['ά', 'έ', 'ή', 'ί', 'ό', 'ύ', 'ώ'];
-
-/// True if it contains any lowercase accented letter.
-/// Assumes a normalized string as input.
-fn has_acute(s: &str) -> bool {
-    s.chars().any(|c| ACUTE_VOWELS_LOWER.contains(&c))
-}
-
-/// Remove last acute accent (lowercase) if any.
-fn remove_last_acute(word: &str) -> String {
-    let mut chars: Vec<char> = word.chars().collect();
-
-    if let Some(pos) = chars.iter().rposition(|c| ACUTE_VOWELS_LOWER.contains(c)) {
-        chars[pos] = match chars[pos] {
-            'ά' => 'α',
-            'έ' => 'ε',
-            'ή' => 'η',
-            'ί' => 'ι',
-            'ό' => 'ο',
-            'ύ' => 'υ',
-            'ώ' => 'ω',
-            _ => chars[pos],
-        };
-    }
-
-    chars.into_iter().collect()
-}
-
-/// Extract vowels from an assumed well formed lowercase syllable.
-fn extract_vowels(s: &str) -> String {
-    const CONSONANTS: [char; 35] = [
-        // Lowercase
-        'β', 'γ', 'δ', 'ζ', 'θ', 'κ', 'λ', 'μ', 'ν', 'ξ', 'π', 'ρ', 'σ', 'ς', 'τ', 'φ', 'χ', 'ψ',
-        // Uppercase
-        'Β', 'Γ', 'Δ', 'Ζ', 'Θ', 'Κ', 'Λ', 'Μ', 'Ν', 'Ξ', 'Π', 'Ρ', 'Σ', 'Τ', 'Φ', 'Χ', 'Ψ',
-    ];
-    s.chars().filter(|ch| !CONSONANTS.contains(ch)).collect()
-}
-
-// These are monosyllables from which we do not want to remove the accent
+/// Monosyllables from which we do not want to remove the accent.
 const MONOSYL_DO_NOT_REMOVE_ACCENT: [&str; 12] = [
     "ή", "Ή", "πού", "Πού", "πώς", "Πώς", "είς", "Είς", "έν", "Έν", "έξ", "Έξ",
 ];
 
-// TODO: Decide on synizisi
+/// Monosyllables from which we want to remove the accent.
 //
-// These are actually monosyllables, but not by our current logic.
-// By putting them here they are return WITHOUT accent at the end.
-const MONOSYL_REMOVE_ACCENT: [&str; 36] = [
-    "πιό",
-    "Πιό",
-    "πιά",
-    "Πιά",
-    "πιώ",
-    "Πιώ",
-    "πίη",
-    "Πίη",
-    "μιά",
-    "Μιά",
-    "μιάς",
-    "Μιάς",
-    "γιά",
-    "Γιά",
-    "γειά",
-    "Γειά",
-    // πιω
-    "πιώ",
-    "Πιώ",
-    "πίεις",
-    "Πίεις",
-    "πίη",
-    "Πίη",
-    "πιή",
-    "Πιή",
-    "πίει",
-    "Πίει",
-    "πιεί",
-    "Πιεί",
-    "πίης",
-    "Πίης",
-    "πιής",
-    "Πιής",
-    "πιούν",
-    "Πιούν",
-    "πιές",
-    "Πιές",
+// These have an accent in polytonic that conflicts with our syllabify logic.
+// We need to store them separatedly to treat them as monosyllables with no accent.
+// Ex. πιὸ ταπεινά > πιό ταπεινά // Expected: πιο ταπεινά
+#[rustfmt::skip]
+const MONOSYL_REMOVE_ACCENT: [&str; 32] = [
+    "πιό", "Πιό", "πιά", "Πιά",
+    "μιά", "Μιά", "μιάς", "Μιάς", "γιά", "Γιά", "γειά", "Γειά",
+    // πιώ
+    "πιώ", "Πιώ", "πίεις", "Πίεις", "πίη", "Πίη", "πιή", "Πιή",
+    "πίει", "Πίει", "πιεί", "Πιεί", "πίης", "Πίης", "πιής", "Πιής",
+    "πιούν", "Πιούν", "πιές", "Πιές"
 ];
-
-fn ends_in_diphthong(s: &str) -> bool {
-    ["όι", "Όι", "έι", "Έι", "άι", "Άι"]
-        .iter()
-        .any(|&e| s.ends_with(e))
-}
-
-fn is_greek_word(word: &str) -> bool {
-    word.chars()
-        .all(|ch| !ch.is_alphabetic() || is_greek_char(ch))
-}
 
 #[allow(unused_variables)]
 fn log(label: &str, value: impl std::fmt::Debug) {
     // println!("{:<30}: {:?}", label, value);
 }
 
+fn dbg_bytes(word: &str) {
+    log(
+        "Input bytes",
+        word.as_bytes()
+            .iter()
+            .map(|byte| format!("{:02x}", byte))
+            .collect::<Vec<String>>()
+            .join(" "),
+    );
+}
+
+/// Convert a word from polytonic to monotonic Greek.
 fn to_mono_word(word: &str) -> String {
-    // For debug: ignore empty words
-    if word.is_empty() {
-        return String::new();
-    }
+    // If the word is empty our segmentation logic is probably wrong.
+    assert!(!word.is_empty());
 
     // Do not remove accents if the word is not greek
     if !is_greek_word(word) {
@@ -180,20 +113,14 @@ fn to_mono_word(word: &str) -> String {
         return word.to_string();
     }
 
-    // Strip punct
-    let (left_punct, word, right_punct) = split_word_punctuation(word);
+    // Decompose punctuation
+    let (left_punct, core, right_punct) = split_word_punctuation(word);
+    log("Left punct", left_punct);
+    log("Right punct", right_punct);
 
-    log("Input word", word);
-    let bstring = word
-        .as_bytes()
-        .iter()
-        .map(|byte| format!("{:02x}", byte))
-        .collect::<Vec<String>>()
-        .join(" ");
-    log("Input bytes", bstring);
-
-    // TODO: special cases
-    let ret = match word {
+    // Special cases where we need the polytonic word to make a decision:
+    // Ex: ποῦ => πού, ποὺ => που
+    let ret = match core {
         "ποὺ" => Some("που"),
         "πὼς" => Some("πως"),
         _ => None,
@@ -202,8 +129,12 @@ fn to_mono_word(word: &str) -> String {
         return format!("{}{}{}", left_punct, s, right_punct);
     }
 
-    // Remove ancient diacritics and convert grave and circumflex to acute
-    let mut out = word
+    log("Input word", core);
+    dbg_bytes(core);
+
+    // Remove ancient diacritics and convert grave and circumflex to acute.
+    // filter_map was performing a bit worse but remains to be tested.
+    let mut out = core
         .nfd()
         // Remove ancient diacritics
         .filter(|c| {
@@ -225,25 +156,25 @@ fn to_mono_word(word: &str) -> String {
     let syllables = syllabify_el(&out);
     log("Syllabified word", &syllables);
 
-    const ABBREVIATION_MARKS: &str = "᾽᾿'";
-    let fst_rpunct = right_punct.chars().next();
+    const ABBREVIATION_MARKS: [char; 3] = ['᾽', '᾿', '\''];
+    let ends_in_abbreviation = match right_punct.chars().next() {
+        Some(fst_rpunct) => ABBREVIATION_MARKS.contains(&fst_rpunct),
+        None => false,
+    };
 
     out = match syllables.as_slice() {
+        // Do we remove the acute accent from a monosyllable?...
         [syl] => {
-            // Here: syl == out
-            // consider adding similar graphs: '
+            // To remove the acute, the word should:
+            // - not be in the excluded list
+            // - not end in an abbreviation mark: έτσ' είναι
+            // - not end in a diphthong: σόι, Κάιν etc.
             if !MONOSYL_DO_NOT_REMOVE_ACCENT.contains(syl)
-                // The word should not end in an abbreviation mark: έτσ' είναι
-                && ABBREVIATION_MARKS.chars().all(|ch| fst_rpunct != Some(ch))
+                && !ends_in_abbreviation
+                && !ends_in_diphthong(&out)
             {
-                // Do not change σόι, Κάιν
-                if ends_in_diphthong(&extract_vowels(syl)) {
-                    log("Monosyllable ending in diphthong", "Keeps accents");
-                    out
-                } else {
-                    log("Monosyllable no accent", "Removing accents");
-                    remove_all_diacritics(&out)
-                }
+                log("Monosyllable no accent", "Removing accents");
+                remove_acute(&out)
             } else {
                 log("Word keeps accents", &out);
                 out
@@ -252,10 +183,10 @@ fn to_mono_word(word: &str) -> String {
         [.., syl1, syl2] => {
             if MONOSYL_REMOVE_ACCENT.contains(&out.as_str()) {
                 log("Word in NOT_ACCENTED list", "Removing accents");
-                remove_all_diacritics(&out)
-            } else if has_acute(syl1) && has_acute(syl2) {
+                remove_acute(&out)
+            } else if has_acute(*syl1) && has_acute(*syl2) {
                 log("Two acute accents in two syllables", "Removing last acute");
-                remove_last_acute(&out)
+                remove_diacritic_at(&out, 1, Diacritic::ACUTE)
             } else {
                 log("Word keeps accents", &out);
                 out
@@ -265,17 +196,13 @@ fn to_mono_word(word: &str) -> String {
     };
 
     // We do this quite late to deal with Κέϋνς -> two syllables
+    // If we did this before splitting on syllables then
+    // Κέυνς will only consistute one syllable.
     out = remove_superfluous_diaereses(&out);
     log("Removed superfluous diaereses", &out);
 
     log("Final transformed word", &out);
-    let bstring = out
-        .as_bytes()
-        .iter()
-        .map(|byte| format!("{:02x}", byte))
-        .collect::<Vec<String>>()
-        .join(" ");
-    log("Input bytes", bstring);
+    dbg_bytes(&out);
     log("======================", "");
 
     format!("{}{}{}", left_punct, out, right_punct)
@@ -320,7 +247,9 @@ mod tests {
 
     mktest_mono!(
         mono_one_syl,
-        ["πιό πιά πείς", "πιο πια πεις"],
+        ["Πιὸ σιγά, πιὸ ταπεινά", "Πιο σιγά, πιο ταπεινά"],
+        ["πιό", "πιο"],
+        ["πιά πείς", "πια πεις"],
         ["Ἂς πιῶ", "Ας πιω"],
         ["ὧν δι᾽ ὧν όν Τρῶν γρῦ γρί", "ων δι᾽ ων ον Τρων γρυ γρι"],
         ["τί θὲς;", "τι θες;"],

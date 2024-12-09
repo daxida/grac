@@ -14,6 +14,32 @@ pub const fn is_greek_char(ch: char) -> bool {
     is_greek_and_coptic_char(ch) || is_greek_extended_char(ch)
 }
 
+pub fn is_greek_word(word: &str) -> bool {
+    word.chars()
+        .all(|ch| !ch.is_alphabetic() || is_greek_char(ch))
+}
+
+/// Check if the word ends in a diphthong.
+///
+/// Should return true when there is trailing consonants: Κάιν.
+pub fn ends_in_diphthong(s: &str) -> bool {
+    let vowels = extract_vowels(s);
+    ["όι", "Όι", "έι", "Έι", "άι", "Άι"]
+        .iter()
+        .any(|&e| vowels.ends_with(e))
+}
+
+/// Extract vowels from an assumed well formed lowercase syllable.
+fn extract_vowels(s: &str) -> String {
+    const CONSONANTS: [char; 35] = [
+        // Lowercase
+        'β', 'γ', 'δ', 'ζ', 'θ', 'κ', 'λ', 'μ', 'ν', 'ξ', 'π', 'ρ', 'σ', 'ς', 'τ', 'φ', 'χ', 'ψ',
+        // Uppercase
+        'Β', 'Γ', 'Δ', 'Ζ', 'Θ', 'Κ', 'Λ', 'Μ', 'Ν', 'Ξ', 'Π', 'Ρ', 'Σ', 'Τ', 'Φ', 'Χ', 'Ψ',
+    ];
+    s.chars().filter(|ch| !CONSONANTS.contains(ch)).collect()
+}
+
 /// Oracle implementation for testing. Return the normalized character.
 fn __base(ch: char) -> char {
     let mut base_char = None;
