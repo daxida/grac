@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from grac import syllabify_el_mode
+from grac import syllabify_el_mode_at
 
 
 def _add_endings(lemmas: list[str], endings: str) -> list[str]:
@@ -51,6 +51,7 @@ IO_IA_NOUN_LEMMA = [
     "δίκι",
     "μπάνι",
     "ίδι",  # Ambiguous: can also be trisyl (but much more common as bisyl)
+    "γέλι",
 ]
 IO_IA_NOUN = _add_endings(IO_IA_NOUN_LEMMA, "ο ου α ων")
 
@@ -104,7 +105,7 @@ def generate_lookup_synizesis(f):
     mapping = {}
 
     for word in SYNIZESIS:
-        _syls = syllabify_el_mode(word, True)
+        _syls = syllabify_el_mode_at(word, [1])
         syllables = str(_syls).replace("'", '"')
         mapping[word] = syllables
 
