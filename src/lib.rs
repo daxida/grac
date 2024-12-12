@@ -16,6 +16,7 @@ pub use monotonic::to_mono;
 pub use syllabify::syllabify_el;
 pub use syllabify::syllabify_el_mode;
 pub use syllabify::syllabify_gr;
+pub use syllabify::Synizesis;
 
 // For testing
 pub use syllabify::syllabify_gr_ref;

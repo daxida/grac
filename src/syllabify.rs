@@ -85,8 +85,30 @@ const EL: Lang = Lang {
     cons_clusters: &CONS_CLUSTERS_EL,
 };
 
+/// Locations where synizesis occurs in text.
+pub enum Synizesis<'a> {
+    Every,
+    Never,
+    /// A slice of syllable indices where synizesis should occur.
+    /// They are 1-indexed counting from the end of the word.
+    ///
+    /// In case of multiple indices, they should refer to the syllable
+    /// positions after the desired synizesis takes place.
+    ///
+    /// F.e.
+    /// > syllabify_el_mode("αστειάκια", SynizesisAt::Indices(&[1, 2])),
+    /// > vec!["α", "στειά", "κια"]
+    ///                2       1
+    /// Even though without synizesis the word contains five syllables:
+    /// > vec!["α", "στει", "ά", "κι", "α"]
+    ///                      3     2    1
+    /// and we may be tempted to use &[1, 3] to refer to the syllables
+    /// that we want to merge.
+    Indices(&'a [usize]),
+}
+
 pub fn syllabify_gr(word: &str) -> Vec<&str> {
-    syllabify_lang(word, &GR, false)
+    syllabify_lang(word, &GR, Synizesis::Never)
 }
 
 /// Syllabify a modern Greek word.
@@ -100,21 +122,28 @@ pub fn syllabify_gr(word: &str) -> Vec<&str> {
 pub fn syllabify_el(word: &str) -> Vec<&str> {
     match lookup_synizesis(word) {
         Some(res) => res.to_vec(),
-        _ => syllabify_lang(word, &EL, false),
+        _ => syllabify_lang(word, &EL, Synizesis::Never),
     }
 }
 
 /// Syllabify a modern Greek word.
 ///
-/// Accepts a boolean flag to either always apply synizesis or to
-/// never apply it.
+/// ```
+/// use grac::{syllabify_el_mode, Synizesis};
 ///
+/// assert_eq!(syllabify_el_mode("αρρώστια", Synizesis::Every), vec!["αρ", "ρώ", "στια"]);
+/// assert_eq!(syllabify_el_mode("αρρώστια", Synizesis::Never), vec!["αρ", "ρώ", "στι", "α"]);
+///
+/// // Only apply synizesis at the first syllable from the end.
+/// // Note that "στειά" does not merge.
+/// let idxs = Synizesis::Indices(&[1]);
+/// assert_eq!(syllabify_el_mode("αστειάκια", idxs), vec!["α", "στει", "ά", "κια"]);
+///
+/// // The indices refer to the syllable positions after the change.
+/// let idxs = Synizesis::Indices(&[1, 2]);
+/// assert_eq!(syllabify_el_mode("αστειάκια", idxs), vec!["α", "στειά", "κια"]);
 /// ```
-/// use grac::syllabify_el_mode;
-/// assert_eq!(syllabify_el_mode("αρρώστια", true), vec!["αρ", "ρώ", "στια"]);
-/// assert_eq!(syllabify_el_mode("αρρώστια", false), vec!["αρ", "ρώ", "στι", "α"]);
-/// ```
-pub fn syllabify_el_mode(word: &str, synizesis: bool) -> Vec<&str> {
+pub fn syllabify_el_mode<'a>(word: &'a str, synizesis: Synizesis) -> Vec<&'a str> {
     syllabify_lang(word, &EL, synizesis)
 }
 
@@ -149,20 +178,30 @@ fn get_byte_offset(pos: usize, chars: &[char]) -> usize {
     chars[..pos].iter().map(|c| c.len_utf8()).sum::<usize>()
 }
 
-fn syllabify_lang<'a>(word: &'a str, lang: &Lang, synizesis: bool) -> Vec<&'a str> {
+fn syllabify_lang<'a>(word: &'a str, lang: &Lang, synizesis: Synizesis) -> Vec<&'a str> {
     let chars: Vec<char> = word.chars().collect();
     let mut fr = chars.len();
     let mut fr_byte = get_byte_offset(fr, &chars);
     let mut syllables = Vec::new();
+    let mut idx_syllable = 1;
 
-    while let Some(to) = parse_syllable_break(&chars, fr, lang, synizesis) {
-        let to_byte = get_byte_offset(to, &chars);
+    loop {
+        let cur_synizesis = match synizesis {
+            Synizesis::Every => true,
+            Synizesis::Never => false,
+            Synizesis::Indices(idxs) => idxs.contains(&idx_syllable),
+        };
+        idx_syllable += 1;
 
-        let syllable = &word[to_byte..fr_byte];
-        syllables.push(syllable);
-
-        fr = to;
-        fr_byte = to_byte;
+        if let Some(to) = parse_syllable_break(&chars, fr, lang, cur_synizesis) {
+            let to_byte = get_byte_offset(to, &chars);
+            let syllable = &word[to_byte..fr_byte];
+            syllables.push(syllable);
+            fr = to;
+            fr_byte = to_byte;
+        } else {
+            break;
+        }
     }
 
     syllables.reverse();
@@ -356,5 +395,21 @@ mod tests {
         assert!(!is_diphthong_gr(&['ι', 'α', 'ι']));
         assert!(!is_diphthong_gr(&['α', 'ε']));
         assert!(!is_diphthong_gr(&['α', 'ϋ']));
+    }
+
+    #[test]
+    fn test_synizesis_at_simple() {
+        assert_eq!(
+            syllabify_el_mode("αστειάκια", Synizesis::Indices(&[1])),
+            vec!["α", "στει", "ά", "κια"]
+        );
+    }
+
+    #[test]
+    fn test_synizesis_at_multiple() {
+        assert_eq!(
+            syllabify_el_mode("αστειάκια", Synizesis::Indices(&[1, 2])),
+            vec!["α", "στειά", "κια"]
+        );
     }
 }
