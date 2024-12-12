@@ -8,7 +8,18 @@ fn syllabify_el(word: &str) -> PyResult<Vec<&str>> {
 
 #[pyfunction]
 fn syllabify_el_mode(word: &str, synizesis: bool) -> PyResult<Vec<&str>> {
-    Ok(_grac::syllabify_el_mode(word, synizesis))
+    match synizesis {
+        true => Ok(_grac::syllabify_el_mode(word, _grac::Synizesis::Every)),
+        false => Ok(_grac::syllabify_el_mode(word, _grac::Synizesis::Never)),
+    }
+}
+
+#[pyfunction]
+fn syllabify_el_mode_at(word: &str, indices: Vec<usize>) -> PyResult<Vec<&str>> {
+    Ok(_grac::syllabify_el_mode(
+        word,
+        _grac::Synizesis::Indices(&indices),
+    ))
 }
 
 #[pyfunction]
@@ -45,6 +56,7 @@ fn remove_diacritic_at(word: &str, pos: usize, diacritic: char) -> PyResult<Stri
 fn grac(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(syllabify_el, m)?)?;
     m.add_function(wrap_pyfunction!(syllabify_el_mode, m)?)?;
+    m.add_function(wrap_pyfunction!(syllabify_el_mode_at, m)?)?;
     m.add_function(wrap_pyfunction!(syllabify_gr, m)?)?;
     m.add_function(wrap_pyfunction!(syllabify_gr_ref, m)?)?;
     m.add_function(wrap_pyfunction!(remove_all_diacritics, m)?)?;
