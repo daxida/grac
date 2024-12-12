@@ -75,6 +75,7 @@ SYNIZESIS = [
     "καινούργιο",
     "χρόνια",
     "χούγια",
+    "διακόσια",
     # Other ια (singular)
     "ίσια",
     *MONOSYLLABLES,
@@ -83,6 +84,10 @@ SYNIZESIS = [
     *IO_IA_NOUN,
     *IO_IOS_NOUN,
     *I_IO_NOUN,
+]
+
+AMBIGUOUS_SYNIZESIS = [
+    "φυλάκια",  # takes synizesis if from φυλάκι, but not if from φυλάκιο
 ]
 
 # We can't just force synizesis at syllabify level on these:
@@ -105,6 +110,9 @@ def generate_lookup_synizesis(f):
     mapping = {}
 
     for word in SYNIZESIS:
+        if word in AMBIGUOUS_SYNIZESIS:
+            continue
+
         _syls = syllabify_el_mode_at(word, [1])
         syllables = str(_syls).replace("'", '"')
         mapping[word] = syllables
