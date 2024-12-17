@@ -52,6 +52,34 @@ where
     has_diacritic(word, Diacritic::ACUTE)
 }
 
+/// Return syllable positions where the given diacritic is found.
+///
+/// The syllable position starts at one and is counted from the end of the word.
+///
+/// # Examples
+///
+/// ```
+/// use grac::{diacritic_pos, Diacritic};
+///
+/// assert_eq!(diacritic_pos("άνθρωπος", Diacritic::ACUTE), [3]);
+/// assert_eq!(diacritic_pos("άνθρωπός", Diacritic::ACUTE), [1, 3]);
+/// assert_eq!(diacritic_pos("τίποτα", Diacritic::GRAVE), []);
+/// ```
+pub fn diacritic_pos(word: &str, diacritic: char) -> Vec<usize> {
+    syllabify_el(word)
+        .iter()
+        .rev()
+        .enumerate()
+        .filter_map(|(index, syllable)| {
+            if has_diacritic(*syllable, diacritic) {
+                Some(index + 1)
+            } else {
+                None
+            }
+        })
+        .collect()
+}
+
 /// Remove specified diacritics from a string.
 ///
 /// # Examples
