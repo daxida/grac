@@ -12,6 +12,8 @@ pub use accents::remove_diacritic_at;
 pub use accents::remove_diacritics;
 pub use accents::Diacritic;
 
+pub use chars::base_lower;
+
 pub use monotonic::to_mono;
 
 pub use syllabify::syllabify_el;
