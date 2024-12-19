@@ -16,6 +16,7 @@ pub use chars::base_lower;
 
 pub use monotonic::to_mono;
 
+pub use syllabify::is_vowel_el;
 pub use syllabify::syllabify_el;
 pub use syllabify::syllabify_el_mode;
 pub use syllabify::syllabify_gr;
