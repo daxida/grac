@@ -95,14 +95,15 @@ pub enum Synizesis<'a> {
     /// In case of multiple indices, they should refer to the syllable
     /// positions after the desired synizesis takes place.
     ///
-    /// F.e.
-    /// > syllabify_el_mode("αστειάκια", SynizesisAt::Indices(&[1, 2])),
-    /// > vec!["α", "στειά", "κια"]
-    ///                2       1
+    /// ## Example
+    ///
+    /// `syllabify_el_mode("αστειάκια", SynizesisAt::Indices(&[1, 2]))`
+    /// `vec!["α", "στειά", "κια"]`
+    ///
     /// Even though without synizesis the word contains five syllables:
-    /// > vec!["α", "στει", "ά", "κι", "α"]
-    ///                      3     2    1
-    /// and we may be tempted to use &[1, 3] to refer to the syllables
+    /// `vec!["α", "στει", "ά", "κι", "α"]`
+    ///
+    /// and we may be tempted to use `&[1, 3]` to refer to the syllables
     /// that we want to merge.
     Indices(&'a [usize]),
 }
