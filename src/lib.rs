@@ -13,6 +13,7 @@ pub use accents::remove_diacritics;
 pub use accents::Diacritic;
 
 pub use chars::base_lower;
+pub use chars::ends_with_diphthong;
 
 pub use monotonic::to_mono;
 

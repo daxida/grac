@@ -4,7 +4,7 @@ use crate::accents::has_acute;
 use crate::accents::remove_acute;
 use crate::accents::remove_diacritic_at;
 use crate::accents::Diacritic;
-use crate::chars::{ends_in_diphthong, is_greek_word};
+use crate::chars::{ends_with_diphthong, is_greek_word};
 use crate::syllabify::syllabify_el;
 
 fn replace_from_str_ary(text: &str, replacements: &[(&str, &str)]) -> String {
@@ -160,7 +160,7 @@ fn to_mono_word(word: &str) -> String {
     log("Syllabified word", &syllables);
 
     const ABBREVIATION_MARKS: [char; 3] = ['᾽', '᾿', '\''];
-    let ends_in_abbreviation = match right_punct.chars().next() {
+    let ends_with_abbreviation = match right_punct.chars().next() {
         Some(fst_rpunct) => ABBREVIATION_MARKS.contains(&fst_rpunct),
         None => false,
     };
@@ -173,8 +173,8 @@ fn to_mono_word(word: &str) -> String {
             // - not end in an abbreviation mark: έτσ' είναι
             // - not end in a diphthong: σόι, Κάιν etc.
             if !MONOSYL_DO_NOT_REMOVE_ACCENT.contains(syl)
-                && !ends_in_abbreviation
-                && !ends_in_diphthong(&out)
+                && !ends_with_abbreviation
+                && !ends_with_diphthong(&out)
             {
                 log("Monosyllable no accent", "Removing accents");
                 remove_acute(&out)

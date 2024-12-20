@@ -19,11 +19,20 @@ pub fn is_greek_word(word: &str) -> bool {
         .all(|ch| !ch.is_alphabetic() || is_greek_char(ch))
 }
 
-/// Check if the word ends in a diphthong.
+/// Check if the word ends with a diphthong.
 ///
-/// Should return true when there is trailing consonants: Κάιν.
-pub fn ends_in_diphthong(s: &str) -> bool {
-    let vowels = extract_vowels(s);
+/// Return true even when there are trailing consonants: Κάιν.
+///
+/// # Examples
+///
+/// ```
+/// use grac::ends_with_diphthong;
+///
+/// assert_eq!(ends_with_diphthong("Κάιν"), true);
+/// assert_eq!(ends_with_diphthong("πλάι"), true);
+/// ```
+pub fn ends_with_diphthong(word: &str) -> bool {
+    let vowels = extract_vowels(word);
     ["όι", "Όι", "όυ", "Όυ", "έι", "Έι", "άι", "Άι"]
         .iter()
         .any(|&e| vowels.ends_with(e))
