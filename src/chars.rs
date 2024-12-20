@@ -24,7 +24,7 @@ pub fn is_greek_word(word: &str) -> bool {
 /// Should return true when there is trailing consonants: Κάιν.
 pub fn ends_in_diphthong(s: &str) -> bool {
     let vowels = extract_vowels(s);
-    ["όι", "Όι", "έι", "Έι", "άι", "Άι"]
+    ["όι", "Όι", "όυ", "Όυ", "έι", "Έι", "άι", "Άι"]
         .iter()
         .any(|&e| vowels.ends_with(e))
 }
