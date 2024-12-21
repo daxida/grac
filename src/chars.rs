@@ -33,9 +33,11 @@ pub fn is_greek_word(word: &str) -> bool {
 /// ```
 pub fn ends_with_diphthong(word: &str) -> bool {
     let vowels = extract_vowels(word);
-    ["όι", "Όι", "όυ", "Όυ", "έι", "Έι", "άι", "Άι"]
-        .iter()
-        .any(|&e| vowels.ends_with(e))
+    [
+        "όι", "Όι", "έι", "Έι", "άι", "Άι", "όυ", "Όυ", "έυ", "Έυ", "άυ", "Άυ",
+    ]
+    .iter()
+    .any(|&e| vowels.ends_with(e))
 }
 
 /// Extract vowels from an assumed well formed lowercase syllable.
