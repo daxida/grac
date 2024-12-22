@@ -95,6 +95,7 @@ SYNIZESIS_PAIRS = [
     ["βράδια", "βρά-δια"],  # we could for this one...
     ["δίχτυα", "δί-χτυα"],
     ["στάχυα", "στά-χυα"],
+    ["δυο", "δυο"],
 ]
 
 
@@ -122,8 +123,12 @@ def generate_lookup_synizesis(f):
         mapping[word.capitalize()] = syllables_cap
 
     for word, _syllables in SYNIZESIS_PAIRS:
-        syllables = str(_syllables.split("-")).replace("'", '"')
+        _syls = _syllables.split("-")
+        syllables = str(_syls).replace("'", '"')
         mapping[word] = syllables
+
+        syllables_cap = str([_syls[0].capitalize()] + _syls[1:]).replace("'", '"')
+        mapping[word.capitalize()] = syllables_cap
 
     for fr, to in sorted(mapping.items()):
         f.write(f'    "{fr}" => &{to},\n')
