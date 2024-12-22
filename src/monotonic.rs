@@ -277,22 +277,16 @@ mod tests {
     mktest_mono!(
         mono_not_greek,
         ["1808·", "1808·"],
-        [
-            "Le Poète est semblable au prince des nuées",
-            "Le Poète est semblable au prince des nuées"
-        ],
-        [
-            "Qui hante la tempête et se rit de l'archer;",
-            "Qui hante la tempête et se rit de l'archer;"
-        ],
-        [
-            "Exilé sur le sol au milieu des huées,",
-            "Exilé sur le sol au milieu des huées,"
-        ],
-        [
-            "Ses ailes de géant l'empêchent de marcher.",
-            "Ses ailes de géant l'empêchent de marcher."
-        ],
+        ["Poète", "Poète"],
+        ["Poète.", "Poète."],
+        [".Poète", ".Poète"],
+        ["Poè-te", "Poè-te"],
+        ["Poè!!te", "Poè!!te"],
+        [".Poè-te.", ".Poè-te."],
+        ["Le Poète des nuées", "Le Poète des nuées"],
+        ["Qui hante la tempête", "Qui hante la tempête"],
+        ["Exilé au milieu des huées,", "Exilé au milieu des huées,"],
+        ["géant l'empêchent", "géant l'empêchent"],
     );
 
     mktest_mono!(
