@@ -159,7 +159,7 @@ fn to_mono_word(word: &str) -> String {
     let syllables = syllabify_el(&out);
     log("Syllabified word", &syllables);
 
-    const ABBREVIATION_MARKS: [char; 3] = ['᾽', '᾿', '\''];
+    const ABBREVIATION_MARKS: &[char] = &['᾽', '᾿', '\'', '‘'];
     let ends_with_abbreviation = match right_punct.chars().next() {
         Some(fst_rpunct) => ABBREVIATION_MARKS.contains(&fst_rpunct),
         None => false,
