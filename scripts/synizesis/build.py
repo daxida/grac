@@ -54,6 +54,9 @@ IA_NOUN_LEMMA = [
     "ορφάνι",
     "ζήλει",
     "ζήλι",
+    # https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=στεναχώρια
+    "στενοχώρι",
+    "στεναχώρι",
 ]
 IA_NOUN = _add_endings(IA_NOUN_LEMMA, "α ας ες")
 
@@ -95,6 +98,7 @@ SYNIZESIS = [
     "χρόνια",
     "χούγια",
     "διακόσια",
+    "γένεια",  # Alternative of γένια
     # Other ια (singular)
     "ίσια",
     *MONOSYLLABLES,

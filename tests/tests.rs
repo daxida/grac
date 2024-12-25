@@ -151,6 +151,8 @@ mktest_el!(
     ["δύο", "δύ-ο"],
     ["ποια", "ποια"],
     ["Ποιος", "Ποιος"],
+    ["γένεια", "γέ-νεια"],
+    ["στεναχώρια", "στε-να-χώ-ρια"],
     // All diminutives in κια take synizesis but it is sometimes ambiguous:
     // φυλάκια takes synizesis if from φυλάκι, but not if from φυλάκιο
     ["αστειάκια", "α-στει-ά-κια"],
