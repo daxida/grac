@@ -1,10 +1,9 @@
 use unicode_normalization::UnicodeNormalization;
 
-use crate::accents::has_acute;
-use crate::accents::remove_acute;
-use crate::accents::remove_diacritic_at;
 use crate::accents::Diacritic;
+use crate::accents::{has_acute, remove_acute, remove_diacritic_at};
 use crate::chars::{ends_with_diphthong, is_greek_word};
+use crate::constants::APOSTROPHES;
 use crate::syllabify::syllabify_el;
 
 fn replace_from_str_ary(text: &str, replacements: &[(&str, &str)]) -> String {
@@ -159,9 +158,8 @@ fn to_mono_word(word: &str) -> String {
     let syllables = syllabify_el(&out);
     log("Syllabified word", &syllables);
 
-    const ABBREVIATION_MARKS: &[char] = &['᾽', '᾿', '\'', '‘'];
     let ends_with_abbreviation = match right_punct.chars().next() {
-        Some(fst_rpunct) => ABBREVIATION_MARKS.contains(&fst_rpunct),
+        Some(fst_rpunct) => APOSTROPHES.contains(&fst_rpunct),
         None => false,
     };
 
