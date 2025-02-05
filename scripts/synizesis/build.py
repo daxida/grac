@@ -46,9 +46,11 @@ MONOSYLLABLES = [
 IA_NOUN_LEMMA = [
     "αλήθει",
     "αρρώστι",
+    "γρίνι",
+    "κατάντι",
+    "φαμίλι",
     "φτώχει",
     "φτώχι",
-    "συμπόνι",
     "περηφάνει",
     "περηφάνι",
     "ορφάνι",
@@ -57,6 +59,7 @@ IA_NOUN_LEMMA = [
     # https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=στεναχώρια
     "στενοχώρι",
     "στεναχώρι",
+    "συμπόνι",
 ]
 IA_NOUN = _add_endings(IA_NOUN_LEMMA, "α ας ες")
 
@@ -84,10 +87,11 @@ IO_IOS_NOUN_LEMMA = [
 IO_IOS_NOUN = _add_endings(IO_IOS_NOUN_LEMMA, "ος ου ο ε οι ων ους")
 
 # Nouns ending in ι (singular in ι / plural in ια)
-I_IO_NOUN = []
+# Ex. χιόνι / χιόνια (only the plural is added)
+I_IA_NOUN = []
 neuters_path = Path(__file__).parent / "neuters.txt"
 with neuters_path.open("r", encoding="utf-8") as f:
-    I_IO_NOUN.extend(sorted(set(f.read().splitlines())))
+    I_IA_NOUN.extend(sorted(set(f.read().splitlines())))
 
 SYNIZESIS = [
     "λόγια",  # Always bisyl as NOUN (can be trisyl as adj.)
@@ -106,7 +110,7 @@ SYNIZESIS = [
     *IA_ADJ,
     *IO_IA_NOUN,
     *IO_IOS_NOUN,
-    *I_IO_NOUN,
+    *I_IA_NOUN,
 ]
 
 AMBIGUOUS_SYNIZESIS = [
