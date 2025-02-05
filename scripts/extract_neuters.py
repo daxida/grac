@@ -52,9 +52,10 @@ def filter_neuter(words: list[str]) -> list[str]:
     * Nouns ending in ι (singular in ι / plural in ια)
       Ex. χιόνι / χιόνια (only the plural is added)
           καΐκι / καΐκια
+          ρολόι / ρολόγια
     """
     words_set = set(words)
-    neuter_words = []
+    neuter_words = set()
     for word in words:
         if word[0].isupper():
             continue
@@ -64,14 +65,22 @@ def filter_neuter(words: list[str]) -> list[str]:
             continue
         if word[-2] in "αεηιου":
             continue
-        plural = word + "α"
-        if plural not in words_set:
-            continue
-        if not is_proparoxytone(plural):
-            continue
-        neuter_words.append(plural)
 
-    return neuter_words
+        # χιόνι / χιόνια
+        # χούι / χούγια
+        plurals = [word + "α", word[:-1] + "για"]
+        for plural in plurals:
+            if plural not in words_set:
+                continue
+            if not is_proparoxytone(plural):
+                continue
+            neuter_words.add(plural)
+
+    # Remove ambiguous
+    neuter_words.remove("άγια")
+    neuter_words.remove("πλάγια")
+
+    return sorted(neuter_words)
 
 
 def main() -> None:
