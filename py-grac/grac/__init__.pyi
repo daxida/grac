@@ -17,4 +17,6 @@ def add_acute(s: str, pos: int) -> str:
     - add_acute("ανθρωπος", 2) > "ανθρώπος"
     """
 
+def has_diacritic(s: str, diacritic: str) -> bool: ...
+
 class Diacritic(Enum): ...

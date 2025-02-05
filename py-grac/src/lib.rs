@@ -52,6 +52,11 @@ fn remove_diacritic_at(word: &str, pos: usize, diacritic: char) -> PyResult<Stri
     Ok(_grac::remove_diacritic_at(word, pos, diacritic))
 }
 
+#[pyfunction]
+fn has_diacritic(word: &str, diacritic: char) -> PyResult<bool> {
+    Ok(_grac::has_diacritic(word, diacritic))
+}
+
 #[pymodule]
 fn grac(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(syllabify_el, m)?)?;
@@ -63,5 +68,6 @@ fn grac(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(to_mono, m)?)?;
     m.add_function(wrap_pyfunction!(add_acute_at, m)?)?;
     m.add_function(wrap_pyfunction!(remove_diacritic_at, m)?)?;
+    m.add_function(wrap_pyfunction!(has_diacritic, m)?)?;
     Ok(())
 }

@@ -7,12 +7,10 @@ There is also an extensive list here:
 https://el.wiktionary.org/wiki/Κατηγορία:Ουσιαστικά_που_κλίνονται_όπως_το_%27τραγούδι%27_(νέα_ελληνικά)
 """
 
-import re
 from pathlib import Path
 
 from grac import syllabify_el_mode
-
-VOWEL_ACCENTED = re.compile(r"[έόίύάήώ]")
+from grac import has_diacritic, Diacritic
 
 # Available here (iso-8859-7):
 # http://www.elspell.gr/
@@ -30,15 +28,31 @@ def load_words() -> list[str]:
             with dic_path.open("r", encoding=encoding) as dic_file:
                 dic_file.readline()
                 return dic_file.read().splitlines()
-        except (UnicodeDecodeError, FileNotFoundError):
-            continue
+        except FileNotFoundError:
+            raise
+        except UnicodeDecodeError:
+            pass
 
     raise RuntimeError(
         "Unable to decode the file with the provided encodings: iso-8859-7, utf-8"
     )
 
 
+def is_proparoxytone(word: str) -> bool:
+    syllables = syllabify_el_mode(word, synizesis=False)
+    return len(syllables) >= 3 and has_diacritic(syllables[-3], Diacritic.ACUTE.value)
+
+
 def filter_neuter(words: list[str]) -> list[str]:
+    """Extract neuter words that should carry synizesis.
+
+    In particular:
+    * We only consider words that, without synizesis, should have been
+      proparoxytone.
+    * Nouns ending in ι (singular in ι / plural in ια)
+      Ex. χιόνι / χιόνια (only the plural is added)
+          καΐκι / καΐκια
+    """
     words_set = set(words)
     neuter_words = []
     for word in words:
@@ -53,8 +67,7 @@ def filter_neuter(words: list[str]) -> list[str]:
         plural = word + "α"
         if plural not in words_set:
             continue
-        syllables = syllabify_el_mode(plural, False)
-        if len(syllables) < 3 or not VOWEL_ACCENTED.search(syllables[-3]):
+        if not is_proparoxytone(plural):
             continue
         neuter_words.append(plural)
 
