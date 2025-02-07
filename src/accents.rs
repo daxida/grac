@@ -20,6 +20,16 @@ impl Diacritic {
     pub const ROUGH: char = '\u{0314}';
 }
 
+const ALL_DIACRITICS: [char; 7] = [
+    Diacritic::CIRCUMFLEX,
+    Diacritic::ACUTE,
+    Diacritic::GRAVE,
+    Diacritic::IOTA_SUBSCRIPT,
+    Diacritic::DIAERESIS,
+    Diacritic::SMOOTH,
+    Diacritic::ROUGH,
+];
+
 /// Checks if the char or &str contains the specified diacritic.
 ///
 /// # Examples
@@ -50,6 +60,27 @@ where
     I: Iterator<Item = char>,
 {
     has_diacritic(word, Diacritic::ACUTE)
+}
+
+/// Check if the word has any given diacritics.
+//
+// The only reason this has not superseeded has_diacritic is because I'm wary
+// of performance issues, and the semantics are more cumbersome:
+// has_diacritics(word, &[Diacritic::ACUTE) vs has_diacritic(word, Diacritic::ACUTE)
+//
+// So while I haven't figure that out, this remains private...
+fn has_diacritics<I>(word: impl UnicodeNormalization<I>, diacritics: &[char]) -> bool
+where
+    I: Iterator<Item = char>,
+{
+    word.nfd().any(|c| diacritics.contains(&c))
+}
+
+pub fn has_any_diacritic<I>(word: impl UnicodeNormalization<I>) -> bool
+where
+    I: Iterator<Item = char>,
+{
+    has_diacritics(word, &ALL_DIACRITICS)
 }
 
 /// Return syllable positions where the given diacritic is found.
@@ -114,18 +145,7 @@ pub fn remove_diacritics(text: &str, diacritics: &[char]) -> String {
 ///              ημετερω ενι οικω εν Αργει τηλοθι πατρης");
 /// ```
 pub fn remove_all_diacritics(text: &str) -> String {
-    remove_diacritics(
-        text,
-        &[
-            Diacritic::CIRCUMFLEX,
-            Diacritic::ACUTE,
-            Diacritic::GRAVE,
-            Diacritic::IOTA_SUBSCRIPT,
-            Diacritic::DIAERESIS,
-            Diacritic::SMOOTH,
-            Diacritic::ROUGH,
-        ],
-    )
+    remove_diacritics(text, &ALL_DIACRITICS)
 }
 
 pub fn remove_acute(text: &str) -> String {
@@ -213,5 +233,12 @@ mod tests {
         assert_eq!(add_diacritic_to_char('α', Diacritic::ACUTE), 'ά');
         assert_eq!(add_diacritic_to_char('Ω', Diacritic::GRAVE), 'Ὼ');
         assert_eq!(add_diacritic_to_char('ά', Diacritic::ACUTE), 'ά');
+    }
+
+    #[test]
+    fn test_any_diacritics() {
+        assert!(!has_any_diacritic("τεστ"));
+        assert!(has_any_diacritic("καλημέρα"));
+        assert!(has_any_diacritic("ϊ"));
     }
 }
