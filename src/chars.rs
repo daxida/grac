@@ -14,9 +14,10 @@ pub const fn is_greek_char(ch: char) -> bool {
     is_greek_and_coptic_char(ch) || is_greek_extended_char(ch)
 }
 
+// The order is important: is_greek_chars is cheaper.
 pub fn is_greek_word(word: &str) -> bool {
     word.chars()
-        .all(|ch| !ch.is_alphabetic() || is_greek_char(ch))
+        .all(|ch| is_greek_char(ch) || !ch.is_alphabetic())
 }
 
 /// Check if the word ends with a diphthong.

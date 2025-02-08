@@ -68,7 +68,7 @@ where
 // of performance issues, and the semantics are more cumbersome:
 // has_diacritics(word, &[Diacritic::ACUTE) vs has_diacritic(word, Diacritic::ACUTE)
 //
-// So while I haven't figure that out, this remains private...
+// So while I haven't figured that out, this remains private...
 fn has_diacritics<I>(word: impl UnicodeNormalization<I>, diacritics: &[char]) -> bool
 where
     I: Iterator<Item = char>,
