@@ -3,7 +3,7 @@ use unicode_normalization::UnicodeNormalization;
 use crate::accents::Diacritic;
 use crate::accents::{has_acute, remove_acute, remove_diacritic_at};
 use crate::chars::{ends_with_diphthong, is_greek_word};
-use crate::constants::APOSTROPHES;
+use crate::constants::{APOSTROPHES, MONOSYLLABLE_ACCENTED};
 use crate::syllabify::syllabify_el;
 
 fn replace_from_str_ary(text: &str, replacements: &[(&str, &str)]) -> String {
@@ -64,11 +64,6 @@ fn split_word_punctuation(word: &str) -> (&str, &str, &str) {
         (word, "", "")
     }
 }
-
-/// Monosyllables from which we do not want to remove the accent.
-const MONOSYL_DO_NOT_REMOVE_ACCENT: [&str; 12] = [
-    "ή", "Ή", "πού", "Πού", "πώς", "Πώς", "είς", "Είς", "έν", "Έν", "έξ", "Έξ",
-];
 
 /// Monosyllables from which we want to remove the accent.
 //
@@ -170,7 +165,7 @@ fn to_mono_word(word: &str) -> String {
             // - not be in the excluded list
             // - not end in an abbreviation mark: έτσ' είναι
             // - not end in a diphthong: σόι, Κάιν etc.
-            if !MONOSYL_DO_NOT_REMOVE_ACCENT.contains(syl)
+            if !MONOSYLLABLE_ACCENTED.contains(syl)
                 && !ends_with_abbreviation
                 && !ends_with_diphthong(&out)
             {
