@@ -10,6 +10,7 @@ def _add_endings(lemmas: list[str], endings: str) -> list[str]:
 
 
 MONOSYLLABLES = [
+    "δια",
     "πιο",
     "πια",
     "μια",
@@ -17,25 +18,6 @@ MONOSYLLABLES = [
     "μιας",
     "για",
     "γεια",
-    # γιος
-    "γιος",
-    "γιοι",
-    "γιου",
-    "γιων",
-    "γιο",
-    "γιους",
-    "γιε",
-    # Ποιος
-    "ποιος",
-    "ποια",
-    "ποιο",
-    "ποιου",
-    "ποιας",
-    "ποιον",
-    "ποιοι",
-    "ποιες",
-    "ποιων",
-    "ποιους",
 ]
 
 
@@ -48,6 +30,7 @@ IA_NOUN_LEMMA = [
     "αλήθει",
     "αρρώστι",
     "γρίνι",
+    "γκρίνι",
     "κατάντι",
     "φαμίλι",
     "φτώχει",
@@ -66,10 +49,15 @@ IA_NOUN = _add_endings(IA_NOUN_LEMMA, "α ας ες")
 
 # Adjectives ending in ιος / ια / ιο.
 # Ex. αλογίσιος
+# Note: includes the pronoun ποιος
+# Note: includes the ending ον for completion (archaic for adjectives,
+#       but also used in modern greek for ποιος)
 IA_ADJ_LEMMA = [
     "αλογίσι",
+    "νι",
+    "ποι",
 ]
-IA_ADJ = _add_endings(IA_ADJ_LEMMA, "ος ου ο ε α ας ων ους ες")
+IA_ADJ = _add_endings(IA_ADJ_LEMMA, "ος ου ο ον ε οι ων ους α ας ες")
 
 # Nouns ending in ιο (singular in ιο, plural in ια).
 # Ex. μπάνιο
@@ -81,11 +69,15 @@ IO_IA_NOUN_LEMMA = [
 ]
 IO_IA_NOUN = _add_endings(IO_IA_NOUN_LEMMA, "ο ου α ων")
 
-# Nouns ending in ιο (singular in ιο, plural in ιος).
-IO_IOS_NOUN_LEMMA = [
+# Nouns ending in ιος (singular in ιος, plural in ιοι).
+# Ex. γιος
+# Note: does not include ήλιος because of ambiguity
+IOS_IOI_NOUN_LEMMA = [
+    "γι",
     "ίσκι",
+    "ήσκι",
 ]
-IO_IOS_NOUN = _add_endings(IO_IOS_NOUN_LEMMA, "ος ου ο ε οι ων ους")
+IOS_IOI_NOUN = _add_endings(IOS_IOI_NOUN_LEMMA, "ος ου ο ε οι ων ους")
 
 # Nouns ending in ι (singular in ι / plural in ια)
 # Ex. χιόνι / χιόνια (only the plural is added)
@@ -95,6 +87,9 @@ with neuters_path.open("r", encoding="utf-8") as f:
     I_IA_NOUN.extend(sorted(set(f.read().splitlines())))
 
 SYNIZESIS = [
+    "βερεσέδια",
+    "βλαστήμια",
+    "διακόσια",
     "λόγια",  # Always bisyl as NOUN (can be trisyl as adj.)
     "έγνοια",  # Always bisyl with this orthography (but έννοια can be both)
     "κουράγιο",
@@ -102,7 +97,6 @@ SYNIZESIS = [
     "καινούργιο",
     "χρόνια",
     "χούγια",
-    "διακόσια",
     "γένεια",  # Alternative of γένια
     # Other ια (singular)
     "ίσια",
@@ -110,7 +104,7 @@ SYNIZESIS = [
     *IA_NOUN,
     *IA_ADJ,
     *IO_IA_NOUN,
-    *IO_IOS_NOUN,
+    *IOS_IOI_NOUN,
     *I_IA_NOUN,
 ]
 
