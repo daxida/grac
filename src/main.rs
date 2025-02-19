@@ -11,30 +11,25 @@ fn read_file(file_path: &str) -> io::Result<String> {
     Ok(content)
 }
 
-#[allow(dead_code)]
-fn clean_word(word: &str) -> String {
-    word.chars().filter(|c| c.is_alphanumeric()).collect()
-}
-
 fn simple_benchmark() {
     let file_path = "dump.txt";
 
     match read_file(file_path) {
         Ok(content) => {
-            // let words: Vec<&str> = content.split_whitespace().collect();
-            // let clean_words: Vec<String> = words.iter().map(|&word| clean_word(word)).collect();
-
-            let start_syllabify = Instant::now();
-            // let _syllabified_words: Vec<Vec<_>> = clean_words
-            //     .iter()
-            //     .map(|cword| syllabify_gr(cword))
-            //     .collect();
-            let _mono = to_mono(&content);
-            let duration_syllabify = start_syllabify.elapsed();
+            let words: Vec<&str> = content.split_whitespace().collect();
             println!(
-                "Total time for syllabification + allocation: {:?}",
-                duration_syllabify
+                "Content size: {}. Number of words: {}",
+                content.len(),
+                words.len()
             );
+
+            let now = Instant::now();
+            let _syls: Vec<Vec<_>> = words.iter().map(|cword| syllabify_gr(cword)).collect();
+            println!("Syllabification took: {:?}", now.elapsed());
+
+            let now = Instant::now();
+            let _mono = to_mono(&content);
+            println!("To monotonic took:    {:?}", now.elapsed());
         }
         Err(e) => eprintln!("Error reading file {}: {}", file_path, e),
     }

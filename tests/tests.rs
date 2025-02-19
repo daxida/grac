@@ -131,6 +131,14 @@ mktest_el!(
     ["αντλώ", "α-ντλώ"],
 );
 
+mktest_el!(
+    syllabify_ypsilon,
+    ["ναυς", "ναυς"],
+    ["νηυς", "νηυς"],
+    ["ναύαρχος", "ναύ-αρ-χος"],
+    ["απηύδησα", "α-πηύ-δη-σα"],
+);
+
 // Diaeresis
 mktest_el!(
     syllabify_el_diaeresis,

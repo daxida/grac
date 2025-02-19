@@ -2,7 +2,17 @@
 ///
 /// Note that this does not include the dot or ellipsis, because, unlike
 /// those, apostrophes can only omit one letter.
-pub const APOSTROPHES: &[char] = &['᾽', '᾿', '\'', '‘', '’'];
+#[rustfmt::skip]
+pub const APOSTROPHES: &[char] = &[
+    // Three main characters described by the Unicode consortium
+    // cf. https://en.wikipedia.org/wiki/Apostrophe
+    // * U+0027 ' APOSTROPHE
+    // * U+2019 ’ RIGHT SINGLE QUOTATION MARK
+    // * U+02BC ʼ MODIFIER LETTER APOSTROPHE
+    '\u{0027}', '\u{2019}', '\u{02BC}',
+    // (Wrong) variants
+    '᾽', '᾿', '‘'
+];
 
 /// List of correctly accented monosyllables, excepting pronouns.
 ///

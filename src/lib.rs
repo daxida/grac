@@ -21,6 +21,7 @@ pub use chars::ends_with_diphthong;
 pub use chars::is_greek_char;
 pub use chars::is_greek_word;
 
+pub use monotonic::split_word_punctuation;
 pub use monotonic::to_mono;
 
 pub use syllabify::is_vowel_el;

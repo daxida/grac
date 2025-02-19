@@ -15,9 +15,16 @@ pub const fn is_greek_char(ch: char) -> bool {
 }
 
 // The order is important: is_greek_chars is cheaper.
+//
+// Note that from the three common characters that represent apostrophe:
+// * U+0027 ' APOSTROPHE
+// * U+2019 ’ RIGHT SINGLE QUOTATION MARK
+// * U+02BC ʼ MODIFIER LETTER APOSTROPHE
+// the last one is the only considered alphabetic, and since it can appear
+// as a possible (probably wrong) variant, it makes sense to include it here.
 pub fn is_greek_word(word: &str) -> bool {
     word.chars()
-        .all(|ch| is_greek_char(ch) || !ch.is_alphabetic())
+        .all(|ch| is_greek_char(ch) || ch == '\u{02BC}' || !ch.is_alphabetic())
 }
 
 /// Check if the word ends with a diphthong.
@@ -220,6 +227,30 @@ mod tests {
             let received = base_lower_ge(ch);
             dbg_test(ch, received, expected);
             assert_eq!(received, expected);
+        }
+    }
+
+    #[test]
+    fn test_is_greek_word() {
+        let greek_words = [
+            "καλημέρα",
+            // U+0027 ' APOSTROPHE
+            "ὑπ\u{0027}",
+            // U+2019 ’ RIGHT SINGLE QUOTATION MARK
+            "ὑπ\u{2019}",
+            // U+02BC ʼ MODIFIER LETTER APOSTROPHE
+            // Note that this one is alphabetic!
+            "ὑπ\u{02BC}",
+        ];
+        for word in greek_words {
+            for ch in word.chars() {
+                if !is_greek_char(ch) {
+                    eprintln!("'{ch}' is not a greek char.");
+                    let msg = if ch.is_alphabetic() { "" } else { "not " };
+                    eprintln!("{ch} is {msg}alphabetic.");
+                }
+            }
+            assert!(is_greek_word(word), "Expected {word} to be a greek word.");
         }
     }
 }

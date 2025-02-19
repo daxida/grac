@@ -38,29 +38,45 @@ fn remove_superfluous_diaereses(text: &str) -> String {
 /// assert_eq!(result, "Ελλάς και κόσμος.\r\n...άνθρωπος.");
 /// ```
 pub fn to_mono(text: &str) -> String {
-    text.split_inclusive(|c: char| c.is_whitespace() || c == '-')
+    text.split_inclusive(|c: char|
+        // Split on hyphens (and faulty variations)
+        c == '-' || c == '—'
+        // The main separator logic is whitespace
+        || c.is_whitespace())
         .map(to_mono_word)
         .collect()
 }
 
 /// Split word into (left_punct, word, right_punct)
-fn split_word_punctuation(word: &str) -> (&str, &str, &str) {
+///
+/// Leaves punctuation inside the word untouched.
+//
+// NOTE: this is in grs
+pub fn split_word_punctuation(word: &str) -> (&str, &str, &str) {
+    // NOTE: we can't use is_greek_char because some punctuation
+    // marks are in that range, ex. ᾽
+    // That is, this won't work:
+    // let not_punct = |c: char| is_greek_char(c) || c.is_alphabetic();
+    // We need another function that is_greek_letter
+    let not_punct = |c: char| c != '\u{02BC}' && c.is_alphabetic();
+
     let start = word
         .char_indices()
-        .find(|&(_, c)| c.is_alphabetic())
+        // TODO: test find_map?
+        .find(|&(_, c)| not_punct(c))
         .map(|(i, _)| i);
 
-    let end = word
-        .char_indices()
-        .rev()
-        .find(|&(_, c)| c.is_alphabetic())
-        .map(|(i, c)| i + c.len_utf8());
-
     if let Some(start) = start {
-        let end = end.unwrap();
+        let end = word
+            .char_indices()
+            .rev()
+            .find(|&(_, c)| not_punct(c))
+            .map(|(i, c)| i + c.len_utf8())
+            .unwrap();
         (&word[..start], &word[start..end], &word[end..])
     } else {
-        // If the word has not a single alphabetic char...
+        // If there is not a single alphabetic char
+        // treat the word as left punctuation.
         (word, "", "")
     }
 }
@@ -157,6 +173,7 @@ fn to_mono_word(word: &str) -> String {
         Some(fst_rpunct) => APOSTROPHES.contains(&fst_rpunct),
         None => false,
     };
+    log("Ends in abbreviation?", ends_with_abbreviation);
 
     out = match syllables.as_slice() {
         // Do we remove the acute accent from a monosyllable?...
@@ -238,6 +255,8 @@ mod tests {
         // ["χλιός", "χλιος"],
         // ["Δαυίδ", "Δαυίδ"],
         ["δύο-τρεῖς", "δύο-τρεις"],
+        // Faulty variation of a hyphen
+        ["δύο—τρεῖς", "δύο—τρεις"],
         ["λογιῶν-τῶν-λογιῶν", "λογιών-των-λογιών"],
         ["Ἅμα πιῇς τσάι", "Άμα πιης τσάι"],
     );
@@ -377,5 +396,13 @@ mod tests {
             "δεν θα σ αφήσουνε να μπεις εκεί"
         ],
         ["ἀρχαϊκάς", "αρχαϊκάς"],
+    );
+
+    mktest_mono!(
+        mono_ancient,
+        ["ἐξεσάωσεν ὑπʼ ἰλύος", "εξεσάωσεν υπʼ ιλύος"],
+        ["ὄφρʼ ἐνὶ", "όφρʼ ενί"],
+        ["σῶφρον ἐπʼ ἀρετήν", "σώφρον επʼ αρετήν"],
+        ["λήξεν άμʼ ἠελίω· τάχα", "λήξεν άμʼ ηελίω· τάχα"],
     );
 }
