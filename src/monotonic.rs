@@ -4,6 +4,7 @@ use crate::accents::Diacritic;
 use crate::accents::{has_acute, remove_acute, remove_diacritic_at};
 use crate::chars::{ends_with_diphthong, is_greek_word};
 use crate::constants::{APOSTROPHES, MONOSYLLABLE_ACCENTED};
+use crate::is_greek_letter;
 use crate::syllabify::syllabify_el;
 
 fn replace_from_str_ary(text: &str, replacements: &[(&str, &str)]) -> String {
@@ -47,22 +48,21 @@ pub fn to_mono(text: &str) -> String {
         .collect()
 }
 
+// Uses the is_greek_letter fast path
+fn not_punct(c: char) -> bool {
+    is_greek_letter(c) || (c != '\u{02BC}' && c.is_alphabetic())
+}
+
 /// Split word into (left_punct, word, right_punct)
 ///
 /// Leaves punctuation inside the word untouched.
 //
-// NOTE: this is in grs
+// NOTE:
+// * This is in grs
+// * It is as fast as find_map
 pub fn split_word_punctuation(word: &str) -> (&str, &str, &str) {
-    // NOTE: we can't use is_greek_char because some punctuation
-    // marks are in that range, ex. ᾽
-    // That is, this won't work:
-    // let not_punct = |c: char| is_greek_char(c) || c.is_alphabetic();
-    // We need another function that is_greek_letter
-    let not_punct = |c: char| c != '\u{02BC}' && c.is_alphabetic();
-
     let start = word
         .char_indices()
-        // TODO: test find_map?
         .find(|&(_, c)| not_punct(c))
         .map(|(i, _)| i);
 
@@ -224,6 +224,19 @@ fn to_mono_word(word: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_not_punct() {
+        let non_punct = ['α', 'a', 'ή'];
+        for p in non_punct {
+            assert!(not_punct(p));
+        }
+
+        let punct = ['.', '2', '᾿'];
+        for p in punct {
+            assert!(!not_punct(p));
+        }
+    }
 
     macro_rules! mktest_mono {
         ($group_name:ident, $([$input:expr, $expected:expr]),* $(,)?) => {

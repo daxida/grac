@@ -19,6 +19,7 @@ pub use accents::Diacritic;
 pub use chars::base_lower;
 pub use chars::ends_with_diphthong;
 pub use chars::is_greek_char;
+pub use chars::is_greek_letter;
 pub use chars::is_greek_word;
 
 pub use monotonic::split_word_punctuation;

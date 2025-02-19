@@ -14,6 +14,15 @@ pub const fn is_greek_char(ch: char) -> bool {
     is_greek_and_coptic_char(ch) || is_greek_extended_char(ch)
 }
 
+/// Same as `is_greek_char` but excludes some punctuation characters
+/// that are in the Unicode Greek range. Ex. 'ʹ'
+pub const fn is_greek_letter(ch: char) -> bool {
+    match ch {
+        'ʹ' | '᾿' | '᾽' | '·' => false,
+        _ => is_greek_char(ch),
+    }
+}
+
 // The order is important: is_greek_chars is cheaper.
 //
 // Note that from the three common characters that represent apostrophe:
