@@ -1,11 +1,12 @@
+import time
+from pathlib import Path
+
+from grac import syllabify_el as msyl2
+from grac import syllabify_gr as syl3
+from grac import syllabify_gr_ref as syl2
 from grac import to_mono
 from greek_accentuation.syllabify import syllabify as syl1
-from grac import syllabify_gr_ref as syl2
-from grac import syllabify_gr as syl3
 from modern_greek_accentuation.syllabify import modern_greek_syllabify as msyl1
-from grac import syllabify_el as msyl2
-from pathlib import Path
-import time
 
 
 def timeit(fn, words, version, ref_elapsed=0.0):
@@ -30,7 +31,7 @@ def split_words(text: str) -> list[str]:
 
 
 def print_rust_test(word: str, syllables: list[str]) -> None:
-    print(f"    [\"{word}\", \"{"-".join(syllables)}\"],")
+    print(f'    ["{word}", "{"-".join(syllables)}"],')
 
 
 def main():
