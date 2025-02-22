@@ -47,6 +47,7 @@ pub fn is_greek_word(word: &str) -> bool {
 ///
 /// assert_eq!(ends_with_diphthong("Κάιν"), true);
 /// assert_eq!(ends_with_diphthong("πλάι"), true);
+/// assert_eq!(ends_with_diphthong("γάιδαρος"), false);
 /// ```
 pub fn ends_with_diphthong(word: &str) -> bool {
     let vowels = extract_vowels(word);
