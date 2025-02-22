@@ -1,11 +1,14 @@
-Port of [greek-accentuation](https://github.com/jtauber/greek-accentuation) to rust / python via PyO3 + maturin.
+Fast accentuation and syllabification library for modern Greek that (partially) takes synizesis into account.
 
-To install the python package, clone the repo and:
-```
-pip install py-grac/
-```
+Consider using this if speed (over python implementations) and accuracy (over generic hyphenation libraries) are relevant to your task.
 
-To test the quick comparison with `greek-accentuation`:
+It also provides some (unfinished) python bindings that can manually be installed by cloning the repo and running: `pip install py-grac/`
+
+Based originally on ideas from [greek-accentuation](https://github.com/jtauber/greek-accentuation), and [modern_greek_accentuation](https://github.com/PicusZeus/modern_greek_accentuation).
+
+### Testing
+
+To test the quick comparison with [greek-accentuation](https://github.com/jtauber/greek-accentuation):
 ```
 pip install greek-accentuation
 python3 cmp.py
@@ -17,7 +20,8 @@ cargo test
 cargo bench
 ```
 
-TODO: 
+### TODO
+
 - Wheels, crate, LICENCE
 - WIP: Finish modern greek syllabification (with no support for synizesis)
 - Explore [this](https://github.com/datio/grhyph) for synizesis
