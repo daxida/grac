@@ -83,6 +83,8 @@ IOS_IOI_NOUN_LEMMA = [
     "γι",
     "ίσκι",
     "ήσκι",
+    # Note: while καπετάνιος has two plurals, the one in αίοι can not take synizesis
+    "καπετάνι",
 ]
 IOS_IOI_NOUN = _add_endings(IOS_IOI_NOUN_LEMMA, "ος ου ο ε οι ων ους")
 
