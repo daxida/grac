@@ -44,10 +44,10 @@ fn benchmark_monotonic(c: &mut Criterion) {
     let mut group = c.benchmark_group("group");
     group.sample_size(10);
 
-    bench_words!(group, words, split_word_punctuation);
-    group.bench_function("to_mono", |b| {
+    bench_words!(group, words, split_punctuation);
+    group.bench_function("to_monotonic", |b| {
         b.iter(|| {
-            let result = to_mono(&content);
+            let result = to_monotonic(&content);
             black_box(result);
         })
     });

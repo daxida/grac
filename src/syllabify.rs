@@ -108,8 +108,8 @@ pub enum Synizesis<'a> {
     Indices(&'a [usize]),
 }
 
-pub fn syllabify_gr(word: &str) -> Vec<&str> {
-    syllabify_lang(word, &GR, Synizesis::Never)
+pub fn syllabify_gr(s: &str) -> Vec<&str> {
+    syllabify_lang(s, &GR, Synizesis::Never)
 }
 
 /// Syllabify a modern Greek word.
@@ -120,10 +120,10 @@ pub fn syllabify_gr(word: &str) -> Vec<&str> {
 /// use grac::syllabify_el;
 /// assert_eq!(syllabify_el("αρρώστια"), vec!["αρ", "ρώ", "στια"]);
 /// ```
-pub fn syllabify_el(word: &str) -> Vec<&str> {
-    match lookup_synizesis(word) {
+pub fn syllabify_el(s: &str) -> Vec<&str> {
+    match lookup_synizesis(s) {
         Some(res) => res.to_vec(),
-        _ => syllabify_lang(word, &EL, Synizesis::Never),
+        _ => syllabify_lang(s, &EL, Synizesis::Never),
     }
 }
 
@@ -144,8 +144,8 @@ pub fn syllabify_el(word: &str) -> Vec<&str> {
 /// let idxs = Synizesis::Indices(&[1, 2]);
 /// assert_eq!(syllabify_el_mode("αστειάκια", idxs), vec!["α", "στειά", "κια"]);
 /// ```
-pub fn syllabify_el_mode<'a>(word: &'a str, synizesis: Synizesis) -> Vec<&'a str> {
-    syllabify_lang(word, &EL, synizesis)
+pub fn syllabify_el_mode<'a>(s: &'a str, synizesis: Synizesis) -> Vec<&'a str> {
+    syllabify_lang(s, &EL, synizesis)
 }
 
 /////////////////////////////////////////////
@@ -175,14 +175,14 @@ fn is_consonant_cluster(chs: &[char], lang: &Lang) -> bool {
 }
 
 #[inline]
-fn get_byte_offset(pos: usize, chars: &[char]) -> usize {
-    chars[..pos].iter().map(|c| c.len_utf8()).sum::<usize>()
+fn get_byte_offset(pos: usize, chs: &[char]) -> usize {
+    chs[..pos].iter().map(|ch| ch.len_utf8()).sum::<usize>()
 }
 
-fn syllabify_lang<'a>(word: &'a str, lang: &Lang, synizesis: Synizesis) -> Vec<&'a str> {
-    let chars: Vec<char> = word.chars().collect();
-    let mut fr = chars.len();
-    let mut fr_byte = get_byte_offset(fr, &chars);
+fn syllabify_lang<'a>(s: &'a str, lang: &Lang, synizesis: Synizesis) -> Vec<&'a str> {
+    let chs: Vec<_> = s.chars().collect();
+    let mut fr = chs.len();
+    let mut fr_byte = get_byte_offset(fr, &chs);
     let mut syllables = Vec::new();
     let mut idx_syllable = 1;
 
@@ -194,9 +194,9 @@ fn syllabify_lang<'a>(word: &'a str, lang: &Lang, synizesis: Synizesis) -> Vec<&
         };
         idx_syllable += 1;
 
-        if let Some(to) = parse_syllable_break(&chars, fr, lang, cur_synizesis) {
-            let to_byte = get_byte_offset(to, &chars);
-            let syllable = &word[to_byte..fr_byte];
+        if let Some(to) = parse_syllable_break(&chs, fr, lang, cur_synizesis) {
+            let to_byte = get_byte_offset(to, &chs);
+            let syllable = &s[to_byte..fr_byte];
             syllables.push(syllable);
             fr = to;
             fr_byte = to_byte;
@@ -209,12 +209,12 @@ fn syllabify_lang<'a>(word: &'a str, lang: &Lang, synizesis: Synizesis) -> Vec<&
     syllables
 }
 
-fn parse_syllable_break(chars: &[char], fr: usize, lang: &Lang, synizesis: bool) -> Option<usize> {
+fn parse_syllable_break(chs: &[char], fr: usize, lang: &Lang, synizesis: bool) -> Option<usize> {
     let mut to = fr;
 
-    move_coda(chars, &mut to, lang);
-    move_nucleus(chars, &mut to, lang, synizesis);
-    move_onset(chars, &mut to, lang);
+    move_coda(chs, &mut to, lang);
+    move_nucleus(chs, &mut to, lang, synizesis);
+    move_onset(chs, &mut to, lang);
 
     if fr > to {
         Some(to)
@@ -223,22 +223,22 @@ fn parse_syllable_break(chars: &[char], fr: usize, lang: &Lang, synizesis: bool)
     }
 }
 
-fn move_coda(chars: &[char], pos: &mut usize, lang: &Lang) {
-    while *pos > 0 && !is_vowel(chars[*pos - 1], lang) {
+fn move_coda(chs: &[char], pos: &mut usize, lang: &Lang) {
+    while *pos > 0 && !is_vowel(chs[*pos - 1], lang) {
         *pos -= 1;
     }
 }
 
-fn move_nucleus(chars: &[char], pos: &mut usize, lang: &Lang, synizesis: bool) {
+fn move_nucleus(chs: &[char], pos: &mut usize, lang: &Lang, synizesis: bool) {
     let to = *pos;
-    while *pos > 0 && (is_vowel(chars[*pos - 1], lang) || chars[*pos - 1] == Diacritic::ROUGH) {
-        if to - *pos > 0 && chars[*pos] != Diacritic::ACUTE && chars[*pos] != Diacritic::ROUGH {
-            if is_diphthong(&chars[*pos - 1..*pos + 1], lang) {
-                if to - *pos > 1 && chars.get(*pos + 1) == Some(&'ι') {
+    while *pos > 0 && (is_vowel(chs[*pos - 1], lang) || chs[*pos - 1] == Diacritic::ROUGH) {
+        if to - *pos > 0 && chs[*pos] != Diacritic::ACUTE && chs[*pos] != Diacritic::ROUGH {
+            if is_diphthong(&chs[*pos - 1..*pos + 1], lang) {
+                if to - *pos > 1 && chs.get(*pos + 1) == Some(&'ι') {
                     *pos += 1;
                     break;
                 }
-            } else if synizesis && chars.get(*pos - 1) == Some(&'ι') {
+            } else if synizesis && chs.get(*pos - 1) == Some(&'ι') {
             } else {
                 break;
             }
@@ -247,12 +247,12 @@ fn move_nucleus(chars: &[char], pos: &mut usize, lang: &Lang, synizesis: bool) {
     }
 }
 
-fn move_onset(chars: &[char], pos: &mut usize, lang: &Lang) {
+fn move_onset(chs: &[char], pos: &mut usize, lang: &Lang) {
     let to = *pos;
     while *pos > 0
-        && !is_vowel(chars[*pos - 1], lang)
+        && !is_vowel(chs[*pos - 1], lang)
         // If we reach a consonant cluster we keep moving
-        && (to == *pos || is_consonant_cluster(&chars[*pos - 1..to], lang))
+        && (to == *pos || is_consonant_cluster(&chs[*pos - 1..to], lang))
     {
         *pos -= 1;
     }
@@ -277,56 +277,50 @@ fn is_consonant_cluster_gr(chs: &[char]) -> bool {
 }
 
 #[inline(always)]
-fn dump<'a>(
-    chars: &[char],
-    fr: usize,
-    to: &mut usize,
-    result: &mut Vec<&'a str>,
-    original: &'a str,
-) {
-    let start = get_byte_offset(fr, chars);
-    let end = get_byte_offset(*to, chars);
+fn dump<'a>(chs: &[char], fr: usize, to: &mut usize, result: &mut Vec<&'a str>, original: &'a str) {
+    let start = get_byte_offset(fr, chs);
+    let end = get_byte_offset(*to, chs);
     result.push(&original[start..end]);
 }
 
 #[inline(always)]
 fn dumpmove<'a>(
-    chars: &[char],
+    chs: &[char],
     fr: usize,
     to: &mut usize,
     result: &mut Vec<&'a str>,
     original: &'a str,
 ) {
-    dump(chars, fr, to, result, original);
+    dump(chs, fr, to, result, original);
     *to = fr;
 }
 
-pub fn syllabify_gr_ref(word: &str) -> Vec<&str> {
+pub fn syllabify_gr_ref(s: &str) -> Vec<&str> {
     let mut result = Vec::new();
     let mut state = 0;
-    let chars: Vec<char> = word.chars().collect();
-    let mut to = chars.len();
+    let chs: Vec<_> = s.chars().collect();
+    let mut to = chs.len();
 
-    for (fr, &ch) in chars.iter().enumerate().rev() {
+    for (fr, &ch) in chs.iter().enumerate().rev() {
         match state {
             0 if is_vowel_gr(ch) => state = 1,
             1 => {
                 if is_vowel_gr(ch) || ch == Diacritic::ROUGH {
-                    let prev = chars[fr + 1];
+                    let prev = chs[fr + 1];
 
                     if prev == Diacritic::ACUTE || prev == Diacritic::ROUGH {
                         // Do nothing
-                    } else if is_diphthong_gr(&chars[fr..fr + 2]) {
+                    } else if is_diphthong_gr(&chs[fr..fr + 2]) {
                         // Two consecutive overlapping diphthongs?
-                        if chars.get(fr + 2) == Some(&'ι') {
+                        if chs.get(fr + 2) == Some(&'ι') {
                             // Dump only the part after the iota
                             if fr + 2 < to {
-                                dump(&chars, fr + 2, &mut to, &mut result, word);
+                                dump(&chs, fr + 2, &mut to, &mut result, s);
                                 to = fr + 2;
                             }
                         }
                     } else {
-                        dumpmove(&chars, fr + 1, &mut to, &mut result, word);
+                        dumpmove(&chs, fr + 1, &mut to, &mut result, s);
                     }
                 } else {
                     state = 2;
@@ -334,10 +328,10 @@ pub fn syllabify_gr_ref(word: &str) -> Vec<&str> {
             }
             2 => {
                 if is_vowel_gr(ch) {
-                    dumpmove(&chars, fr + 1, &mut to, &mut result, word);
+                    dumpmove(&chs, fr + 1, &mut to, &mut result, s);
                     state = 1;
-                } else if !is_consonant_cluster_gr(&chars[fr..to]) {
-                    dumpmove(&chars, fr + 1, &mut to, &mut result, word);
+                } else if !is_consonant_cluster_gr(&chs[fr..to]) {
+                    dumpmove(&chs, fr + 1, &mut to, &mut result, s);
                     state = 0;
                 }
             }
@@ -346,7 +340,7 @@ pub fn syllabify_gr_ref(word: &str) -> Vec<&str> {
     }
 
     if 0 < to {
-        dump(&chars, 0, &mut to, &mut result, word);
+        dump(&chs, 0, &mut to, &mut result, s);
     }
 
     result.reverse();
@@ -360,34 +354,33 @@ mod tests {
     #[test]
     fn test_full_syllable() {
         let word = "στρες";
-        let chars: Vec<char> = word.chars().collect();
-        let pos = chars.len();
-        let syllable_break = parse_syllable_break(&chars, pos, &GR, false);
+        let chs: Vec<_> = word.chars().collect();
+        let pos = chs.len();
+        let syllable_break = parse_syllable_break(&chs, pos, &GR, false);
         assert_eq!(syllable_break, Some(0));
     }
 
     #[test]
     fn test_mia_syllable_syn_true() {
         let word = "μια";
-        let chars: Vec<char> = word.chars().collect();
-        let pos = chars.len();
-        let syllable_break = parse_syllable_break(&chars, pos, &GR, true);
+        let chs: Vec<_> = word.chars().collect();
+        let pos = chs.len();
+        let syllable_break = parse_syllable_break(&chs, pos, &GR, true);
         assert_eq!(syllable_break, Some(0));
     }
 
     #[test]
     fn test_mia_syllable_syn_false() {
         let word = "μια";
-        let chars: Vec<char> = word.chars().collect();
-        let pos = chars.len();
-        let syllable_break = parse_syllable_break(&chars, pos, &GR, false);
+        let chs: Vec<_> = word.chars().collect();
+        let pos = chs.len();
+        let syllable_break = parse_syllable_break(&chs, pos, &GR, false);
         assert_eq!(syllable_break, Some(2));
     }
 
     #[test]
     fn test_syllabify_el() {
-        let word = "μπεις";
-        assert_eq!(syllabify_el(word).len(), 1)
+        assert_eq!(syllabify_el("μπεις").len(), 1)
     }
 
     #[test]

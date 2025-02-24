@@ -7,15 +7,15 @@ use crate::constants::{APOSTROPHES, MONOSYLLABLE_ACCENTED};
 use crate::is_greek_letter;
 use crate::syllabify::syllabify_el;
 
-fn replace_from_str_ary(text: &str, replacements: &[(&str, &str)]) -> String {
-    let mut result = text.to_string();
+fn replace_from_str_ary(s: &str, replacements: &[(&str, &str)]) -> String {
+    let mut result = s.to_string();
     for &(from, to) in replacements {
         result = result.replace(from, to);
     }
     result
 }
 
-fn remove_superfluous_diaereses(text: &str) -> String {
+fn remove_superfluous_diaereses(s: &str) -> String {
     const SUPERFLUOUS_DIAERESES: [(&str, &str); 6] = [
         ("άϊ", "άι"),
         ("άϋ", "άυ"),
@@ -24,7 +24,7 @@ fn remove_superfluous_diaereses(text: &str) -> String {
         ("όϊ", "όι"),
         ("ούϊ", "ούι"),
     ];
-    replace_from_str_ary(text, &SUPERFLUOUS_DIAERESES)
+    replace_from_str_ary(s, &SUPERFLUOUS_DIAERESES)
 }
 
 /// Convert text from polytonic to monotonic Greek.
@@ -35,49 +35,49 @@ fn remove_superfluous_diaereses(text: &str) -> String {
 /// use grac::*;
 ///
 /// let text = "Ἑλλάς καὶ κόσμος.\r\n...ἄνθρωπος.";
-/// let result = to_mono(text);
+/// let result = to_monotonic(text);
 /// assert_eq!(result, "Ελλάς και κόσμος.\r\n...άνθρωπος.");
 /// ```
-pub fn to_mono(text: &str) -> String {
-    text.split_inclusive(|c: char|
+pub fn to_monotonic(s: &str) -> String {
+    s.split_inclusive(|ch: char|
         // Split on hyphens (and faulty variations)
-        c == '-' || c == '—'
+        ch == '-' || ch == '—'
         // The main separator logic is whitespace
-        || c.is_whitespace())
-        .map(to_mono_word)
+        || ch.is_whitespace())
+        .map(to_monotonic_word)
         .collect()
 }
 
 // Uses the is_greek_letter fast path
-fn not_punct(c: char) -> bool {
-    is_greek_letter(c) || (c != '\u{02BC}' && c.is_alphabetic())
+fn not_punct(ch: char) -> bool {
+    is_greek_letter(ch) || (ch != '\u{02BC}' && ch.is_alphabetic())
 }
 
-/// Split word into (left_punct, word, right_punct)
+/// Split string into (left_punct, core, right_punct)
 ///
-/// Leaves punctuation inside the word untouched.
+/// Leaves punctuation inside the core untouched.
 //
 // NOTE:
 // * This is in grs
 // * It is as fast as find_map
-pub fn split_word_punctuation(word: &str) -> (&str, &str, &str) {
-    let start = word
+pub fn split_punctuation(s: &str) -> (&str, &str, &str) {
+    let start = s
         .char_indices()
-        .find(|&(_, c)| not_punct(c))
+        .find(|&(_, ch)| not_punct(ch))
         .map(|(i, _)| i);
 
     if let Some(start) = start {
-        let end = word
+        let end = s
             .char_indices()
             .rev()
-            .find(|&(_, c)| not_punct(c))
-            .map(|(i, c)| i + c.len_utf8())
+            .find(|&(_, ch)| not_punct(ch))
+            .map(|(i, ch)| i + ch.len_utf8())
             .unwrap();
-        (&word[..start], &word[start..end], &word[end..])
+        (&s[..start], &s[start..end], &s[end..])
     } else {
         // If there is not a single alphabetic char
         // treat the word as left punctuation.
-        (word, "", "")
+        (s, "", "")
     }
 }
 
@@ -101,10 +101,10 @@ fn log(label: &str, value: impl std::fmt::Debug) {
     // println!("{:<30}: {:?}", label, value);
 }
 
-fn dbg_bytes(word: &str) {
+fn dbg_bytes(s: &str) {
     log(
         "Input bytes",
-        word.as_bytes()
+        s.as_bytes()
             .iter()
             .map(|byte| format!("{:02x}", byte))
             .collect::<Vec<String>>()
@@ -115,38 +115,39 @@ fn dbg_bytes(word: &str) {
 /// Remove ancient diacritics and convert grave and circumflex to acute
 /// in a single pass.
 ///
+/// TODO:
 /// filter_map was performing a bit worse but remains to be tested.
-fn convert_to_acute(word: &str) -> String {
-    word.nfd()
-        .filter(|c| {
+fn convert_to_acute(s: &str) -> String {
+    s.nfd()
+        .filter(|ch| {
             ![
                 Diacritic::IOTA_SUBSCRIPT,
                 Diacritic::ROUGH,
                 Diacritic::SMOOTH,
             ]
-            .contains(c)
+            .contains(ch)
         })
-        .map(|c| match c {
+        .map(|ch| match ch {
             Diacritic::GRAVE | Diacritic::CIRCUMFLEX => Diacritic::ACUTE,
-            _ => c,
+            _ => ch,
         })
         .nfc()
         .collect::<String>()
 }
 
-/// Convert a word from polytonic to monotonic Greek.
-fn to_mono_word(word: &str) -> String {
+/// Convert a string representing a word to monotonic Greek.
+fn to_monotonic_word(s: &str) -> String {
     // If the word is empty our segmentation logic is probably wrong.
-    assert!(!word.is_empty());
+    assert!(!s.is_empty());
 
     // Do not remove accents if the word is not greek
-    if !is_greek_word(word) {
-        log("Not a greek word!", word);
-        return word.to_string();
+    if !is_greek_word(s) {
+        log("Not a greek word!", s);
+        return s.to_string();
     }
 
     // Decompose punctuation
-    let (left_punct, core, right_punct) = split_word_punctuation(word);
+    let (left_punct, core, right_punct) = split_punctuation(s);
     log("Left punct", left_punct);
     log("Right punct", right_punct);
 
@@ -157,8 +158,8 @@ fn to_mono_word(word: &str) -> String {
         "πὼς" => Some("πως"),
         _ => None,
     };
-    if let Some(s) = ret {
-        return format!("{}{}{}", left_punct, s, right_punct);
+    if let Some(ret) = ret {
+        return format!("{}{}{}", left_punct, ret, right_punct);
     }
 
     log("Input word", core);
@@ -249,7 +250,7 @@ mod tests {
                 ];
 
                 for (input, expected) in test_cases {
-                    let result = to_mono(input);
+                    let result = to_monotonic(input);
                     assert_eq!(result, expected);
                 }
             }

@@ -4,7 +4,7 @@ import sys
 from time import time
 from typing import Callable
 
-from grac import to_mono
+from grac import to_monotonic
 from modern_greek_accentuation.accentuation import convert_to_monotonic
 from poly2mono.main import poly2mono
 
@@ -44,7 +44,7 @@ def main() -> None:
     suite: dict[str, list[str]] = {
         "orig": cont,
         "poly": tm(poly2mono, content).split(),
-        "grac": tm(to_mono, content).split(),
+        "grac": tm(to_monotonic, content).split(),
         # Too slow...
         "mgaa": tm(convert_to_monotonic, content).split(),
         # "mgaa": grac,
@@ -74,7 +74,7 @@ def main() -> None:
             print("Ctxt:")
             print(f"  {lw}: '{get_ctx(cont, idx, lambda x: x)}'")
             print(f"  {lw1}: '{get_ctx(cont, idx, poly2mono)}'")
-            print(f"  {lw2}: '{get_ctx(cont, idx, to_mono)}'")
+            print(f"  {lw2}: '{get_ctx(cont, idx, to_monotonic)}'")
             print(f"  {lw3}: '{get_ctx(cont, idx, convert_to_monotonic)}'")
 
             # Relevant end
@@ -90,7 +90,7 @@ def main() -> None:
         #     assert False
 
     with open("out.txt", "w") as f:
-        f.write(to_mono(content))
+        f.write(to_monotonic(content))
     print("Wrote monotonic version at out.txt")
 
     print()

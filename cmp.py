@@ -4,7 +4,7 @@ from pathlib import Path
 from grac import syllabify_el as msyl2
 from grac import syllabify_gr as syl3
 from grac import syllabify_gr_ref as syl2
-from grac import to_mono
+from grac import to_monotonic
 from greek_accentuation.syllabify import syllabify as syl1
 from modern_greek_accentuation.syllabify import modern_greek_syllabify as msyl1
 

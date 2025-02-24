@@ -21,16 +21,18 @@ impl Diacritic {
 }
 
 const ALL_DIACRITICS: [char; 7] = [
-    Diacritic::CIRCUMFLEX,
     Diacritic::ACUTE,
     Diacritic::GRAVE,
+    Diacritic::CIRCUMFLEX,
     Diacritic::IOTA_SUBSCRIPT,
     Diacritic::DIAERESIS,
     Diacritic::SMOOTH,
     Diacritic::ROUGH,
 ];
 
-/// Checks if the char or &str contains the specified diacritic.
+/// Check if the word contains the given diacritic.
+///
+/// A word can be anything that implements the UnicodeNormalization trait over char.
 ///
 /// # Examples
 ///
@@ -40,12 +42,13 @@ const ALL_DIACRITICS: [char; 7] = [
 /// assert_eq!(has_diacritic('α', Diacritic::GRAVE), false);
 /// assert_eq!(has_diacritic('ϊ', Diacritic::DIAERESIS), true);
 /// assert_eq!(has_diacritic("γάϊδουρος", Diacritic::ACUTE), true);
+/// assert_eq!(has_diacritic("σόι".chars(), Diacritic::ACUTE), true);
 /// ```
 pub fn has_diacritic<I>(word: impl UnicodeNormalization<I>, diacritic: char) -> bool
 where
     I: Iterator<Item = char>,
 {
-    word.nfd().any(|c| c == diacritic)
+    word.nfd().any(|ch| ch == diacritic)
 }
 
 pub fn has_diaeresis<I>(word: impl UnicodeNormalization<I>) -> bool
@@ -63,7 +66,10 @@ where
 }
 
 /// Check if the word has any given diacritics.
+///
+/// A word can be anything that implements the UnicodeNormalization trait over char.
 //
+// NOTE:
 // The only reason this has not superseeded has_diacritic is because I'm wary
 // of performance issues, and the semantics are more cumbersome:
 // * has_diacritics(word, &[Diacritic::ACUTE])
@@ -73,7 +79,7 @@ pub fn has_diacritics<I>(word: impl UnicodeNormalization<I>, diacritics: &[char]
 where
     I: Iterator<Item = char>,
 {
-    word.nfd().any(|c| diacritics.contains(&c))
+    word.nfd().any(|ch| diacritics.contains(&ch))
 }
 
 pub fn has_any_diacritic<I>(word: impl UnicodeNormalization<I>) -> bool
@@ -96,8 +102,8 @@ where
 /// assert_eq!(diacritic_pos("άνθρωπός", Diacritic::ACUTE), [1, 3]);
 /// assert_eq!(diacritic_pos("τίποτα", Diacritic::GRAVE), []);
 /// ```
-pub fn diacritic_pos(word: &str, diacritic: char) -> Vec<usize> {
-    syllabify_el(word)
+pub fn diacritic_pos(s: &str, diacritic: char) -> Vec<usize> {
+    syllabify_el(s)
         .iter()
         .rev()
         .enumerate()
@@ -111,7 +117,7 @@ pub fn diacritic_pos(word: &str, diacritic: char) -> Vec<usize> {
         .collect()
 }
 
-/// Remove specified diacritics from a string.
+/// Remove given diacritics.
 ///
 /// # Examples
 ///
@@ -123,15 +129,15 @@ pub fn diacritic_pos(word: &str, diacritic: char) -> Vec<usize> {
 /// let res  = "άνθρωπος εστι";
 /// assert_eq!(remove_diacritics(text, &diacritics), res);
 /// ```
-pub fn remove_diacritics(text: &str, diacritics: &[char]) -> String {
-    text.nfd()
+pub fn remove_diacritics(s: &str, diacritics: &[char]) -> String {
+    s.nfd()
         .filter(|ch| !diacritics.contains(ch))
         .collect::<String>()
         .nfc()
         .to_string()
 }
 
-/// Remove all diacritics from a string.
+/// Remove all diacritics.
 ///
 /// # Examples
 ///
@@ -144,15 +150,17 @@ pub fn remove_diacritics(text: &str, diacritics: &[char]) -> String {
 ///             "την δ᾽ εγω ου λυσω: πριν μιν και γηρας επεισιν\n
 ///              ημετερω ενι οικω εν Αργει τηλοθι πατρης");
 /// ```
-pub fn remove_all_diacritics(text: &str) -> String {
-    remove_diacritics(text, &ALL_DIACRITICS)
+pub fn remove_all_diacritics(s: &str) -> String {
+    remove_diacritics(s, &ALL_DIACRITICS)
 }
 
-pub fn remove_acute(text: &str) -> String {
-    remove_diacritics(text, &[Diacritic::ACUTE])
+pub fn remove_acute(s: &str) -> String {
+    remove_diacritics(s, &[Diacritic::ACUTE])
 }
 
-/// Remove diacritic to the specified syllable of a word.
+/// Remove diacritic at the given syllable position.
+///
+/// The syllable position starts at one and is counted from the end of the word.
 ///
 /// # Examples
 ///
@@ -160,12 +168,14 @@ pub fn remove_acute(text: &str) -> String {
 /// use grac::{remove_diacritic_at, Diacritic};
 ///
 /// assert_eq!(remove_diacritic_at("άνθρωπέ", 1, Diacritic::ACUTE), "άνθρωπε");
+/// assert_eq!(remove_diacritic_at("άνθρωπέ", 2, Diacritic::ACUTE), "άνθρωπέ");
+/// assert_eq!(remove_diacritic_at("άνθρωπέ", 3, Diacritic::ACUTE), "ανθρωπέ");
 /// ```
-pub fn remove_diacritic_at(word: &str, pos: usize, diacritic: char) -> String {
-    let mut syllables: Vec<&str> = syllabify_el(word);
+pub fn remove_diacritic_at(s: &str, pos: usize, diacritic: char) -> String {
+    let mut syllables = syllabify_el(s);
 
     if pos == 0 || pos > syllables.len() {
-        word.to_string()
+        s.to_string()
     } else {
         let idx = syllables.len() - pos;
         let replace_with = remove_diacritics(syllables[idx], &[diacritic]);
@@ -174,7 +184,7 @@ pub fn remove_diacritic_at(word: &str, pos: usize, diacritic: char) -> String {
     }
 }
 
-/// Add an acute accent to the specified syllable of a word.
+/// Add an acute accent at the given syllable position.
 ///
 /// The syllable position starts at one and is counted from the end of the word.
 ///
@@ -186,21 +196,23 @@ pub fn remove_diacritic_at(word: &str, pos: usize, diacritic: char) -> String {
 /// assert_eq!(add_acute_at("ανθρωπος", 1), "ανθρωπός");
 /// assert_eq!(add_acute_at("ανθρωπος", 2), "ανθρώπος");
 /// assert_eq!(add_acute_at("ανθρωπος", 3), "άνθρωπος");
+///
+/// // Does nothing if the position is out of bounds.
+/// assert_eq!(add_acute_at("ανθρωπος", 0), "ανθρωπος");
 /// assert_eq!(add_acute_at("ανθρωπος", 4), "ανθρωπος");
 ///
-/// // It may not yield the expected result based on the
-/// // syllabification of the word.
+/// // May not yield the expected result based on syllabification
 /// assert_eq!(add_acute_at("σοι", 1), "σοί");
 /// ```
-pub fn add_acute_at(word: &str, pos: usize) -> String {
-    add_diacritic_at(word, pos, Diacritic::ACUTE)
+pub fn add_acute_at(s: &str, pos: usize) -> String {
+    add_diacritic_at(s, pos, Diacritic::ACUTE)
 }
 
-fn add_diacritic_at(word: &str, pos: usize, diacritic: char) -> String {
-    let mut syllables: Vec<&str> = syllabify_el(word);
+fn add_diacritic_at(s: &str, pos: usize, diacritic: char) -> String {
+    let mut syllables = syllabify_el(s);
 
     if pos == 0 || pos > syllables.len() {
-        word.to_string()
+        s.to_string()
     } else {
         let idx = syllables.len() - pos;
         let replace_with = add_diacritic_at_syllable(syllables[idx], diacritic);
@@ -213,7 +225,7 @@ fn add_diacritic_at(word: &str, pos: usize, diacritic: char) -> String {
 ///
 /// This is not ideal and could not yield the expected result.
 fn add_diacritic_at_syllable(syllable: &str, diacritic: char) -> String {
-    let mut chars: Vec<char> = syllable.chars().collect();
+    let mut chars: Vec<_> = syllable.chars().collect();
     if let Some(pos) = chars.iter().rposition(|ch| is_vowel_el(*ch)) {
         chars[pos] = add_diacritic_to_char(chars[pos], diacritic);
     }

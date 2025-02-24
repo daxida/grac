@@ -38,8 +38,8 @@ fn remove_all_diacritics(word: &str) -> PyResult<String> {
 }
 
 #[pyfunction]
-fn to_mono(word: &str) -> PyResult<String> {
-    Ok(_grac::to_mono(word))
+fn to_monotonic(word: &str) -> PyResult<String> {
+    Ok(_grac::to_monotonic(word))
 }
 
 #[pyfunction]
@@ -65,7 +65,7 @@ fn grac(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(syllabify_gr, m)?)?;
     m.add_function(wrap_pyfunction!(syllabify_gr_ref, m)?)?;
     m.add_function(wrap_pyfunction!(remove_all_diacritics, m)?)?;
-    m.add_function(wrap_pyfunction!(to_mono, m)?)?;
+    m.add_function(wrap_pyfunction!(to_monotonic, m)?)?;
     m.add_function(wrap_pyfunction!(add_acute_at, m)?)?;
     m.add_function(wrap_pyfunction!(remove_diacritic_at, m)?)?;
     m.add_function(wrap_pyfunction!(has_diacritic, m)?)?;

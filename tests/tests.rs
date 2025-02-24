@@ -12,7 +12,7 @@ macro_rules! assert_eq_dbg {
             $input.chars(),
             $input
                 .chars()
-                .map(|c| format!("U+{:04X}", c as u32))
+                .map(|ch| format!("U+{:04X}", ch as u32))
                 .collect::<Vec<_>>(),
         );
     };
@@ -381,8 +381,8 @@ impl quickcheck::Arbitrary for GreekWord {
             .filter_map(char::from_u32)
             .collect();
         for _ in 0..wlen {
-            let c = g.choose(&letters).unwrap();
-            word.push(*c);
+            let ch = g.choose(&letters).unwrap();
+            word.push(*ch);
         }
         Self(word)
     }

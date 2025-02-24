@@ -31,8 +31,8 @@ pub const fn is_greek_letter(ch: char) -> bool {
 // * U+02BC ʼ MODIFIER LETTER APOSTROPHE
 // the last one is the only considered alphabetic, and since it can appear
 // as a possible (probably wrong) variant, it makes sense to include it here.
-pub fn is_greek_word(word: &str) -> bool {
-    word.chars()
+pub fn is_greek_word(s: &str) -> bool {
+    s.chars()
         .all(|ch| is_greek_char(ch) || ch == '\u{02BC}' || !ch.is_alphabetic())
 }
 
@@ -49,8 +49,8 @@ pub fn is_greek_word(word: &str) -> bool {
 /// assert_eq!(ends_with_diphthong("πλάι"), true);
 /// assert_eq!(ends_with_diphthong("γάιδαρος"), false);
 /// ```
-pub fn ends_with_diphthong(word: &str) -> bool {
-    let vowels = extract_vowels(word);
+pub fn ends_with_diphthong(s: &str) -> bool {
+    let vowels = extract_vowels(s);
     [
         "όι", "Όι", "έι", "Έι", "άι", "Άι", "όυ", "Όυ", "έυ", "Έυ", "άυ", "Άυ",
     ]
@@ -253,13 +253,6 @@ mod tests {
             "ὑπ\u{02BC}",
         ];
         for word in greek_words {
-            for ch in word.chars() {
-                if !is_greek_char(ch) {
-                    eprintln!("'{ch}' is not a greek char.");
-                    let msg = if ch.is_alphabetic() { "" } else { "not " };
-                    eprintln!("{ch} is {msg}alphabetic.");
-                }
-            }
             assert!(is_greek_word(word), "Expected {word} to be a greek word.");
         }
     }

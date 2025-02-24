@@ -22,8 +22,8 @@ pub use chars::is_greek_char;
 pub use chars::is_greek_letter;
 pub use chars::is_greek_word;
 
-pub use monotonic::split_word_punctuation;
-pub use monotonic::to_mono;
+pub use monotonic::split_punctuation;
+pub use monotonic::to_monotonic;
 
 pub use syllabify::is_vowel_el;
 pub use syllabify::syllabify_el;

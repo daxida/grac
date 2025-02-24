@@ -1,4 +1,4 @@
-use grac::{syllabify_gr, to_mono};
+use grac::{syllabify_gr, to_monotonic};
 use std::fs::File;
 use std::io::{self, Read};
 use std::time::Instant;
@@ -23,7 +23,7 @@ fn run(text: &str) {
     println!("Syllabification took: {:?}", now.elapsed());
 
     let now = Instant::now();
-    let _mono = to_mono(&text);
+    let _mono = to_monotonic(&text);
     println!("To monotonic took:    {:?}", now.elapsed());
 }
 

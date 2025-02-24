@@ -25,7 +25,7 @@ def main() -> None:
     print(f"Modern (syn):  {join(grac.syllabify_el_mode(word, True))}")
     print(f"Modern (~syn): {join(grac.syllabify_el_mode(word, False))}")
     print(f"Modern (syn1): {join(grac.syllabify_el_mode_at(word, [1]))}")
-    print(f"Monotonic:     {grac.to_mono(word)}")
+    print(f"Monotonic:     {grac.to_monotonic(word)}")
 
 
 if __name__ == "__main__":
