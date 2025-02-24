@@ -234,6 +234,16 @@ mod tests {
         }
     }
 
+    #[test]
+    fn test_split_word_punctuation() {
+        assert_eq!(split_punctuation("λέξη..."), ("", "λέξη", "..."));
+        assert_eq!(split_punctuation(";?λέξη"), (";?", "λέξη", ""));
+        assert_eq!(split_punctuation(";?λέξη..."), (";?", "λέξη", "..."));
+        assert_eq!(split_punctuation(";?λέ-ξη..."), (";?", "λέ-ξη", "..."));
+        assert_eq!(split_punctuation(";?..."), (";?...", "", ""));
+        assert_eq!(split_punctuation("2ος"), ("2", "ος", ""));
+    }
+
     macro_rules! mktest_mono {
         ($group_name:ident, $([$input:expr, $expected:expr]),* $(,)?) => {
             #[test]
