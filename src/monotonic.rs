@@ -16,12 +16,13 @@ fn replace_from_str_ary(s: &str, replacements: &[(&str, &str)]) -> String {
 }
 
 fn remove_superfluous_diaereses(s: &str) -> String {
-    const SUPERFLUOUS_DIAERESES: [(&str, &str); 6] = [
+    const SUPERFLUOUS_DIAERESES: [(&str, &str); 7] = [
         ("άϊ", "άι"),
         ("άϋ", "άυ"),
         ("έϊ", "έι"),
         ("έϋ", "έυ"),
         ("όϊ", "όι"),
+        ("όϋ", "όυ"),
         ("ούϊ", "ούι"),
     ];
     replace_from_str_ary(s, &SUPERFLUOUS_DIAERESES)
@@ -159,16 +160,16 @@ fn to_monotonic_word(s: &str) -> String {
     log("Input word", core);
     dbg_bytes(core);
 
-    let mut out = convert_to_acute(core);
-
-    let syllables = syllabify_el(&out);
-    log("Syllabified word", &syllables);
+    let mut out: String = convert_to_acute(core);
 
     let ends_with_abbreviation = match right_punct.chars().next() {
         Some(fst_rpunct) => APOSTROPHES.contains(&fst_rpunct),
         None => false,
     };
     log("Ends in abbreviation?", ends_with_abbreviation);
+
+    let syllables = syllabify_el(&out);
+    log("Syllabified word", &syllables);
 
     out = match syllables.as_slice() {
         // Do we remove the acute accent from a monosyllable?...
@@ -292,6 +293,7 @@ mod tests {
         ["φαΐ", "φαΐ"],
         ["ἀρχαϊκάς", "αρχαϊκάς"],
         ["Στάυλς", "Στάυλς"],
+        ["κακόϋπνος", "κακόυπνος"],
     );
 
     mktest_mono!(

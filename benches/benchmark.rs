@@ -22,21 +22,21 @@ fn read_file(file_path: &str) -> (String, String) {
 
     let _ = File::open(file_path).and_then(|mut file| file.read_to_string(&mut content));
 
-    let name = Path::new(file_path)
+    let stem = Path::new(file_path)
         .file_stem()
         .and_then(|name| name.to_str())
-        .unwrap_or("")
-        .to_string();
+        .unwrap_or("");
+    let name = format!("{stem}.txt");
 
     (content, name)
 }
 
 // const DUMP_PATH: &str = "tests/fixtures/dump.txt";
 const MONO_PATH: &str = "tests/fixtures/monotonic.txt";
-const PATHS: [&str; 2] = [
+const PATHS: [&str; 3] = [
     MONO_PATH,
     "tests/fixtures/polytonic.txt",
-    // "tests/fixtures/english.txt",
+    "tests/fixtures/english.txt",
 ];
 
 fn benchmark_syllabify(c: &mut Criterion) {
@@ -56,16 +56,16 @@ fn benchmark_syllabify(c: &mut Criterion) {
 }
 
 fn benchmark_to_monotonic(c: &mut Criterion) {
-    let mut group = c.benchmark_group("monotonic");
+    let mut group = c.benchmark_group("to_monotonic");
     group
         .measurement_time(std::time::Duration::new(3, 0))
         .warm_up_time(std::time::Duration::new(2, 0));
 
-    for file_path in &PATHS {
+    for file_path in PATHS {
         let (content, stem) = read_file(file_path);
         // let words: Vec<_> = content.split_whitespace().collect();
         // bench_words!(group, words, split_punctuation);
-        group.bench_with_input(format!("to_monotonic@{stem}"), &content, |b, i| {
+        group.bench_with_input(stem, &content, |b, i| {
             b.iter(|| {
                 let result = to_monotonic(&i);
                 black_box(result);
