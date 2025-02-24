@@ -1,12 +1,14 @@
 """Read, convert and compare monotonic."""
 
-import sys
 from time import time
 from typing import Callable
+from pathlib import Path
 
 from grac import to_monotonic
 from modern_greek_accentuation.accentuation import convert_to_monotonic
 from poly2mono.main import poly2mono
+
+IPATH = Path("tests/fixtures/dump.txt")
 
 
 def tm(func, *args, **kwargs):
@@ -28,14 +30,7 @@ def get_ctx(words: list[str], idx: int, fn: Callable[[str], str]) -> str:
 
 
 def main() -> None:
-    try:
-        fpath = sys.argv[1]
-    except IndexError:
-        fpath = "dump.txt"
-        # print("Error: needs a path to the text file.")
-        # return
-
-    with open(fpath, "r") as f:
+    with IPATH.open() as f:
         lines = f.readlines()
         content = "".join(line for line in lines if not line.startswith("---"))
 

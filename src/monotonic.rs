@@ -56,22 +56,16 @@ fn not_punct(ch: char) -> bool {
 /// Split string into (left_punct, core, right_punct)
 ///
 /// Leaves punctuation inside the core untouched.
-//
-// NOTE:
-// * This is in grs
-// * It is as fast as find_map
 pub fn split_punctuation(s: &str) -> (&str, &str, &str) {
     let start = s
         .char_indices()
-        .find(|&(_, ch)| not_punct(ch))
-        .map(|(i, _)| i);
+        .find_map(|(i, ch)| not_punct(ch).then_some(i));
 
     if let Some(start) = start {
         let end = s
             .char_indices()
             .rev()
-            .find(|&(_, ch)| not_punct(ch))
-            .map(|(i, ch)| i + ch.len_utf8())
+            .find_map(|(i, ch)| not_punct(ch).then_some(i + ch.len_utf8()))
             .unwrap();
         (&s[..start], &s[start..end], &s[end..])
     } else {

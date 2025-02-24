@@ -1,14 +1,15 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use grac::*;
 use std::fs::File;
-use std::io::{self, Read};
+use std::io::Read;
+use std::path::Path;
 
 macro_rules! bench_words {
-    ($group:expr, $words:expr, $( $fn:ident ),* ) => {
+    ($group:expr, $words:expr, $name:expr, $( $fn:ident ),* ) => {
         $(
-            $group.bench_function(stringify!($fn), |b| {
+            $group.bench_with_input(format!("{}@{}", stringify!($fn), $name), &$words, |b, i| {
                 b.iter(|| {
-                    let result: Vec<_> = $words.iter().map(|word| $fn(word)).collect();
+                    let result: Vec<_> = i.iter().map(|word| $fn(word)).collect();
                     black_box(result);
                 });
             });
@@ -16,58 +17,85 @@ macro_rules! bench_words {
     };
 }
 
-fn read_file(file_path: &str) -> io::Result<String> {
-    let mut file = File::open(file_path)?;
+fn read_file(file_path: &str) -> (String, String) {
     let mut content = String::new();
-    file.read_to_string(&mut content)?;
-    Ok(content)
+
+    let _ = File::open(file_path).and_then(|mut file| file.read_to_string(&mut content));
+
+    let name = Path::new(file_path)
+        .file_stem()
+        .and_then(|name| name.to_str())
+        .unwrap_or("")
+        .to_string();
+
+    (content, name)
 }
+
+// const DUMP_PATH: &str = "tests/fixtures/dump.txt";
+const MONO_PATH: &str = "tests/fixtures/monotonic.txt";
+const PATHS: [&str; 2] = [
+    MONO_PATH,
+    "tests/fixtures/polytonic.txt",
+    // "tests/fixtures/english.txt",
+];
 
 fn benchmark_syllabify(c: &mut Criterion) {
-    let file_path = "dump.txt";
-    let content = read_file(file_path).unwrap();
-    let words: Vec<&str> = content.split_whitespace().collect();
+    let mut group = c.benchmark_group("syllabify");
+    group
+        .measurement_time(std::time::Duration::new(3, 0))
+        .warm_up_time(std::time::Duration::new(2, 0));
 
-    let mut group = c.benchmark_group("group");
-    group.sample_size(20);
+    for file_path in PATHS {
+        let (content, stem) = read_file(file_path);
+        let words: Vec<_> = content.split_whitespace().collect();
 
-    bench_words!(group, words, syllabify_gr);
-    bench_words!(group, words, syllabify_gr_ref);
-    bench_words!(group, words, syllabify_el);
+        bench_words!(group, words, stem, syllabify_gr);
+        bench_words!(group, words, stem, syllabify_gr_ref);
+        bench_words!(group, words, stem, syllabify_el);
+    }
 }
 
-fn benchmark_monotonic(c: &mut Criterion) {
-    let file_path = "dump.txt";
-    let content = read_file(file_path).unwrap();
-    let words: Vec<&str> = content.split_whitespace().collect();
+fn benchmark_to_monotonic(c: &mut Criterion) {
+    let mut group = c.benchmark_group("monotonic");
+    group
+        .measurement_time(std::time::Duration::new(3, 0))
+        .warm_up_time(std::time::Duration::new(2, 0));
 
-    let mut group = c.benchmark_group("group");
-    group.sample_size(10);
-
-    bench_words!(group, words, split_punctuation);
-    group.bench_function("to_monotonic", |b| {
-        b.iter(|| {
-            let result = to_monotonic(&content);
-            black_box(result);
-        })
-    });
+    for file_path in &PATHS {
+        let (content, stem) = read_file(file_path);
+        // let words: Vec<_> = content.split_whitespace().collect();
+        // bench_words!(group, words, split_punctuation);
+        group.bench_with_input(format!("to_monotonic@{stem}"), &content, |b, i| {
+            b.iter(|| {
+                let result = to_monotonic(&i);
+                black_box(result);
+            })
+        });
+    }
 }
 
 fn benchmark_char(c: &mut Criterion) {
-    let file_path = "dump.txt";
-    let content = read_file(file_path).unwrap();
-    let words: Vec<&str> = content.split_whitespace().collect();
+    let mut group = c.benchmark_group("is_greek_word");
+    group
+        .measurement_time(std::time::Duration::new(3, 0))
+        .warm_up_time(std::time::Duration::new(2, 0));
 
-    let mut group = c.benchmark_group("group");
-    group.sample_size(10);
-
-    bench_words!(group, words, is_greek_word);
+    for file_path in PATHS {
+        let (content, stem) = read_file(file_path);
+        let words: Vec<_> = content.split_whitespace().collect();
+        group.bench_with_input(stem, &words, |b, i| {
+            b.iter(|| {
+                let result: Vec<_> = i.iter().map(|word| is_greek_word(word)).collect();
+                black_box(result);
+            })
+        });
+    }
 }
 
 criterion_group!(
     benches,
     benchmark_syllabify,
-    benchmark_monotonic,
+    benchmark_to_monotonic,
     benchmark_char
 );
 criterion_main!(benches);

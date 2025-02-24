@@ -8,6 +8,8 @@ from grac import to_monotonic
 from greek_accentuation.syllabify import syllabify as syl1
 from modern_greek_accentuation.syllabify import modern_greek_syllabify as msyl1
 
+IPATH = Path("tests/fixtures/dump.txt")
+
 
 def timeit(fn, words, version, ref_elapsed=0.0):
     start_time = time.time()
@@ -37,8 +39,7 @@ def print_rust_test(word: str, syllables: list[str]) -> None:
 def main():
     start_time = time.time()
 
-    ipath = Path("dump.txt")
-    with ipath.open("r", encoding="utf-8") as f:
+    with IPATH.open("r", encoding="utf-8") as f:
         text = f.read()
 
     mono_diff = 0
