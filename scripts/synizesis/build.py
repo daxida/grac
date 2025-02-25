@@ -23,6 +23,10 @@ MONOSYLLABLES = [
     "γιεν",
 ]
 
+# Verbs with synizesis at the last syllable.
+# Ex. πιω (from πίνω)
+VERBS_LEMMA = ["πι"]
+VERBS = _add_endings(VERBS_LEMMA, "ω εις ει ουν ες")
 
 # Nouns ending in ια (singular in ια, genitive in ιας).
 # Ex. αρρώστια
@@ -52,7 +56,8 @@ IA_NOUN = _add_endings(IA_NOUN_LEMMA, "α ας ες")
 
 # Adjectives ending in ιος / ια / ιο.
 # Ex. αλογίσιος
-# Note: includes the pronoun ποιος
+# Note: includes the pronoun ποιος (even though it has no vocative)
+# Note: includes the pronoun τέτοιος
 # Note: includes the ending ον for completion (archaic for adjectives,
 #       but also used in modern greek for ποιος)
 IA_ADJ_LEMMA = [
@@ -63,6 +68,7 @@ IA_ADJ_LEMMA = [
     "γιδίσι",
     "νι",
     "ποι",
+    "τέτοι",
 ]
 IA_ADJ = _add_endings(IA_ADJ_LEMMA, "ος ου ο ον ε οι ων ους α ας ες")
 
@@ -110,6 +116,7 @@ SYNIZESIS = [
     # Other ια (singular)
     "ίσια",
     *MONOSYLLABLES,
+    *VERBS,
     *IA_NOUN,
     *IA_ADJ,
     *IO_IA_NOUN,
