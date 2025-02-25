@@ -32,3 +32,13 @@ pub const MONOSYLLABLE_ACCENTED_WITH_PRONOUNS: [&str; 28] = [
     // Capitalized
     "Μού", "Μάς", "Τού", "Τής", "Τούς", "Τών", "Σού", "Σάς",
 ];
+
+/// Greek words with two accepted syllabifications
+//
+// Would need a build script for inflexions
+#[rustfmt::skip]
+pub const ALT_SYLLABIC: [&str; 6] = [
+    "ήλιος", "Ήλιος",
+    "έννοια", "Έννοια",
+    "ίδιος", "Ίδιος",
+];
