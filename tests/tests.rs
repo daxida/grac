@@ -160,6 +160,8 @@ mktest_el!(
     ["ποια", "ποια"],
     ["Ποιος", "Ποιος"],
     ["γιεν", "γιεν"],
+    ["πλιο", "πλιο"],
+    ["Μπλια", "Μπλια"],
 );
 
 mktest_el!(
@@ -173,6 +175,7 @@ mktest_el!(
     ["ρολόγια", "ρο-λό-για"],
     ["καπετάνιο", "κα-πε-τά-νιο"],
     ["τέτοιο", "τέ-τοιο"],
+    ["πραμάτεια", "πρα-μά-τεια"],
     // All diminutives in κια take synizesis but it is sometimes ambiguous:
     // φυλάκια takes synizesis if from φυλάκι, but not if from φυλάκιο
     ["αστειάκια", "α-στει-ά-κια"],
@@ -200,8 +203,6 @@ mktest_el!(
     ["πιω", "πιω"],
     ["πιει", "πιει"],
     ["πιεις", "πιεις"],
-    // Can be an adjective
-    // ["ήπια", "ή-πια"],
 );
 
 // Depends on the speaker. This can not be a general rule.

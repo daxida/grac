@@ -35,10 +35,13 @@ pub const MONOSYLLABLE_ACCENTED_WITH_PRONOUNS: [&str; 28] = [
 
 /// Greek words with two accepted syllabifications
 //
-// Would need a build script for inflexions
+// Would need a build script / macro for inflexions
 #[rustfmt::skip]
-pub const ALT_SYLLABIC: [&str; 6] = [
+pub const ALT_SYLLABIC: [&str; 10] = [
     "ήλιος", "Ήλιος",
     "έννοια", "Έννοια",
     "ίδιος", "Ίδιος",
+    "ίδιοι", "Ίδιοι",
+    // With synizesis if from πίνω, without if from ήπιος
+    "ήπια", "Ήπια",
 ];

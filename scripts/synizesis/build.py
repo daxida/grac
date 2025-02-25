@@ -14,13 +14,18 @@ def _add_endings(lemmas: list[str], endings: str) -> list[str]:
 MONOSYLLABLES = [
     "δια",
     "πια",
+    "πλια",
+    "μπλια",
     "πιο",
+    "πλιο",
+    "μπλιο",
     "μια",
     "μιαν",
     "μιας",
     "γεια",
     "για",
     "γιεν",
+    "τζια",
 ]
 
 # Verbs with synizesis at the last syllable.
@@ -44,6 +49,7 @@ IA_NOUN_LEMMA = [
     "φτώχι",
     "περηφάνει",
     "περηφάνι",
+    "πραμάτει",
     "ορφάνι",
     "ζήλει",
     "ζήλι",
