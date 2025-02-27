@@ -103,7 +103,7 @@ IOS_IOI_NOUN = _add_endings(IOS_IOI_NOUN_LEMMA, "ος ου ο ε οι ων ου�
 # Nouns ending in ι (singular in ι / plural in ια)
 # Ex. χιόνι / χιόνια (only the plural is added)
 I_IA_NOUN = []
-neuters_path = Path(__file__).parent / "neuters.txt"
+neuters_path = Path(__file__).parent / "data/neuters.txt"
 with neuters_path.open("r", encoding="utf-8") as f:
     I_IA_NOUN.extend(sorted(set(f.read().splitlines())))
 
@@ -181,7 +181,7 @@ def generate_lookup_synizesis(f: TextIO) -> None:
     f.write(
         "pub fn lookup_synizesis(word: &str) -> Option<&'static [&'static str]> {\n"
     )
-    f.write("    LOOKUP.get(word).cloned()\n")
+    f.write("    LOOKUP.get(word).copied()\n")
     f.write("}\n")
 
 
