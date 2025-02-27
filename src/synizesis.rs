@@ -4719,5 +4719,5 @@ static LOOKUP: phf::Map<&'static str, &'static [&'static str]> = phf_map! {
 };
 
 pub fn lookup_synizesis(word: &str) -> Option<&'static [&'static str]> {
-    LOOKUP.get(word).cloned()
+    LOOKUP.get(word).copied()
 }

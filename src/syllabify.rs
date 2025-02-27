@@ -380,7 +380,7 @@ mod tests {
 
     #[test]
     fn test_syllabify_el() {
-        assert_eq!(syllabify_el("μπεις").len(), 1)
+        assert_eq!(syllabify_el("μπεις").len(), 1);
     }
 
     #[test]

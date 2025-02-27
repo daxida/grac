@@ -67,9 +67,9 @@ fn benchmark_to_monotonic(c: &mut Criterion) {
         // bench_words!(group, words, split_punctuation);
         group.bench_with_input(stem, &content, |b, i| {
             b.iter(|| {
-                let result = to_monotonic(&i);
+                let result = to_monotonic(i);
                 black_box(result);
-            })
+            });
         });
     }
 }
@@ -87,7 +87,7 @@ fn benchmark_char(c: &mut Criterion) {
             b.iter(|| {
                 let result: Vec<_> = i.iter().map(|word| is_greek_word(word)).collect();
                 black_box(result);
-            })
+            });
         });
     }
 }

@@ -32,7 +32,7 @@ const ALL_DIACRITICS: [char; 7] = [
 
 /// Check if the word contains the given diacritic.
 ///
-/// A word can be anything that implements the UnicodeNormalization trait over char.
+/// A word can be anything that implements [`unicode_normalization::UnicodeNormalization`]
 ///
 /// # Examples
 ///
@@ -67,7 +67,7 @@ where
 
 /// Check if the word has any given diacritics.
 ///
-/// A word can be anything that implements the UnicodeNormalization trait over char.
+/// A word can be anything that implements [`unicode_normalization::UnicodeNormalization`]
 //
 // NOTE:
 // The only reason this has not superseeded has_diacritic is because I'm wary

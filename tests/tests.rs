@@ -1,7 +1,7 @@
 use grac::{syllabify_el, syllabify_gr, syllabify_gr_ref};
 use quickcheck::quickcheck;
 
-/// More informative than a simple "assert_eq"
+/// More informative than a simple `assert_eq!` macro.
 macro_rules! assert_eq_dbg {
     ($result:expr, $expected:expr, $input:expr) => {
         assert_eq!(
@@ -163,6 +163,18 @@ mktest_el!(
     ["πλιο", "πλιο"],
     ["Μπλια", "Μπλια"],
 );
+
+// The syllabification should be that of the word without the final n
+// and the final n should be then appended to the last syllable.
+// Until proven otherwise!
+//
+// Not supported for the moment
+// mktest_el!(
+//     syllabify_el_synizesis_final_n,
+//     ["αστέριαν", "α-στέ-ριαν"],
+//     ["γένειαν", "γέ-νειαν"],
+//     ["τέτοιον", "τέ-τοιον"],
+// );
 
 mktest_el!(
     syllabify_el_synizesis,

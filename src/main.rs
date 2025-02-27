@@ -23,7 +23,7 @@ fn run(text: &str) {
     println!("Syllabification took: {:?}", now.elapsed());
 
     let now = Instant::now();
-    let _mono = to_monotonic(&text);
+    let _mono = to_monotonic(text);
     println!("To monotonic took:    {:?}", now.elapsed());
 }
 
@@ -31,6 +31,6 @@ fn main() {
     let file_path = "dump.txt";
     match read_file(file_path) {
         Ok(content) => run(&content),
-        Err(e) => eprintln!("Error reading file {}: {}", file_path, e),
+        Err(e) => eprintln!("Error reading file {file_path}: {e}"),
     }
 }

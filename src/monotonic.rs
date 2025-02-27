@@ -101,7 +101,7 @@ fn dbg_bytes(s: &str) {
         "Input bytes",
         s.as_bytes()
             .iter()
-            .map(|byte| format!("{:02x}", byte))
+            .map(|byte| format!("{byte:02x}"))
             .collect::<Vec<String>>()
             .join(" "),
     );
@@ -154,7 +154,7 @@ fn to_monotonic_word(s: &str) -> String {
         _ => None,
     };
     if let Some(ret) = ret {
-        return format!("{}{}{}", left_punct, ret, right_punct);
+        return format!("{left_punct}{ret}{right_punct}");
     }
 
     log("Input word", core);
@@ -214,7 +214,7 @@ fn to_monotonic_word(s: &str) -> String {
     dbg_bytes(&out);
     log("======================", "");
 
-    format!("{}{}{}", left_punct, out, right_punct)
+    format!("{left_punct}{out}{right_punct}")
 }
 
 #[cfg(test)]

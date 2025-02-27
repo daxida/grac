@@ -86,7 +86,7 @@ fn __base_lower(ch: char) -> char {
 }
 
 /// Return the normalized lower character.
-pub fn base_lower(ch: char) -> char {
+pub const fn base_lower(ch: char) -> char {
     match ch {
         // Greek and Coptic
         '\u{0370}'..='\u{03FF}' => base_lower_gc(ch),
@@ -100,8 +100,8 @@ pub fn base_lower(ch: char) -> char {
 ///
 /// This does not normalize:  ';' | '·' | 'Ϊ' | 'Ϋ' | 'ϓ' | 'ϔ'
 ///
-/// https://www.unicode.org/charts/PDF/U0370.pdf
-fn base_lower_gc(ch: char) -> char {
+/// <https://www.unicode.org/charts/PDF/U0370.pdf>
+const fn base_lower_gc(ch: char) -> char {
     match ch {
         // Lowercase unaccented (α > ω)
         // We want to check these first since they are most frequent.
@@ -160,7 +160,7 @@ fn base_lower_gc(ch: char) -> char {
     }
 }
 
-fn base_lower_ge(ch: char) -> char {
+const fn base_lower_ge(ch: char) -> char {
     match ch {
         'ἀ' | 'ἁ' | 'ἂ' | 'ἃ' | 'ἄ' | 'ἅ' | 'ἆ' | 'ἇ' | 'Ἀ' | 'Ἁ' | 'Ἂ' | 'Ἃ' | 'Ἄ' | 'Ἅ' | 'Ἆ'
         | 'Ἇ' | 'ὰ' | 'ά' | 'ᾀ' | 'ᾁ' | 'ᾂ' | 'ᾃ' | 'ᾄ' | 'ᾅ' | 'ᾆ' | 'ᾇ' | 'ᾈ' | 'ᾉ' | 'ᾊ'
