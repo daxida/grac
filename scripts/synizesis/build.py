@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 from typing import TextIO
 
-from grac import syllabify_el_mode_at
+from grac import syllabify_el_mode_at, remove_all_diacritics
 
 
 def _add_endings(lemmas: list[str], endings: str) -> list[str]:
@@ -174,7 +174,9 @@ def generate_lookup_synizesis(f: TextIO) -> None:
         syllables_cap = str([_syls[0].capitalize()] + _syls[1:]).replace("'", '"')
         mapping[word.capitalize()] = syllables_cap
 
-    for fr, to in sorted(mapping.items()):
+    for fr, to in sorted(
+        mapping.items(), key=lambda pair: remove_all_diacritics(pair[0])
+    ):
         f.write(f'    "{fr}" => &{to},\n')
 
     f.write("};\n\n")
