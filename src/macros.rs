@@ -100,7 +100,7 @@ macro_rules! conc {
     }};
 }
 
-const fn copy_bytes<'mem>(x: &[u8], mem: &mut [u8], k: &mut usize) {
+const fn copy_bytes(x: &[u8], mem: &mut [u8], k: &mut usize) {
     let mut i = 0;
     while i < x.len() {
         mem[*k] = x[i];
@@ -109,7 +109,7 @@ const fn copy_bytes<'mem>(x: &[u8], mem: &mut [u8], k: &mut usize) {
     }
 }
 
-const fn copy_bytes_capitalized<'mem>(x: &[u8], mem: &mut [u8], k: &mut usize) {
+const fn copy_bytes_capitalized(x: &[u8], mem: &mut [u8], k: &mut usize) {
     assert!(x.len() >= 2); // Only support Greek
     let mut i = 0;
 

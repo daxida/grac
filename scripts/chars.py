@@ -46,7 +46,7 @@ def generate_rust_function(
         )
     )
 
-    code = f"fn {fn_name}" "(ch: char) -> char {\n    match ch {\n"
+    code = f"fn {fn_name}(ch: char) -> char {{\n    match ch {{\n"
     for base, chars in base_mapping.items():
         variations = " | ".join(f"'{ch}'" for ch in chars)
         code += f"        {variations} => '{base}',\n"

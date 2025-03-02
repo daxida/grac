@@ -37,7 +37,7 @@ const ALL_DIACRITICS: [char; 7] = [
 /// # Examples
 ///
 /// ```
-/// # use grac::{Diacritic, has_diacritic};
+/// use grac::{Diacritic, has_diacritic};
 ///
 /// assert_eq!(has_diacritic('α', Diacritic::GRAVE), false);
 /// assert_eq!(has_diacritic('ϊ', Diacritic::DIAERESIS), true);
