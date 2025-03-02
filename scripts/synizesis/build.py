@@ -6,6 +6,8 @@ from typing import TextIO
 
 from grac import syllabify_el_mode_at, remove_all_diacritics
 
+ppath = Path("scripts/synizesis/data")
+
 
 def _add_endings(lemmas: list[str], endings: str) -> list[str]:
     return [f"{lemma}{ending}" for lemma in lemmas for ending in endings.split()]
@@ -187,8 +189,32 @@ def generate_lookup_synizesis(f: TextIO) -> None:
     f.write("}\n")
 
 
+def write_registry() -> None:
+    """Write every word (lowercase only) that contains synizesis.
+
+    This is only used for sanity checks in git diffs.
+    """
+    path = ppath / "registry.txt"
+
+    all_words = []
+    for word in SYNIZESIS:
+        if word in AMBIGUOUS_SYNIZESIS:
+            continue
+        all_words.append(word)
+    for word, _ in SYNIZESIS_PAIRS:
+        all_words.append(word)
+
+    all_words.sort(key=remove_all_diacritics)
+
+    with path.open("w") as f:
+        for word in all_words:
+            f.write(f"{word}\n")
+
+
 def main() -> None:
     generate_lookup_synizesis(sys.stdout)
+
+    write_registry()
 
     path = Path("src/synizesis.rs")
     with path.open("w", encoding="utf-8") as f:
