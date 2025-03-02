@@ -1,3 +1,4 @@
+use aho_corasick::AhoCorasick;
 use unicode_normalization::UnicodeNormalization;
 
 use crate::accents::Diacritic;
@@ -7,25 +8,15 @@ use crate::constants::{APOSTROPHES, MONOSYLLABLE_ACCENTED};
 use crate::is_greek_letter;
 use crate::syllabify::syllabify_el;
 
-fn replace_from_str_ary(s: &str, replacements: &[(&str, &str)]) -> String {
-    let mut result = s.to_string();
-    for &(from, to) in replacements {
-        result = result.replace(from, to);
-    }
-    result
-}
-
+// Intended to be run over the entire text, and not individual words.
+// When ran over words, the cost of building the automata is too big,
 fn remove_superfluous_diaereses(s: &str) -> String {
-    const SUPERFLUOUS_DIAERESES: [(&str, &str); 7] = [
-        ("άϊ", "άι"),
-        ("άϋ", "άυ"),
-        ("έϊ", "έι"),
-        ("έϋ", "έυ"),
-        ("όϊ", "όι"),
-        ("όϋ", "όυ"),
-        ("ούϊ", "ούι"),
-    ];
-    replace_from_str_ary(s, &SUPERFLUOUS_DIAERESES)
+    const DIAERESES_WRONG: [&str; 14] =
+        with_capitalized!(["άϊ", "άϋ", "έϊ", "έϋ", "όϊ", "όϋ", "ούϊ"]);
+    const DIAERESES_CORRECT: [&str; 14] =
+        with_capitalized!(["άι", "άυ", "έι", "έυ", "όι", "όυ", "ούι"]);
+    let ac = AhoCorasick::new(DIAERESES_WRONG).unwrap();
+    ac.replace_all(s, &DIAERESES_CORRECT)
 }
 
 /// Convert text from polytonic to monotonic Greek.
@@ -40,13 +31,15 @@ fn remove_superfluous_diaereses(s: &str) -> String {
 /// assert_eq!(result, "Ελλάς και κόσμος.\r\n...άνθρωπος.");
 /// ```
 pub fn to_monotonic(s: &str) -> String {
-    s.split_inclusive(|ch: char|
+    let out: String = s
+        .split_inclusive(|ch: char|
         // Split on hyphens (and faulty variations)
         ch == '-' || ch == '—'
         // The main separator logic is whitespace
         || ch.is_whitespace())
         .map(to_monotonic_word)
-        .collect()
+        .collect();
+    remove_superfluous_diaereses(&out)
 }
 
 // Uses the is_greek_letter fast path
@@ -203,12 +196,6 @@ fn to_monotonic_word(s: &str) -> String {
         _ => out,
     };
 
-    // We do this quite late to deal with Κέϋνς -> two syllables
-    // If we did this before splitting on syllables then
-    // Κέυνς will only consistute one syllable.
-    out = remove_superfluous_diaereses(&out);
-    log("Removed superfluous diaereses", &out);
-
     log("Final transformed word", &out);
     dbg_bytes(&out);
     log("======================", "");
@@ -303,6 +290,8 @@ mod tests {
         ["ἀρχαϊκάς", "αρχαϊκάς"],
         ["Στάυλς", "Στάυλς"],
         ["κακόϋπνος", "κακόυπνος"],
+        ["Άϊντε", "Άιντε"],
+        ["Όϊπεν", "Όιπεν"],
     );
 
     mktest_mono!(
