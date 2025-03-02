@@ -27,11 +27,11 @@ pub const MONOSYLLABLE_ACCENTED_WITH_PRONOUNS: [&str; 28] = conc!(
 /// Greek words with two accepted syllabifications
 ///
 // TODO: <https://el.wiktionary.org/wiki/Κατηγορία:Λέξεις_με_δύο_προφορές_(νέα_ελληνικά)>
-pub const ALT_SYLLABIC: [&str; 34] = with_capitalized!(conc!(
+pub const MULTIPLE_ACCENTUATION: [&str; 36] = with_capitalized!(conc!(
     // έννοια
     expand!(["έννοι"], ["α", "ας", "ες"]),
     // πίνω / ήπιος
-    expand!(["ήπι"], ["α", "ες"]),
+    expand!(["ήπι"], ["α", "ε", "ες"]),
     // ίδιος
     expand!(
         ["ίδι"],
@@ -46,7 +46,7 @@ mod tests {
     use super::*;
 
     fn is_alt_syllabic(word: &str) -> bool {
-        ALT_SYLLABIC.contains(&word)
+        MULTIPLE_ACCENTUATION.contains(&word)
     }
 
     #[test]

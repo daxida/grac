@@ -76,10 +76,6 @@ def filter_neuter(words: list[str]) -> list[str]:
                 continue
             neuter_words.add(plural)
 
-    # Remove ambiguous
-    neuter_words.discard("άγια")
-    neuter_words.discard("πλάγια")
-
     return sorted(neuter_words)
 
 

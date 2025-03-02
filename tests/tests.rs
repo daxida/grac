@@ -215,6 +215,7 @@ mktest_el!(
     ["πιω", "πιω"],
     ["πιει", "πιει"],
     ["πιεις", "πιεις"],
+    ["ήπιαν", "ή-πιαν"],
 );
 
 // Depends on the speaker. This can not be a general rule.

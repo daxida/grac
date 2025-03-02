@@ -32,8 +32,10 @@ MONOSYLLABLES = [
 
 # Verbs with synizesis at the last syllable.
 # Ex. πιω (from πίνω)
-VERBS_LEMMA = ["πι"]
-VERBS = _add_endings(VERBS_LEMMA, "ω εις ει ουν ες")
+VERBS = [
+    *_add_endings(["πι"], "ω εις ει ουν ες"),
+    *_add_endings(["ήπι"], "α ες ε αν"),
+]
 
 # Nouns ending in ια (singular in ια, genitive in ιας).
 # Ex. αρρώστια
@@ -92,11 +94,11 @@ IO_IA_NOUN = _add_endings(IO_IA_NOUN_LEMMA, "ο ου α ων")
 
 # Nouns ending in ιος (singular in ιος, plural in ιοι).
 # Ex. γιος
-# Note: does not include ήλιος because of ambiguity
 IOS_IOI_NOUN_LEMMA = [
     "γι",
     "ίσκι",
     "ήσκι",
+    "ήλι",
     # Note: while καπετάνιος has two plurals, the one in αίοι can not take synizesis
     "καπετάνι",
 ]
@@ -105,7 +107,7 @@ IOS_IOI_NOUN = _add_endings(IOS_IOI_NOUN_LEMMA, "ος ου ο ε οι ων ου�
 # Nouns ending in ι (singular in ι / plural in ια)
 # Ex. χιόνι / χιόνια (only the plural is added)
 I_IA_NOUN = []
-neuters_path = Path(__file__).parent / "data/neuters.txt"
+neuters_path = ppath / "neuters.txt"
 with neuters_path.open("r", encoding="utf-8") as f:
     I_IA_NOUN.extend(sorted(set(f.read().splitlines())))
 
@@ -132,8 +134,18 @@ SYNIZESIS = [
     *I_IA_NOUN,
 ]
 
-AMBIGUOUS_SYNIZESIS = [
-    "φυλάκια",  # takes synizesis if from φυλάκι, but not if from φυλάκιο
+# Words with multiple accepted accentuations
+MULTIPLE_ACCENTUATION = [
+    # Should be manually sync with src/constants/MULTIPLE_ACCENTUATION
+    *_add_endings(["άγι"], "ος ου ο ε οι ων ους α ας ες"),
+    *_add_endings(["έννοι"], "α ας ες"),
+    *_add_endings(["ήπι"], "α ε ες"),
+    # Requires adapting grs logic I think
+    # *_add_endings(["ίδι"], "ος ου ο ε οι ων ους α ας ες"),
+    *_add_endings(["ήλι"], "ου ο"),
+    # Others
+    "πλάγια",  # takes syn if from πλάι, not if from πλάγιος
+    "φυλάκια",  # takes syn if from φυλάκι, not if from φυλάκιο
 ]
 
 # We can't just force synizesis at syllabify level on these:
@@ -157,7 +169,7 @@ def generate_lookup_synizesis(f: TextIO) -> None:
     mapping = {}
 
     for word in SYNIZESIS:
-        if word in AMBIGUOUS_SYNIZESIS:
+        if word in MULTIPLE_ACCENTUATION:
             continue
 
         _syls = syllabify_el_mode_at(word, [1])
@@ -198,7 +210,7 @@ def write_registry() -> None:
 
     all_words = []
     for word in SYNIZESIS:
-        if word in AMBIGUOUS_SYNIZESIS:
+        if word in MULTIPLE_ACCENTUATION:
             continue
         all_words.append(word)
     for word, _ in SYNIZESIS_PAIRS:
