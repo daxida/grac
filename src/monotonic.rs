@@ -77,19 +77,18 @@ pub fn split_punctuation(s: &str) -> (&str, &str, &str) {
 }
 
 /// Monosyllables from which we want to remove the accent.
-//
-// These have an accent in polytonic that conflicts with our syllabify logic.
-// We need to store them separatedly to treat them as monosyllables with no accent.
-// Ex. πιὸ ταπεινά > πιό ταπεινά // Expected: πιο ταπεινά
+///
+/// These have an accent in polytonic that conflicts with our syllabify logic.
+/// We need to store them separatedly to treat them as monosyllables with no accent.
+/// Ex. πιὸ ταπεινά > πιό ταπεινά // Expected: πιο ταπεινά
 #[rustfmt::skip]
-const MONOSYL_REMOVE_ACCENT: [&str; 32] = [
-    "πιό", "Πιό", "πιά", "Πιά",
-    "μιά", "Μιά", "μιάς", "Μιάς", "γιά", "Γιά", "γειά", "Γειά",
+const MONOSYL_REMOVE_ACCENT: [&str; 32] = with_capitalized!([
+    "πιό", "πιά", "μιά", "μιάς", "γιά", "γειά",
     // πιώ
-    "πιώ", "Πιώ", "πίεις", "Πίεις", "πίη", "Πίη", "πιή", "Πιή",
-    "πίει", "Πίει", "πιεί", "Πιεί", "πίης", "Πίης", "πιής", "Πιής",
-    "πιούν", "Πιούν", "πιές", "Πιές"
-];
+    "πιώ",
+    "πίεις", "πίη", "πιή", "πίει", "πιεί", "πίης", "πιής",
+    "πιούν", "πιές",
+]);
 
 #[allow(unused_variables)]
 fn log(label: &str, value: impl std::fmt::Debug) {

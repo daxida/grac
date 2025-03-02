@@ -14,34 +14,45 @@ pub const APOSTROPHES: &[char] = &[
     '᾽', '᾿', '‘'
 ];
 
-/// List of correctly accented monosyllables, excepting pronouns.
-///
-/// Useful to address if a word is correctly accented, since any monosyllable
-/// outside of this list can be treated as an error.
-pub const MONOSYLLABLE_ACCENTED: [&str; 12] = [
-    "ή", "Ή", "πού", "Πού", "πώς", "Πώς", "είς", "Είς", "έν", "Έν", "έξ", "Έξ",
-];
+/// Correctly accented monosyllables. Does not contain pronouns.
+pub const MONOSYLLABLE_ACCENTED: [&str; 12] =
+    with_capitalized!(["ή", "πού", "πώς", "είς", "έν", "έξ"]);
 
-/// List of correctly accented monosyllables, including pronouns.
-// TODO: Avoid duplication
-#[rustfmt::skip]
-pub const MONOSYLLABLE_ACCENTED_WITH_PRONOUNS: [&str; 28] = [
-    "ή", "Ή", "πού", "Πού", "πώς", "Πώς", "είς", "Είς", "έν", "Έν", "έξ", "Έξ",
-    // Lowercase
-    "μού", "μάς", "τού", "τής", "τούς", "τών", "σού", "σάς",
-    // Capitalized
-    "Μού", "Μάς", "Τού", "Τής", "Τούς", "Τών", "Σού", "Σάς",
-];
+/// Correctly accented monosyllables, including (accented versions of) pronouns.
+pub const MONOSYLLABLE_ACCENTED_WITH_PRONOUNS: [&str; 28] = conc!(
+    MONOSYLLABLE_ACCENTED,
+    with_capitalized!(["μού", "μάς", "τού", "τής", "τούς", "τών", "σού", "σάς"])
+);
 
 /// Greek words with two accepted syllabifications
-//
-// Would need a build script / macro for inflexions
-#[rustfmt::skip]
-pub const ALT_SYLLABIC: [&str; 10] = [
-    "ήλιος", "Ήλιος",
-    "έννοια", "Έννοια",
-    "ίδιος", "Ίδιος",
-    "ίδιοι", "Ίδιοι",
-    // With synizesis if from πίνω, without if from ήπιος
-    "ήπια", "Ήπια",
-];
+///
+// TODO: <https://el.wiktionary.org/wiki/Κατηγορία:Λέξεις_με_δύο_προφορές_(νέα_ελληνικά)>
+pub const ALT_SYLLABIC: [&str; 34] = with_capitalized!(conc!(
+    // έννοια
+    expand!(["έννοι"], ["α", "ας", "ες"]),
+    // πίνω / ήπιος
+    expand!(["ήπι"], ["α", "ες"]),
+    // ίδιος
+    expand!(
+        ["ίδι"],
+        ["ος", "ου", "ο", "ε", "οι", "ων", "ους", "α", "ας", "ες"]
+    ),
+    // ήλιος / ήλιο
+    expand!(["ήλι"], ["ου", "ο"])
+));
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn is_alt_syllabic(word: &str) -> bool {
+        ALT_SYLLABIC.contains(&word)
+    }
+
+    #[test]
+    fn test_alt_syllabic() {
+        assert!(is_alt_syllabic("ήλιο"));
+        assert!(is_alt_syllabic("Ήλιο"));
+        assert!(!is_alt_syllabic("ήλιος"));
+    }
+}
