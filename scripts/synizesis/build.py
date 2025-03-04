@@ -117,10 +117,12 @@ IO_NOUN_LEMMA = [
 ]
 io_noun_endings = "ο ου α ων"
 IO_NOUN = add_endings(IO_NOUN_LEMMA, io_noun_endings)
+other_io_noun = load_from_path(ppath / "wiki_noun_neut_ιο.txt")
+IO_NOUN.extend(add_endings([word[:-1] for word in other_io_noun], io_noun_endings))
 
 # Noun (masculine) ending in ιος (singular in ιος, plural in ιοι).
 # Ex. γιος
-IOS_IOI_NOUN_LEMMA = [
+IOS_NOUN_LEMMA = [
     "γι",
     "ίσκι",
     "ήσκι",
@@ -128,7 +130,10 @@ IOS_IOI_NOUN_LEMMA = [
     # Note: while καπετάνιος has two plurals, the one in αίοι can not take synizesis
     "καπετάνι",
 ]
-IOS_IOI_NOUN = add_endings(IOS_IOI_NOUN_LEMMA, "ος ου ο ε οι ων ους")
+ios_noun_endings = "ος ου ο ε οι ων ους"
+IOS_NOUN = add_endings(IOS_NOUN_LEMMA, ios_noun_endings)
+other_ios_noun = load_from_path(ppath / "wiki_noun_masc_ιος.txt")
+IOS_NOUN.extend(add_endings([word[:-2] for word in other_ios_noun], ios_noun_endings))
 
 # Noun (neuter) ending in ι (singular in ι / plural in ια)
 # Ex. χιόνι / χιόνια (only the plural is added)
@@ -153,7 +158,7 @@ SYNIZESIS = [
     *IA_NOUN,
     *IOS_ADJ,
     *IO_NOUN,
-    *IOS_IOI_NOUN,
+    *IOS_NOUN,
     *I_IA_NOUN,
 ]
 
