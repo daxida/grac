@@ -36,8 +36,14 @@ CATEGORY_URLS = [
 """(label, url)"""
 
 
+def extract_category(url: str) -> str:
+    return url.split("/")[-1].replace("_", " ")
+
+
 def scrape_category(url: str) -> list[str]:
     words = []
+    category = None
+
     while url:
         print(f"Requesting {urllib.parse.unquote(url)}")
         response = requests.get(url)
@@ -45,17 +51,17 @@ def scrape_category(url: str) -> list[str]:
             print(f"Failed to fetch page: {response.status_code}")
             break
 
-        url = ""
-
         soup = BeautifulSoup(response.text, "html.parser")
 
         # select <div id="mw-pages"> first
         selector = "#mw-pages .mw-category-group ul li a"
         words.extend(a.text for a in soup.select(selector))
 
-        next_page = soup.select_one(
-            "a[title='Κατηγορία:Ουσιαστικά με συνίζηση στην κατάληξη (νέα ελληνικά)']:contains('επόμενη σελίδα')"
-        )
+        if category is None:
+            category = extract_category(url)
+
+        next_page = soup.select_one(f"a[title='{category}']:contains('επόμενη σελίδα')")
+        url = ""
         if next_page:
             url = f"{BASE_URL}{next_page['href']}"
 

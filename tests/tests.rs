@@ -163,6 +163,7 @@ mktest_el!(
     ["πλιο", "πλιο"],
     ["Μπλια", "Μπλια"],
     ["βιος", "βιος"],
+    ["χλιος", "χλιος"],
 );
 
 // The syllabification should be that of the word without the final n
@@ -192,6 +193,7 @@ mktest_el!(
     ["άδειο", "ά-δειο"],
     ["ζαχαρένια", "ζα-χα-ρέ-νια"],
     ["γυναικάκιας", "γυ-ναι-κά-κιας"],
+    ["γύμνια", "γύ-μνια"],
     // All diminutives in κια take synizesis but it is sometimes ambiguous:
     // φυλάκια takes synizesis if from φυλάκι, but not if from φυλάκιο
     ["αστειάκια", "α-στει-ά-κια"],
