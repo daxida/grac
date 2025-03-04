@@ -10,7 +10,7 @@ from grac import remove_all_diacritics, syllabify_el_mode_at
 ppath = Path("scripts/synizesis/data")
 
 
-def _add_endings(lemmas: list[str], endings: str) -> list[str]:
+def add_endings(lemmas: list[str], endings: str) -> list[str]:
     return [f"{lemma}{ending}" for lemma in lemmas for ending in endings.split()]
 
 
@@ -39,8 +39,8 @@ MONOSYLLABLES = [
 # Verb with synizesis at the last syllable.
 # Ex. πιω (from πίνω)
 VERBS = [
-    *_add_endings(["πι"], "ω εις ει ουν ες"),
-    *_add_endings(["ήπι"], "α ες ε αν"),
+    *add_endings(["πι"], "ω εις ει ουν ες"),
+    *add_endings(["ήπι"], "α ες ε αν"),
 ]
 
 # Noun (feminine) ending in ια (singular in ια, genitive in ιας).
@@ -51,6 +51,7 @@ VERBS = [
 IA_NOUN_LEMMA = [
     "αλήθει",
     "αρρώστι",
+    "αρρώστει",
     "βλαστήμι",
     "γρίνι",
     "γκρίνι",
@@ -72,7 +73,10 @@ IA_NOUN_LEMMA = [
     "στεναχώρι",
     "συμπόνι",
 ]
-IA_NOUN = _add_endings(IA_NOUN_LEMMA, "α ας ες")
+ia_noun_endings = "α ας ες"
+IA_NOUN = add_endings(IA_NOUN_LEMMA, ia_noun_endings)
+other_ia_noun = load_from_path(ppath / "wiki_noun_fem_ια.txt")
+IA_NOUN.extend(add_endings([word[:-1] for word in other_ia_noun], ia_noun_endings))
 
 # Adjective ending in ιος / ια / ιο.
 # Ex. αλογίσιος
@@ -82,7 +86,7 @@ IA_NOUN = _add_endings(IA_NOUN_LEMMA, "α ας ες")
 # * includes the pronoun τέτοιος
 # * includes the ending ον for completion (archaic for adjectives,
 #   but also used in modern greek for ποιος)
-IA_ADJ_LEMMA = [
+IOS_ADJ_LEMMA = [
     "άδει",
     "αλογίσι",
     "ασημένι",
@@ -97,18 +101,22 @@ IA_ADJ_LEMMA = [
     "ποι",
     "τέτοι",
 ]
-IA_ADJ = _add_endings(IA_ADJ_LEMMA, "ος ου ο ον ε οι ων ους α ας ες")
+ios_adj_endings = "ος ου ο ον ε οι ων ους α ας ες"
+IOS_ADJ = add_endings(IOS_ADJ_LEMMA, ios_adj_endings)
+other_ios_adj = load_from_path(ppath / "wiki_adj_ιος.txt")
+IOS_ADJ.extend(add_endings([word[:-2] for word in other_ios_adj], ios_adj_endings))
 
 # Noun (neuter) ending in ιο (singular in ιο, plural in ια).
 # Ex. μπάνιο
-IO_IA_NOUN_LEMMA = [
+IO_NOUN_LEMMA = [
     "δίκι",
     "κουράγι",
     "μπάνι",
     "ίδι",  # Ambiguous: can also be trisyl (but much more common as bisyl)
     "γέλι",
 ]
-IO_IA_NOUN = _add_endings(IO_IA_NOUN_LEMMA, "ο ου α ων")
+io_noun_endings = "ο ου α ων"
+IO_NOUN = add_endings(IO_NOUN_LEMMA, io_noun_endings)
 
 # Noun (masculine) ending in ιος (singular in ιος, plural in ιοι).
 # Ex. γιος
@@ -120,7 +128,7 @@ IOS_IOI_NOUN_LEMMA = [
     # Note: while καπετάνιος has two plurals, the one in αίοι can not take synizesis
     "καπετάνι",
 ]
-IOS_IOI_NOUN = _add_endings(IOS_IOI_NOUN_LEMMA, "ος ου ο ε οι ων ους")
+IOS_IOI_NOUN = add_endings(IOS_IOI_NOUN_LEMMA, "ος ου ο ε οι ων ους")
 
 # Noun (neuter) ending in ι (singular in ι / plural in ια)
 # Ex. χιόνι / χιόνια (only the plural is added)
@@ -143,8 +151,8 @@ SYNIZESIS = [
     *MONOSYLLABLES,
     *VERBS,
     *IA_NOUN,
-    *IA_ADJ,
-    *IO_IA_NOUN,
+    *IOS_ADJ,
+    *IO_NOUN,
     *IOS_IOI_NOUN,
     *I_IA_NOUN,
 ]
@@ -156,15 +164,15 @@ SYNIZESIS = [
 #
 # Should be manually sync with src/constants/MULTIPLE_PRONUNCIATION
 MULTIPLE_PRONUNCIATION = [
-    *_add_endings(["άδει"], "α ας ες"),
+    *add_endings(["άδει"], "α ας ες"),
     # For ακρίβεια, the version with synizesis should probably be prefered.
-    *_add_endings(["ακρίβει"], "α ας ες"),
-    *_add_endings(["άγι"], "ος ου ο ε οι ων ους α ας ες"),
-    *_add_endings(["έννοι"], "α ας ες"),
-    *_add_endings(["ήπι"], "α ε ες"),  # partial overlap
-    *_add_endings(["ίδι"], "ος ο ε οι α"),  # partial overlap
-    *_add_endings(["ήλι"], "ου ο"),  # partial overlap
-    *_add_endings(["μύρι"], "οι ων ους ες α"),
+    *add_endings(["ακρίβει"], "α ας ες"),
+    *add_endings(["άγι"], "ος ου ο ε οι ων ους α ας ες"),
+    *add_endings(["έννοι"], "α ας ες"),
+    *add_endings(["ήπι"], "α ε ες"),  # partial overlap
+    *add_endings(["ίδι"], "ος ο ε οι α"),  # partial overlap
+    *add_endings(["ήλι"], "ου ο"),  # partial overlap
+    *add_endings(["μύρι"], "οι ων ους ες α"),
     # Others
     "αρχοντολόγια",  # takes syn if from αρχοντολόγιο, not if from αρχοντολό(γ)ι
     "πλάγια",  # takes syn if from πλάι, not if from πλάγιος
