@@ -30,14 +30,14 @@ MONOSYLLABLES = [
     "τζια",
 ]
 
-# Verbs with synizesis at the last syllable.
+# Verb with synizesis at the last syllable.
 # Ex. πιω (from πίνω)
 VERBS = [
     *_add_endings(["πι"], "ω εις ει ουν ες"),
     *_add_endings(["ήπι"], "α ες ε αν"),
 ]
 
-# Nouns ending in ια (singular in ια, genitive in ιας).
+# Noun (feminine) ending in ια (singular in ια, genitive in ιας).
 # Ex. αρρώστια
 #
 # Note that if the ια form has συνίζηση so does the equivalent
@@ -45,9 +45,12 @@ VERBS = [
 IA_NOUN_LEMMA = [
     "αλήθει",
     "αρρώστι",
+    "βλαστήμι",
     "γρίνι",
     "γκρίνι",
+    "έγνοι",  # Always bisyl with this orthography (but έννοια can be both)
     "κατάντι",
+    "κούνι",
     "φαμίλι",
     "φτώχει",
     "φτώχι",
@@ -57,6 +60,7 @@ IA_NOUN_LEMMA = [
     "ορφάνι",
     "ζήλει",
     "ζήλι",
+    "σκούφι",
     # https://www.greek-language.gr/greekLang/modern_greek/tools/lexica/triantafyllides/search.html?lq=στεναχώρια
     "στενοχώρι",
     "στεναχώρι",
@@ -64,35 +68,43 @@ IA_NOUN_LEMMA = [
 ]
 IA_NOUN = _add_endings(IA_NOUN_LEMMA, "α ας ες")
 
-# Adjectives ending in ιος / ια / ιο.
+# Adjective ending in ιος / ια / ιο.
 # Ex. αλογίσιος
-# Note: includes the pronoun ποιος (even though it has no vocative)
-# Note: includes the pronoun τέτοιος
-# Note: includes the ending ον for completion (archaic for adjectives,
-#       but also used in modern greek for ποιος)
+#
+# Notes:
+# * includes the pronoun ποιος (even though it has no vocative)
+# * includes the pronoun τέτοιος
+# * includes the ending ον for completion (archaic for adjectives,
+#   but also used in modern greek for ποιος)
 IA_ADJ_LEMMA = [
+    "άδει",
     "αλογίσι",
     "ασημένι",
     "αχυρένι",
     "γαλάζι",
     "γιδίσι",
+    "ζαχαρένι",
+    "ίσι",
+    "καινούρι",
+    "καινούργι",
     "νι",
     "ποι",
     "τέτοι",
 ]
 IA_ADJ = _add_endings(IA_ADJ_LEMMA, "ος ου ο ον ε οι ων ους α ας ες")
 
-# Nouns ending in ιο (singular in ιο, plural in ια).
+# Noun (neuter) ending in ιο (singular in ιο, plural in ια).
 # Ex. μπάνιο
 IO_IA_NOUN_LEMMA = [
     "δίκι",
+    "κουράγι",
     "μπάνι",
     "ίδι",  # Ambiguous: can also be trisyl (but much more common as bisyl)
     "γέλι",
 ]
 IO_IA_NOUN = _add_endings(IO_IA_NOUN_LEMMA, "ο ου α ων")
 
-# Nouns ending in ιος (singular in ιος, plural in ιοι).
+# Noun (masculine) ending in ιος (singular in ιος, plural in ιοι).
 # Ex. γιος
 IOS_IOI_NOUN_LEMMA = [
     "γι",
@@ -104,7 +116,7 @@ IOS_IOI_NOUN_LEMMA = [
 ]
 IOS_IOI_NOUN = _add_endings(IOS_IOI_NOUN_LEMMA, "ος ου ο ε οι ων ους")
 
-# Nouns ending in ι (singular in ι / plural in ια)
+# Noun (neuter) ending in ι (singular in ι / plural in ια)
 # Ex. χιόνι / χιόνια (only the plural is added)
 I_IA_NOUN = []
 neuters_path = ppath / "neuters.txt"
@@ -113,18 +125,16 @@ with neuters_path.open("r", encoding="utf-8") as f:
 
 SYNIZESIS = [
     "βερεσέδια",
-    "βλαστήμια",
-    "διακόσια",
+    "διακόσια",  # Should require a LOT of variations to be fully covered...
     "λόγια",  # Always bisyl as NOUN (can be trisyl as adj.)
-    "έγνοια",  # Always bisyl with this orthography (but έννοια can be both)
-    "κουράγιο",
-    "καινούριο",
-    "καινούργιο",
     "χρόνια",
     "χούγια",
-    "γένεια",  # Alternative of γένια
-    # Other ια (singular)
-    "ίσια",
+    "ψώνια",
+    "μάγια",
+    # Alternative spellings (the common versions should already be included)
+    "γένεια",  # γένια
+    "παλλικάρια",  # παλικάρια
+    "μεντέρια",  # μεντέρια
     *MONOSYLLABLES,
     *VERBS,
     *IA_NOUN,
@@ -137,6 +147,7 @@ SYNIZESIS = [
 # Words with multiple accepted accentuations
 MULTIPLE_ACCENTUATION = [
     # Should be manually sync with src/constants/MULTIPLE_ACCENTUATION
+    *_add_endings(["άδει"], "α ας ες"),
     *_add_endings(["άγι"], "ος ου ο ε οι ων ους α ας ες"),
     *_add_endings(["έννοι"], "α ας ες"),
     *_add_endings(["ήπι"], "α ε ες"),
@@ -148,7 +159,8 @@ MULTIPLE_ACCENTUATION = [
     "φυλάκια",  # takes syn if from φυλάκι, not if from φυλάκιο
 ]
 
-# We can't just force synizesis at syllabify level on these:
+# We can't just force synizesis at syllabify level on these
+# (because of the ypsilon instead of iota):
 SYNIZESIS_PAIRS = [
     ["βράδια", "βρά-δια"],  # we could for this one...
     ["δίχτυα", "δί-χτυα"],
