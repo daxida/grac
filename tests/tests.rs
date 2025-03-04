@@ -191,6 +191,7 @@ mktest_el!(
     ["πραμάτεια", "πρα-μά-τεια"],
     ["άδειο", "ά-δειο"],
     ["ζαχαρένια", "ζα-χα-ρέ-νια"],
+    ["γυναικάκιας", "γυ-ναι-κά-κιας"],
     // All diminutives in κια take synizesis but it is sometimes ambiguous:
     // φυλάκια takes synizesis if from φυλάκι, but not if from φυλάκιο
     ["αστειάκια", "α-στει-ά-κια"],

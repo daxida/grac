@@ -135,6 +135,17 @@ IOS_NOUN = add_endings(IOS_NOUN_LEMMA, ios_noun_endings)
 other_ios_noun = load_from_path(ppath / "wiki_noun_masc_ιος.txt")
 IOS_NOUN.extend(add_endings([word[:-2] for word in other_ios_noun], ios_noun_endings))
 
+# Noun (masculine) ending in ιας
+# Ex. γυναικάκιας
+IAS_NOUN_LEMMA = [
+    "κανάγ",
+    "γυναικάκ",
+]
+ias_noun_endings = "ιας ια ιες"
+IAS_NOUN = add_endings(IAS_NOUN_LEMMA, ias_noun_endings)
+other_ias_noun = load_from_path(ppath / "wiki_noun_masc_ιας.txt")
+IAS_NOUN.extend(add_endings([word[:-3] for word in other_ias_noun], ias_noun_endings))
+
 # Noun (neuter) ending in ι (singular in ι / plural in ια)
 # Ex. χιόνι / χιόνια (only the plural is added)
 I_IA_NOUN = []
@@ -159,6 +170,7 @@ SYNIZESIS = [
     *IOS_ADJ,
     *IO_NOUN,
     *IOS_NOUN,
+    *IAS_NOUN,
     *I_IA_NOUN,
 ]
 
@@ -182,6 +194,7 @@ MULTIPLE_PRONUNCIATION = [
     "αρχοντολόγια",  # takes syn if from αρχοντολόγιο, not if from αρχοντολό(γ)ι
     "πλάγια",  # takes syn if from πλάι, not if from πλάγιος
     "φυλάκια",  # takes syn if from φυλάκι, not if from φυλάκιο
+    "ουράνια",  # takes syn if from (noun) ουράνια, not if from ουράνιος
 ]
 
 # We can't just force synizesis at syllabify level on these
