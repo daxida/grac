@@ -14,6 +14,11 @@ def _add_endings(lemmas: list[str], endings: str) -> list[str]:
     return [f"{lemma}{ending}" for lemma in lemmas for ending in endings.split()]
 
 
+def load_from_path(path: Path) -> list[str]:
+    with path.open(encoding="utf-8") as f:
+        return sorted(set(f.read().splitlines()))
+
+
 MONOSYLLABLES = [
     "δια",
     "πια",
@@ -120,11 +125,10 @@ IOS_IOI_NOUN = _add_endings(IOS_IOI_NOUN_LEMMA, "ος ου ο ε οι ων ου�
 # Noun (neuter) ending in ι (singular in ι / plural in ια)
 # Ex. χιόνι / χιόνια (only the plural is added)
 I_IA_NOUN = []
-neuters_path = ppath / "neuters.txt"
-with neuters_path.open("r", encoding="utf-8") as f:
-    I_IA_NOUN.extend(sorted(set(f.read().splitlines())))
+I_IA_NOUN.extend(load_from_path(ppath / "neuters.txt"))
 
 SYNIZESIS = [
+    "βιος",
     "βερεσέδια",
     "διακόσια",  # Should require a LOT of variations to be fully covered...
     "λόγια",  # Always bisyl as NOUN (can be trisyl as adj.)
@@ -249,18 +253,18 @@ def write_registry(path: Path) -> None:
 
     This is only used for sanity checks in git diffs.
     """
-    all_words = []
+    all_words = set()
     for word in SYNIZESIS:
         if word in MULTIPLE_PRONUNCIATION:
             continue
-        all_words.append(word)
+        all_words.add(word)
     for word, _ in SYNIZESIS_PAIRS:
-        all_words.append(word)
+        all_words.add(word)
 
-    all_words.sort(key=remove_all_diacritics)
+    all_words_sorted = sorted(all_words, key=remove_all_diacritics)
 
     with path.open("w") as f:
-        for word in all_words:
+        for word in all_words_sorted:
             f.write(f"{word}\n")
 
 

@@ -162,6 +162,7 @@ mktest_el!(
     ["γιεν", "γιεν"],
     ["πλιο", "πλιο"],
     ["Μπλια", "Μπλια"],
+    ["βιος", "βιος"],
 );
 
 // The syllabification should be that of the word without the final n
