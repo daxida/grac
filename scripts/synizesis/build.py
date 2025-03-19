@@ -160,6 +160,7 @@ SYNIZESIS = [
     "χούγια",
     "ψώνια",
     "μάγια",
+    "σκέλια",
     # Alternative spellings (the common versions should already be included)
     "γένεια",  # γένια
     "παλλικάρια",  # παλικάρια

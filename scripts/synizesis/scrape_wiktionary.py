@@ -4,6 +4,7 @@ Ignores the pronoun category since it only contains τέτοιος.
 https://el.wiktionary.org/wiki/Κατηγορία:Αντωνυμίες_με_συνίζηση_στην_κατάληξη_(νέα_ελληνικά)
 """
 
+import re
 import urllib.parse
 from pathlib import Path
 
@@ -69,8 +70,6 @@ def scrape_category(url: str) -> list[str]:
 
 
 def extract_label(raw: str) -> str:
-    import re
-
     return re.findall(r"adj|noun_fem|noun_masc|noun_neut", raw)[0]
 
 
