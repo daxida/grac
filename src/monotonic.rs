@@ -122,6 +122,18 @@ fn convert_to_acute(s: &str) -> String {
         .collect::<String>()
 }
 
+/// Special cases where we need the polytonic word to make a decision:
+/// Ex: ποῦ => πού, ποὺ => που
+fn special_cases(s: &str) -> Option<&str> {
+    match s {
+        "ποὺ" => Some("που"),
+        "Ποὺ" => Some("Που"),
+        "πὼς" => Some("πως"),
+        "Πὼς" => Some("Πως"),
+        _ => None,
+    }
+}
+
 /// Convert a string representing a word to monotonic Greek.
 fn to_monotonic_word(s: &str) -> String {
     // If the word is empty our segmentation logic is probably wrong.
@@ -138,14 +150,7 @@ fn to_monotonic_word(s: &str) -> String {
     log("Left punct", left_punct);
     log("Right punct", right_punct);
 
-    // Special cases where we need the polytonic word to make a decision:
-    // Ex: ποῦ => πού, ποὺ => που
-    let ret = match core {
-        "ποὺ" => Some("που"),
-        "πὼς" => Some("πως"),
-        _ => None,
-    };
-    if let Some(ret) = ret {
+    if let Some(ret) = special_cases(core) {
         return format!("{left_punct}{ret}{right_punct}");
     }
 
@@ -252,6 +257,10 @@ mod tests {
         mono_special_cases,
         ["ποὺ", "που"],
         ["Ἐκεῖνον ποὺ μοῦ", "Εκείνον που μου"],
+        [
+            "βρωμόσκυλο! Ποὺ βρωμᾷς πρωὶ-πρωὶ",
+            "βρωμόσκυλο! Που βρωμάς πρωί-πρωί"
+        ]
     );
 
     mktest_mono!(
