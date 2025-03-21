@@ -122,14 +122,25 @@ fn convert_to_acute(s: &str) -> String {
         .collect::<String>()
 }
 
-/// Special cases where we need the polytonic word to make a decision:
+/// Special cases.
+///
+/// Sometimes we need the polytonic word to make a decision:
 /// Ex: ποῦ => πού, ποὺ => που
+///
+/// Sometimes, due to synizesis, the words with replaced acute accents
+/// does not exist:
+/// Ex: ποιὸς => ποιός (when it should be ποιος)
 fn special_cases(s: &str) -> Option<&str> {
     match s {
         "ποὺ" => Some("που"),
         "Ποὺ" => Some("Που"),
         "πὼς" => Some("πως"),
         "Πὼς" => Some("Πως"),
+        // TODO: finish as we find other the cases to test against
+        "ποιὸς" => Some("ποιος"),
+        "Ποιὸς" => Some("Ποιος"),
+        "ποιὰ" => Some("ποια"),
+        "Ποιὰ" => Some("Ποια"),
         _ => None,
     }
 }
@@ -261,6 +272,13 @@ mod tests {
             "βρωμόσκυλο! Ποὺ βρωμᾷς πρωὶ-πρωὶ",
             "βρωμόσκυλο! Που βρωμάς πρωί-πρωί"
         ]
+    );
+
+    mktest_mono!(
+        mono_poios_variants,
+        ["καὶ ποιὸς τὸν ἐσκότωσε;", "και ποιος τον εσκότωσε;"],
+        ["Ποιὸς λοιπὸν τὸν ἐσκότωσε;", "Ποιος λοιπόν τον εσκότωσε;"],
+        ["Ἤξερες ποιὰ ἦτον αὐτή;", "Ήξερες ποια ήτον αυτή;"],
     );
 
     mktest_mono!(
