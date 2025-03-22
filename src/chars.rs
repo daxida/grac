@@ -1,37 +1,78 @@
+//! Char utilities.
+//!
+//! Unicode Greek Ranges:
+//! - [Greek and Coptic](https://www.unicode.org/charts/PDF/U0370.pdf)
+//! - [Greek Extended](https://www.unicode.org/charts/PDF/U1F00.pdf)
 use unicode_normalization::char::decompose_canonical;
 
-// TODO: Do stemming instead of using unicode_normalization
-
-const fn is_greek_and_coptic_char(ch: char) -> bool {
+/// Check if a character is in the _Greek and Coptic_ range.
+///
+/// Includes the following non alphabetic chars:
+///
+/// 0x375: ͵ - GREEK LOWER NUMERAL SIGN
+/// 0x37e: ; - GREEK QUESTION MARK
+/// 0x384: ΄ - GREEK TONOS
+/// 0x385: ΅ - GREEK DIALYTIKA TONOS
+/// 0x387: · - GREEK ANO TELEIA
+/// 0x3f6: ϶ - GREEK REVERSED LUNATE EPSILON SYMBOL
+pub const fn is_greek_and_coptic_char(ch: char) -> bool {
     ch >= '\u{0370}' && ch <= '\u{03FF}'
 }
 
+/// Check if a character is in the _Greek Extended_ range.
+///
+/// Includes the following non alphabetic chars:
+///
+/// 0x1fbd: ᾽ - GREEK KORONIS
+/// 0x1fbf: ᾿ - GREEK PSILI
+/// 0x1fc0: ῀ - GREEK PERISPOMENI
+/// 0x1fc1: ῁ - GREEK DIALYTIKA AND PERISPOMENI
+/// 0x1fcd: ῍ - GREEK PSILI AND VARIA
+/// 0x1fce: ῎ - GREEK PSILI AND OXIA
+/// 0x1fcf: ῏ - GREEK PSILI AND PERISPOMENI
+/// 0x1fdd: ῝ - GREEK DASIA AND VARIA
+/// 0x1fde: ῞ - GREEK DASIA AND OXIA
+/// 0x1fdf: ῟ - GREEK DASIA AND PERISPOMENI
+/// 0x1fed: ῭ - GREEK DIALYTIKA AND VARIA
+/// 0x1fee: ΅ - GREEK DIALYTIKA AND OXIA
+/// 0x1fef: ` - GREEK VARIA
+/// 0x1ffd: ´ - GREEK OXIA
+/// 0x1ffe: ῾ - GREEK DASIA
 pub const fn is_greek_extended_char(ch: char) -> bool {
     ch >= '\u{1F00}' && ch <= '\u{1FFF}'
 }
 
+/// Check if a character is in the _Greek and Coptic_ or the _Greek Extended_ range.
+///
+/// Includes non alphabetic characters. For an only alphabetic version, use [is_greek_letter].
 pub const fn is_greek_char(ch: char) -> bool {
     is_greek_and_coptic_char(ch) || is_greek_extended_char(ch)
 }
 
-/// Same as `is_greek_char` but excludes some punctuation characters
-/// that are in the Unicode Greek range. Ex. 'ʹ'
+/// Check if a character is in the _Greek and Coptic_ or the _Greek Extended_ range.
+///
+/// Excludes every non alphabetic characters in both ranges.
 pub const fn is_greek_letter(ch: char) -> bool {
     match ch {
-        'ʹ' | '᾿' | '᾽' | '·' => false,
+        '\u{375}' | '\u{37E}' | '\u{384}' | '\u{385}' | '\u{387}' | '\u{3F6}' | '\u{1FBD}'
+        | '\u{1FBF}' | '\u{1FC0}' | '\u{1FC1}' | '\u{1FCD}' | '\u{1FCE}' | '\u{1FCF}'
+        | '\u{1FDD}' | '\u{1FDE}' | '\u{1FDF}' | '\u{1FED}' | '\u{1FEE}' | '\u{1FEF}'
+        | '\u{1FFD}' | '\u{1FFE}' => false,
         _ => is_greek_char(ch),
     }
 }
 
-// The order is important: is_greek_chars is cheaper.
-//
-// Note that from the three common characters that represent apostrophe:
-// * U+0027 ' APOSTROPHE
-// * U+2019 ’ RIGHT SINGLE QUOTATION MARK
-// * U+02BC ʼ MODIFIER LETTER APOSTROPHE
-// the last one is the only considered alphabetic, and since it can appear
-// as a possible (probably wrong) variant, it makes sense to include it here.
+/// Check if a word is Greek.
+///
+/// Note that from the three common characters that represent apostrophe:
+/// * U+0027 ' APOSTROPHE
+/// * U+2019 ’ RIGHT SINGLE QUOTATION MARK
+/// * U+02BC ʼ MODIFIER LETTER APOSTROPHE
+///
+/// the last one is the only considered alphabetic, and since it can appear
+/// as a possible (probably wrong) variant, it makes sense to include it here.
 pub fn is_greek_word(s: &str) -> bool {
+    // The order is important: is_greek_char is cheaper.
     s.chars()
         .all(|ch| is_greek_char(ch) || ch == '\u{02BC}' || !ch.is_alphabetic())
 }
@@ -51,11 +92,10 @@ pub fn is_greek_word(s: &str) -> bool {
 /// ```
 pub fn ends_with_diphthong(s: &str) -> bool {
     let vowels = extract_vowels(s);
-    [
+    const DIPHTHONGS: [&str; 12] = [
         "όι", "Όι", "έι", "Έι", "άι", "Άι", "όυ", "Όυ", "έυ", "Έυ", "άυ", "Άυ",
-    ]
-    .iter()
-    .any(|&e| vowels.ends_with(e))
+    ];
+    DIPHTHONGS.iter().any(|&e| vowels.ends_with(e))
 }
 
 /// Extract vowels from an assumed well formed lowercase syllable.
@@ -69,7 +109,9 @@ fn extract_vowels(s: &str) -> String {
     s.chars().filter(|ch| !CONSONANTS.contains(ch)).collect()
 }
 
-/// Oracle implementation for testing. Return the normalized character.
+/// Return the normalized character.
+///
+/// Oracle implementation for testing.
 fn __base(ch: char) -> char {
     let mut base_char = None;
     decompose_canonical(ch, |c| {
@@ -78,7 +120,9 @@ fn __base(ch: char) -> char {
     base_char.unwrap_or(ch)
 }
 
-/// Oracle implementation for testing. Return the normalized lower character.
+/// Return the normalized lower character.
+///
+/// Oracle implementation for testing.
 ///
 /// This should be equal to [`base_lower`](self::base_lower)
 fn __base_lower(ch: char) -> char {
@@ -96,11 +140,9 @@ pub const fn base_lower(ch: char) -> char {
     }
 }
 
-/// Normalize and cast to lowercase Greek and Coptic: U+0370–U+03FF
+/// Normalize and cast to lowercase the _Greek and Coptic_ range.
 ///
-/// This does not normalize:  ';' | '·' | 'Ϊ' | 'Ϋ' | 'ϓ' | 'ϔ'
-///
-/// <https://www.unicode.org/charts/PDF/U0370.pdf>
+/// Does NOT normalize:  ';' | '·' | 'Ϊ' | 'Ϋ' | 'ϓ' | 'ϔ'
 const fn base_lower_gc(ch: char) -> char {
     match ch {
         // Lowercase unaccented (α > ω)
@@ -160,6 +202,7 @@ const fn base_lower_gc(ch: char) -> char {
     }
 }
 
+/// Normalize and cast to lowercase the _Greek Extended_ range.
 const fn base_lower_ge(ch: char) -> char {
     match ch {
         'ἀ' | 'ἁ' | 'ἂ' | 'ἃ' | 'ἄ' | 'ἅ' | 'ἆ' | 'ἇ' | 'Ἀ' | 'Ἁ' | 'Ἂ' | 'Ἃ' | 'Ἄ' | 'Ἅ' | 'Ἆ'
