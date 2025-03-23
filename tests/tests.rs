@@ -438,6 +438,16 @@ impl quickcheck::Arbitrary for GreekWord {
         }
         Self(word)
     }
+
+    // From the quickcheck crate implementation of Arbitrary for String
+    fn shrink(&self) -> Box<dyn Iterator<Item = GreekWord>> {
+        let chars: Vec<char> = self.0.chars().collect();
+        Box::new(
+            chars
+                .shrink()
+                .map(|x| GreekWord(x.into_iter().collect::<String>())),
+        )
+    }
 }
 
 quickcheck! {
