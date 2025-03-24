@@ -1,4 +1,5 @@
 use grac::{syllabify_el, syllabify_gr, syllabify_gr_ref};
+use grac::{syllabify_el_mode, Synizesis};
 use quickcheck::quickcheck;
 
 /// More informative than a simple `assert_eq!` macro.
@@ -53,6 +54,25 @@ macro_rules! mktest_el {
 
             for (input, expected) in test_cases {
                 let result = syllabify_el(input);
+                let tc_expected = expected.split('-').collect::<Vec<_>>();
+                assert_eq_dbg!(result, tc_expected, input);
+            }
+        }
+    };
+}
+
+macro_rules! mktest_el_mode {
+    ($group_name:ident, $([$synizesis:expr, $input:expr, $expected:expr]),* $(,)?) => {
+        #[test]
+        fn $group_name() {
+            let test_cases = vec![
+                $(
+                    ($synizesis, $input, $expected),
+                )*
+            ];
+
+            for (synizesis, input, expected) in test_cases {
+                let result = syllabify_el_mode(input, synizesis);
                 let tc_expected = expected.split('-').collect::<Vec<_>>();
                 assert_eq_dbg!(result, tc_expected, input);
             }
@@ -144,6 +164,16 @@ mktest_el!(
     syllabify_el_diaeresis,
     ["Αγλαΐα", "Α-γλα-ΐ-α"],
     ["αδενοϋπόφυση", "α-δε-νο-ϋ-πό-φυ-ση"]
+);
+
+mktest_el_mode!(
+    mode_with_synizesis,
+    [Synizesis::Every, "μάγια", "μά-για"],
+    [Synizesis::Never, "μάγια", "μά-γι-α"],
+    [Synizesis::Every, "μυαλό", "μυα-λό"],
+    [Synizesis::Never, "μυαλό", "μυ-α-λό"],
+    [Synizesis::Every, "καληώρα", "κα-ληώ-ρα"],
+    [Synizesis::Never, "καληώρα", "κα-λη-ώ-ρα"],
 );
 
 // Synizesis

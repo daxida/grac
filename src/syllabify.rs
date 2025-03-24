@@ -234,11 +234,14 @@ fn move_nucleus(chs: &[char], pos: &mut usize, lang: &Lang, synizesis: bool) {
     while *pos > 0 && (is_vowel(chs[*pos - 1], lang) || chs[*pos - 1] == Diacritic::ROUGH) {
         if to - *pos > 0 && chs[*pos] != Diacritic::ACUTE && chs[*pos] != Diacritic::ROUGH {
             if is_diphthong(&chs[*pos - 1..*pos + 1], lang) {
+                // Deal with overlapping diphthongs: ουι
                 if to - *pos > 1 && chs.get(*pos + 1) == Some(&'ι') {
                     *pos += 1;
                     break;
                 }
-            } else if synizesis && chs.get(*pos - 1) == Some(&'ι') {
+            } else if synizesis && matches!(chs.get(*pos - 1), Some('ι') | Some('υ') | Some('η'))
+            {
+                // Keep advancing
             } else {
                 break;
             }

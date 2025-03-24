@@ -154,6 +154,7 @@ I_IA_NOUN.extend(load_from_path(ppath / "neuters.txt"))
 SYNIZESIS = [
     "βιος",
     "βερεσέδια",
+    "βράδια",
     "διακόσια",  # Should require a LOT of variations to be fully covered...
     "λόγια",  # Always bisyl as NOUN (can be trisyl as adj.)
     "χρόνια",
@@ -161,6 +162,10 @@ SYNIZESIS = [
     "ψώνια",
     "μάγια",
     "σκέλια",
+    # synizesis at upsilon
+    "δίχτυα",
+    "στάχυα",
+    "δυο",
     # Alternative spellings (the common versions should already be included)
     "γένεια",  # γένια
     "παλλικάρια",  # παλικάρια
@@ -198,14 +203,8 @@ MULTIPLE_PRONUNCIATION = [
     "ουράνια",  # takes syn if from (noun) ουράνια, not if from ουράνιος
 ]
 
-# We can't just force synizesis at syllabify level on these
-# (because of the ypsilon instead of iota):
-SYNIZESIS_PAIRS = [
-    ["βράδια", "βρά-δια"],  # we could for this one...
-    ["δίχτυα", "δί-χτυα"],
-    ["στάχυα", "στά-χυα"],
-    ["δυο", "δυο"],
-]
+
+MERGING_PAIRS = []
 
 
 def generate_lookup_synizesis(f: TextIO) -> None:
@@ -231,7 +230,7 @@ def generate_lookup_synizesis(f: TextIO) -> None:
         syllables_cap = str(_syls).replace("'", '"')
         mapping[word.capitalize()] = syllables_cap
 
-    for word, _syllables in SYNIZESIS_PAIRS:
+    for word, _syllables in MERGING_PAIRS:
         _syls = _syllables.split("-")
         syllables = str(_syls).replace("'", '"')
         mapping[word] = syllables
@@ -285,7 +284,7 @@ def write_registry(path: Path) -> None:
         if word in MULTIPLE_PRONUNCIATION:
             continue
         all_words.add(word)
-    for word, _ in SYNIZESIS_PAIRS:
+    for word, _ in MERGING_PAIRS:
         all_words.add(word)
 
     all_words_sorted = sorted(all_words, key=remove_all_diacritics)
