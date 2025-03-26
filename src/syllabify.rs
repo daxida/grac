@@ -87,7 +87,7 @@ const EL: Lang = Lang {
 
 /// Locations to merge syllables at vowels.
 ///
-/// # Merge::Indices
+/// # `Merge::Indices`
 ///
 /// A slice of syllable indices where merging should occur.
 /// They are 1-indexed counting from the end of the word.
@@ -264,7 +264,7 @@ fn is_candidate_diphthong(chs: &[char]) -> bool {
 }
 
 fn is_candidate_synizesis(chs: &[char], pos: usize) -> bool {
-    matches!(chs.get(pos - 1), Some('ι') | Some('υ') | Some('η'))
+    matches!(chs.get(pos - 1), Some('ι' | 'υ' | 'η'))
 }
 
 fn move_nucleus(chs: &[char], pos: &mut usize, lang: &Lang, merge: bool) {
@@ -320,7 +320,7 @@ fn is_consonant_cluster_gr(chs: &[char]) -> bool {
 }
 
 #[inline(always)]
-fn dump<'a>(chs: &[char], fr: usize, to: &mut usize, result: &mut Vec<&'a str>, original: &'a str) {
+fn dump<'a>(chs: &[char], fr: usize, to: &usize, result: &mut Vec<&'a str>, original: &'a str) {
     let start = get_byte_offset(fr, chs);
     let end = get_byte_offset(*to, chs);
     result.push(&original[start..end]);
@@ -353,7 +353,11 @@ pub fn syllabify_gr_ref(s: &str) -> Vec<&str> {
 
     for (fr, &ch) in chs.iter().enumerate().rev() {
         match state {
-            State::Start if is_vowel_gr(ch) => state = State::FoundVowel,
+            State::Start => {
+                if is_vowel_gr(ch) {
+                    state = State::FoundVowel;
+                }
+            }
             State::FoundVowel => {
                 if is_vowel_gr(ch) || ch == Diacritic::ROUGH {
                     let prev = chs[fr + 1];
@@ -367,7 +371,7 @@ pub fn syllabify_gr_ref(s: &str) -> Vec<&str> {
                         if chs.get(fr + 2) == Some(&'ι') {
                             // Dump only the part after the iota
                             if fr + 2 < to {
-                                dump(&chs, fr + 2, &mut to, &mut result, s);
+                                dump(&chs, fr + 2, &to, &mut result, s);
                                 to = fr + 2;
                             }
                         }
@@ -387,12 +391,11 @@ pub fn syllabify_gr_ref(s: &str) -> Vec<&str> {
                     state = State::Start;
                 }
             }
-            _ => {}
         }
     }
 
     if 0 < to {
-        dump(&chs, 0, &mut to, &mut result, s);
+        dump(&chs, 0, &to, &mut result, s);
     }
 
     result.reverse();

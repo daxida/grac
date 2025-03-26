@@ -44,14 +44,18 @@ pub const fn is_greek_extended_char(ch: char) -> bool {
 
 /// Check if a character is in the _Greek and Coptic_ or the _Greek Extended_ range.
 ///
-/// Includes non alphabetic characters. For an only alphabetic version, use [is_greek_letter].
+/// Includes non alphabetic characters.
+///
+/// For a version excluding non alphabetic characters, use [`is_greek_letter`].
 pub const fn is_greek_char(ch: char) -> bool {
     is_greek_and_coptic_char(ch) || is_greek_extended_char(ch)
 }
 
 /// Check if a character is in the _Greek and Coptic_ or the _Greek Extended_ range.
 ///
-/// Excludes every non alphabetic characters in both ranges.
+/// Excludes non alphabetic characters.
+///
+/// For a version including non alphabetic characters, use [`is_greek_char`].
 pub const fn is_greek_letter(ch: char) -> bool {
     match ch {
         '\u{375}' | '\u{37E}' | '\u{384}' | '\u{385}' | '\u{387}' | '\u{3F6}' | '\u{1FBD}'

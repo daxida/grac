@@ -1,6 +1,6 @@
 //! Utility macros.
 //!
-//! Cf. https://users.rust-lang.org/t/expanding-const-str-arrays/126374/6
+//! Cf. <https://users.rust-lang.org/t/expanding-const-str-arrays/126374/6>
 
 /// Expand the cartesian product of two const &str arrays.
 ///

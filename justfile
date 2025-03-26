@@ -10,5 +10,9 @@ lint:
   uvx ruff check --output-format=concise
 
 clippy *args:
-  cargo clippy {{args}} --all-targets --all-features -- -W clippy::nursery -W clippy::pedantic -A clippy::must_use_candidate -A clippy::module_name_repetitions -A clippy::cast_precision_loss
+  cargo clippy {{args}} --all-targets --all-features -- -W clippy::nursery -W clippy::pedantic \
+  -A clippy::must_use_candidate \
+  -A clippy::module_name_repetitions \
+  -A clippy::cast_precision_loss \
+  -A clippy::unicode_not_nfc
 

@@ -5,4 +5,4 @@
 perf.data*
 
 .vscode/
-scripts/synizesis/data/el_GR.dic
+scripts/synizesis/data/*.dic

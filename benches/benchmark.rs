@@ -1,5 +1,5 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use grac::*;
+use grac::{is_greek_word, syllabify_el, syllabify_gr, syllabify_gr_ref, to_monotonic};
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
