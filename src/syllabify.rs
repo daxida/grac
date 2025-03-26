@@ -85,36 +85,43 @@ const EL: Lang = Lang {
     cons_clusters: &CONS_CLUSTERS_EL,
 };
 
-/// Locations where synizesis occurs in text.
-pub enum Synizesis<'a> {
+/// Locations to merge syllables at vowels.
+///
+/// # Merge::Indices
+///
+/// A slice of syllable indices where merging should occur.
+/// They are 1-indexed counting from the end of the word.
+///
+/// In case of multiple indices, they should refer to the syllable
+/// positions after the desired merging takes place.
+///
+/// # Example
+///
+/// ```
+/// use grac::{syllabify_el_mode, Merge};
+///
+/// let result = syllabify_el_mode("αστειάκια", Merge::Indices(&[1, 2]));
+/// assert_eq!(result, vec!["α", "στειά", "κια"]);
+/// // Even though without merge the word contains five syllables:
+/// // `vec!["α", "στει", "ά", "κι", "α"]`
+/// // and we may be tempted to use `&[1, 3]` to refer to the syllables
+/// // that we want to merge.
+/// ```
+pub enum Merge<'a> {
     Every,
     Never,
-    /// A slice of syllable indices where synizesis should occur.
-    /// They are 1-indexed counting from the end of the word.
-    ///
-    /// In case of multiple indices, they should refer to the syllable
-    /// positions after the desired synizesis takes place.
-    ///
-    /// ## Example
-    ///
-    /// `syllabify_el_mode("αστειάκια", SynizesisAt::Indices(&[1, 2]))`
-    /// `vec!["α", "στειά", "κια"]`
-    ///
-    /// Even though without synizesis the word contains five syllables:
-    /// `vec!["α", "στει", "ά", "κι", "α"]`
-    ///
-    /// and we may be tempted to use `&[1, 3]` to refer to the syllables
-    /// that we want to merge.
     Indices(&'a [usize]),
 }
 
 pub fn syllabify_gr(s: &str) -> Vec<&str> {
-    syllabify_lang(s, &GR, Synizesis::Never)
+    syllabify_lang(s, &GR, Merge::Never)
 }
 
 /// Syllabify a modern Greek word.
 ///
 /// Automatically detects synizesis.
+///
+/// # Example
 ///
 /// ```
 /// use grac::syllabify_el;
@@ -123,29 +130,36 @@ pub fn syllabify_gr(s: &str) -> Vec<&str> {
 pub fn syllabify_el(s: &str) -> Vec<&str> {
     match lookup_synizesis(s) {
         Some(res) => res.to_vec(),
-        _ => syllabify_lang(s, &EL, Synizesis::Never),
+        _ => syllabify_lang(s, &EL, Merge::Never),
     }
 }
 
 /// Syllabify a modern Greek word.
 ///
+/// # Example
+///
 /// ```
-/// use grac::{syllabify_el_mode, Synizesis};
+/// use grac::{syllabify_el_mode, Merge};
 ///
-/// assert_eq!(syllabify_el_mode("αρρώστια", Synizesis::Every), vec!["αρ", "ρώ", "στια"]);
-/// assert_eq!(syllabify_el_mode("αρρώστια", Synizesis::Never), vec!["αρ", "ρώ", "στι", "α"]);
+/// assert_eq!(syllabify_el_mode("αρρώστια", Merge::Every), vec!["αρ", "ρώ", "στια"]);
+/// assert_eq!(syllabify_el_mode("αρρώστια", Merge::Never), vec!["αρ", "ρώ", "στι", "α"]);
 ///
-/// // Only apply synizesis at the first syllable from the end.
+/// // Merge only at the first syllable from the end.
 /// // Note that "στειά" does not merge.
-/// let idxs = Synizesis::Indices(&[1]);
+/// let idxs = Merge::Indices(&[1]);
 /// assert_eq!(syllabify_el_mode("αστειάκια", idxs), vec!["α", "στει", "ά", "κια"]);
 ///
 /// // The indices refer to the syllable positions after the change.
-/// let idxs = Synizesis::Indices(&[1, 2]);
+/// let idxs = Merge::Indices(&[1, 2]);
 /// assert_eq!(syllabify_el_mode("αστειάκια", idxs), vec!["α", "στειά", "κια"]);
+///
+/// // Merge only words for vowel frontiers, and from back to start.
+/// assert_eq!(syllabify_el_mode("χέρια", Merge::Indices(&[1])), vec!["χέ", "ρια"]);
+/// assert_eq!(syllabify_el_mode("χέρια", Merge::Indices(&[2])), vec!["χέ", "ρι", "α"]);
+/// assert_eq!(syllabify_el_mode("χέρια", Merge::Indices(&[3])), vec!["χέ", "ρι", "α"]);
 /// ```
-pub fn syllabify_el_mode<'a>(s: &'a str, synizesis: Synizesis) -> Vec<&'a str> {
-    syllabify_lang(s, &EL, synizesis)
+pub fn syllabify_el_mode<'a>(s: &'a str, merge: Merge) -> Vec<&'a str> {
+    syllabify_lang(s, &EL, merge)
 }
 
 /////////////////////////////////////////////
@@ -179,7 +193,7 @@ fn get_byte_offset(pos: usize, chs: &[char]) -> usize {
     chs[..pos].iter().map(|ch| ch.len_utf8()).sum::<usize>()
 }
 
-fn syllabify_lang<'a>(s: &'a str, lang: &Lang, synizesis: Synizesis) -> Vec<&'a str> {
+fn syllabify_lang<'a>(s: &'a str, lang: &Lang, merge: Merge) -> Vec<&'a str> {
     let chs: Vec<_> = s.chars().collect();
     let mut fr = chs.len();
     let mut fr_byte = get_byte_offset(fr, &chs);
@@ -187,14 +201,14 @@ fn syllabify_lang<'a>(s: &'a str, lang: &Lang, synizesis: Synizesis) -> Vec<&'a 
     let mut idx_syllable = 1;
 
     loop {
-        let cur_synizesis = match synizesis {
-            Synizesis::Every => true,
-            Synizesis::Never => false,
-            Synizesis::Indices(idxs) => idxs.contains(&idx_syllable),
+        let cur_merge = match merge {
+            Merge::Every => true,
+            Merge::Never => false,
+            Merge::Indices(idxs) => idxs.contains(&idx_syllable),
         };
         idx_syllable += 1;
 
-        if let Some(to) = parse_syllable_break(&chs, fr, lang, cur_synizesis) {
+        if let Some(to) = parse_syllable_break(&chs, fr, lang, cur_merge) {
             let to_byte = get_byte_offset(to, &chs);
             let syllable = &s[to_byte..fr_byte];
             syllables.push(syllable);
@@ -209,11 +223,11 @@ fn syllabify_lang<'a>(s: &'a str, lang: &Lang, synizesis: Synizesis) -> Vec<&'a 
     syllables
 }
 
-fn parse_syllable_break(chs: &[char], fr: usize, lang: &Lang, synizesis: bool) -> Option<usize> {
+fn parse_syllable_break(chs: &[char], fr: usize, lang: &Lang, merge: bool) -> Option<usize> {
     let mut to = fr;
 
     move_coda(chs, &mut to, lang);
-    move_nucleus(chs, &mut to, lang, synizesis);
+    move_nucleus(chs, &mut to, lang, merge);
     move_onset(chs, &mut to, lang);
 
     if fr > to {
@@ -229,19 +243,45 @@ fn move_coda(chs: &[char], pos: &mut usize, lang: &Lang) {
     }
 }
 
-fn move_nucleus(chs: &[char], pos: &mut usize, lang: &Lang, synizesis: bool) {
+const CANDIDATE_MERGING_DIPHTHONGS_EL: [(char, char); 10] = [
+    ('α', 'η'),
+    ('ά', 'η'),
+    ('α', 'ϊ'),
+    ('α', 'ΐ'),
+    ('ά', 'ι'),
+    ('ο', 'η'),
+    ('ό', 'η'),
+    ('ο', 'ϊ'),
+    ('ο', 'ΐ'),
+    ('ό', 'ι'),
+];
+
+fn is_candidate_diphthong(chs: &[char]) -> bool {
+    match chs {
+        [a, b] => CANDIDATE_MERGING_DIPHTHONGS_EL.contains(&(*a, *b)),
+        _ => false,
+    }
+}
+
+fn is_candidate_synizesis(chs: &[char], pos: usize) -> bool {
+    matches!(chs.get(pos - 1), Some('ι') | Some('υ') | Some('η'))
+}
+
+fn move_nucleus(chs: &[char], pos: &mut usize, lang: &Lang, merge: bool) {
     let to = *pos;
     while *pos > 0 && (is_vowel(chs[*pos - 1], lang) || chs[*pos - 1] == Diacritic::ROUGH) {
         if to - *pos > 0 && chs[*pos] != Diacritic::ACUTE && chs[*pos] != Diacritic::ROUGH {
-            if is_diphthong(&chs[*pos - 1..*pos + 1], lang) {
+            let icd = is_candidate_diphthong(&chs[*pos - 1..*pos + 1]);
+
+            if merge && (is_candidate_synizesis(chs, *pos) || icd) {
+                // Keep moving
+            } else if !icd && is_diphthong(&chs[*pos - 1..*pos + 1], lang) {
                 // Deal with overlapping diphthongs: ουι
                 if to - *pos > 1 && chs.get(*pos + 1) == Some(&'ι') {
                     *pos += 1;
                     break;
                 }
-            } else if synizesis && matches!(chs.get(*pos - 1), Some('ι') | Some('υ') | Some('η'))
-            {
-                // Keep advancing
+                // Keep moving
             } else {
                 break;
             }
@@ -286,6 +326,13 @@ fn dump<'a>(chs: &[char], fr: usize, to: &mut usize, result: &mut Vec<&'a str>, 
     result.push(&original[start..end]);
 }
 
+#[derive(Debug)]
+enum State {
+    Start,
+    FoundVowel,
+    FoundConsonant,
+}
+
 #[inline(always)]
 fn dumpmove<'a>(
     chs: &[char],
@@ -300,20 +347,22 @@ fn dumpmove<'a>(
 
 pub fn syllabify_gr_ref(s: &str) -> Vec<&str> {
     let mut result = Vec::new();
-    let mut state = 0;
+    let mut state = State::Start;
     let chs: Vec<_> = s.chars().collect();
     let mut to = chs.len();
 
     for (fr, &ch) in chs.iter().enumerate().rev() {
         match state {
-            0 if is_vowel_gr(ch) => state = 1,
-            1 => {
+            State::Start if is_vowel_gr(ch) => state = State::FoundVowel,
+            State::FoundVowel => {
                 if is_vowel_gr(ch) || ch == Diacritic::ROUGH {
                     let prev = chs[fr + 1];
 
                     if prev == Diacritic::ACUTE || prev == Diacritic::ROUGH {
                         // Do nothing
-                    } else if is_diphthong_gr(&chs[fr..fr + 2]) {
+                    } else if !is_candidate_diphthong(&chs[fr..fr + 2])
+                        && is_diphthong_gr(&chs[fr..fr + 2])
+                    {
                         // Two consecutive overlapping diphthongs?
                         if chs.get(fr + 2) == Some(&'ι') {
                             // Dump only the part after the iota
@@ -326,16 +375,16 @@ pub fn syllabify_gr_ref(s: &str) -> Vec<&str> {
                         dumpmove(&chs, fr + 1, &mut to, &mut result, s);
                     }
                 } else {
-                    state = 2;
+                    state = State::FoundConsonant;
                 }
             }
-            2 => {
+            State::FoundConsonant => {
                 if is_vowel_gr(ch) {
                     dumpmove(&chs, fr + 1, &mut to, &mut result, s);
-                    state = 1;
+                    state = State::FoundVowel;
                 } else if !is_consonant_cluster_gr(&chs[fr..to]) {
                     dumpmove(&chs, fr + 1, &mut to, &mut result, s);
-                    state = 0;
+                    state = State::Start;
                 }
             }
             _ => {}
@@ -395,17 +444,17 @@ mod tests {
     }
 
     #[test]
-    fn test_synizesis_at_simple() {
+    fn test_merge_at_simple() {
         assert_eq!(
-            syllabify_el_mode("αστειάκια", Synizesis::Indices(&[1])),
+            syllabify_el_mode("αστειάκια", Merge::Indices(&[1])),
             vec!["α", "στει", "ά", "κια"]
         );
     }
 
     #[test]
-    fn test_synizesis_at_multiple() {
+    fn test_merge_at_multiple() {
         assert_eq!(
-            syllabify_el_mode("αστειάκια", Synizesis::Indices(&[1, 2])),
+            syllabify_el_mode("αστειάκια", Merge::Indices(&[1, 2])),
             vec!["α", "στειά", "κια"]
         );
     }

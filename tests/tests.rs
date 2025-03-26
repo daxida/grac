@@ -1,5 +1,5 @@
 use grac::{syllabify_el, syllabify_gr, syllabify_gr_ref};
-use grac::{syllabify_el_mode, Synizesis};
+use grac::{syllabify_el_mode, Merge};
 use quickcheck::quickcheck;
 
 /// More informative than a simple `assert_eq!` macro.
@@ -167,13 +167,79 @@ mktest_el!(
 );
 
 mktest_el_mode!(
-    mode_with_synizesis,
-    [Synizesis::Every, "μάγια", "μά-για"],
-    [Synizesis::Never, "μάγια", "μά-γι-α"],
-    [Synizesis::Every, "μυαλό", "μυα-λό"],
-    [Synizesis::Never, "μυαλό", "μυ-α-λό"],
-    [Synizesis::Every, "καληώρα", "κα-ληώ-ρα"],
-    [Synizesis::Never, "καληώρα", "κα-λη-ώ-ρα"],
+    syllabify_el_merge_synizesis,
+    [Merge::Every, "μάγια", "μά-για"],
+    [Merge::Never, "μάγια", "μά-γι-α"],
+    [Merge::Every, "μυαλό", "μυα-λό"],
+    [Merge::Never, "μυαλό", "μυ-α-λό"],
+    [Merge::Every, "καληώρα", "κα-ληώ-ρα"],
+    [Merge::Never, "καληώρα", "κα-λη-ώ-ρα"],
+);
+
+mktest_el_mode!(
+    syllabify_el_merge_ai_oi,
+    // ai
+    [Merge::Every, "αι", "αι"],
+    [Merge::Never, "αι", "αι"],
+    [Merge::Every, "άι", "άι"],
+    [Merge::Never, "άι", "ά-ι"],
+    [Merge::Every, "αϊ", "αϊ"],
+    [Merge::Never, "αϊ", "α-ϊ"],
+    [Merge::Every, "γαϊ", "γαϊ"],
+    [Merge::Never, "γαϊ", "γα-ϊ"],
+    [Merge::Every, "φαΐ", "φαΐ"],
+    [Merge::Never, "φαΐ", "φα-ΐ"],
+    // oi
+    [Merge::Every, "οι", "οι"],
+    [Merge::Never, "οι", "οι"],
+    [Merge::Every, "όι", "όι"],
+    [Merge::Never, "όι", "ό-ι"],
+    [Merge::Every, "οϊ", "οϊ"],
+    [Merge::Never, "οϊ", "ο-ϊ"],
+    [Merge::Every, "ροΐ", "ροΐ"],
+    [Merge::Never, "ροΐ", "ρο-ΐ"],
+    // But ei does not follow the same rules!
+    [Merge::Every, "έι", "έι"],
+    [Merge::Never, "έι", "έι"],
+);
+
+// While not perfect, we adopt the better convention of never merging,
+// that is coherent with our synizesis approach, and seems to hold true for
+// αη/οη occurrences.
+//
+// From scrapping: www.greek-language.gr
+//
+// Merged words summary for query = '*αη*':
+// * Merged words (20)
+// * Not merged words (17)
+// Merged words summary for query = '*οη*':
+// * Merged words (0)
+// * Not merged words (127)
+//
+// Some exceptions (for example αηδόνι) have been added in build.rs
+mktest_el!(
+    syllabify_el_merge_ai_oi_convention,
+    // ai
+    // 1. αη άη
+    ["αηδόνι", "αη-δό-νι"],
+    ["καημένος", "καη-μέ-νος"],
+    ["νταηλίκι", "ντα-η-λί-κι"],
+    ["άηχος", "ά-η-χος"],
+    // 2. άι αϊ
+    ["γάιδαρος", "γάι-δα-ρος"],
+    ["νεράιδα", "νε-ράι-δα"],
+    ["παϊδάκι", "πα-ϊ-δά-κι"],
+    ["μαϊμού", "μαϊ-μού"],
+    // oi
+    // 1. οη όη
+    ["αλόη", "α-λό-η"],
+    ["χλόη", "χλό-η"],
+    ["αγνόηση", "α-γνό-η-ση"],
+    // 2. όι οϊ
+    ["σόι", "σό-ι"],
+    ["ρόιδι", "ρόι-δι"],
+    ["ρολόι", "ρο-λό-ι"],
+    ["μοιρολόι", "μοι-ρο-λό-ι"],
 );
 
 // Synizesis
@@ -485,5 +551,13 @@ quickcheck! {
         let result_1 = syllabify_gr_ref(&word.0);
         let result_2 = syllabify_gr(&word.0);
         result_1 == result_2
+    }
+}
+
+#[test]
+fn test_equality() {
+    let words = ["άην", "άη", "αη", "άι", "αϊ", "αΐ"];
+    for word in words {
+        assert_eq!(syllabify_gr(word), syllabify_gr_ref(word));
     }
 }

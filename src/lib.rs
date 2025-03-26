@@ -32,7 +32,7 @@ pub use syllabify::is_vowel_el;
 pub use syllabify::syllabify_el;
 pub use syllabify::syllabify_el_mode;
 pub use syllabify::syllabify_gr;
-pub use syllabify::Synizesis;
+pub use syllabify::Merge;
 
 // For testing
 pub use syllabify::syllabify_gr_ref;

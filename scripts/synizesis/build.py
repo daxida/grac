@@ -203,8 +203,41 @@ MULTIPLE_PRONUNCIATION = [
     "ουράνια",  # takes syn if from (noun) ουράνια, not if from ουράνιος
 ]
 
-
-MERGING_PAIRS = []
+# Not due to synizesis, but may include synizesis at some location.
+#
+# They are few exceptions and therefore it makes sense to just slam them
+# into the synizesis.rs map, even if it is properly not that phenomenon.
+#
+# Does not include diminutive endings (-άκια etc.)
+MERGE_AT = [
+    # ai
+    [add_endings(["αηδόν"], "ι ια"), [1, 3]],
+    [add_endings(["αηδον"], "ιού ιών"), [1, 3]],
+    [add_endings(["αηδονίσι"], ios_adj_endings), [1, 4]],
+    [add_endings(["καημέν"], ios_adj_endings), [3]],
+    [add_endings(["μαϊμ"], "ού ούς"), [2]],
+    [add_endings(["μαϊμ"], "ούδες ούδων"), [3]],
+    [add_endings(["μαϊμουδίσι"], ios_adj_endings), [1, 4]],
+    [add_endings(["μαϊστράλ"], "ι ια"), [1, 3]],
+    [add_endings(["νεράιδ"], "α ας ες ων"), [2]],
+    [add_endings(["γάιδαρ"], "ος ου ο ε οι ων ους"), [3]],
+    [add_endings(["γαϊδούρ"], "ι ια"), [1, 3]],
+    [add_endings(["γαϊδουρ"], "ιού ιών"), [1, 3]],
+    [add_endings(["γαϊδουρίσι"], ios_adj_endings), [1, 4]],
+    [add_endings(["γαϊτάν"], "ι ια"), [1, 3]],
+    [add_endings(["γαϊταν"], "ιού ιών"), [1, 3]],
+    [add_endings(["χαϊβάν"], "ι ια"), [1, 3]],
+    [add_endings(["χαϊβαν"], "ιού ιών"), [1, 3]],
+    [add_endings(["χάιδ"], "ι ια"), [1, 2]],
+    [add_endings(["χαϊδ"], "ιού ιών"), [1, 2]],
+    # oi
+    [add_endings(["βόιδ"], "ι ια"), [1, 2]],
+    [add_endings(["βοϊδ"], "ιού ιών"), [1, 2]],
+    [add_endings(["ρόιδ"], "ι ια"), [1, 2]],
+    [add_endings(["ροϊδ"], "ιού ιών"), [1, 2]],
+    [add_endings(["κορόιδ"], "ο ου α ων"), [2]],
+    [["κοροϊδάκια"], [1, 3]],
+]
 
 
 def generate_lookup_synizesis(f: TextIO) -> None:
@@ -230,13 +263,15 @@ def generate_lookup_synizesis(f: TextIO) -> None:
         syllables_cap = str(_syls).replace("'", '"')
         mapping[word.capitalize()] = syllables_cap
 
-    for word, _syllables in MERGING_PAIRS:
-        _syls = _syllables.split("-")
-        syllables = str(_syls).replace("'", '"')
-        mapping[word] = syllables
+    for words, accent_at in MERGE_AT:
+        for word in words:
+            _syls = syllabify_el_mode_at(word, accent_at)
+            syllables = str(_syls).replace("'", '"')
+            mapping[word] = syllables
 
-        syllables_cap = str([_syls[0].capitalize()] + _syls[1:]).replace("'", '"')
-        mapping[word.capitalize()] = syllables_cap
+            _syls = [_syls[0].capitalize()] + _syls[1:]
+            syllables_cap = str(_syls).replace("'", '"')
+            mapping[word.capitalize()] = syllables_cap
 
     for fr, to in sorted(
         mapping.items(), key=lambda pair: remove_all_diacritics(pair[0])
@@ -284,8 +319,9 @@ def write_registry(path: Path) -> None:
         if word in MULTIPLE_PRONUNCIATION:
             continue
         all_words.add(word)
-    for word, _ in MERGING_PAIRS:
-        all_words.add(word)
+    for words, _ in MERGE_AT:
+        for word in words:
+            all_words.add(word)
 
     all_words_sorted = sorted(all_words, key=remove_all_diacritics)
 
