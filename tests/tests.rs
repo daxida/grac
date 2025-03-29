@@ -184,7 +184,7 @@ mktest_el_mode!(
 );
 
 mktest_el_mode!(
-    syllabify_el_merge_ai_oi,
+    syllabify_el_merge,
     // ai
     [Merge::Every, "αι", "αι"],
     [Merge::Never, "αι", "αι"],
@@ -209,6 +209,18 @@ mktest_el_mode!(
     [Merge::Never, "όϊ", "ό-ϊ"],
     [Merge::Every, "ροΐ", "ροΐ"],
     [Merge::Never, "ροΐ", "ρο-ΐ"],
+    // ui (rare)
+    [Merge::Every, "υι", "υι"],
+    [Merge::Never, "υι", "υι"],
+    [Merge::Every, "ύι", "ύι"],
+    [Merge::Never, "ύι", "ύ-ι"],
+    [Merge::Every, "υϊ", "υϊ"],
+    [Merge::Never, "υϊ", "υ-ϊ"],
+    [Merge::Every, "ύϊ", "ύϊ"],
+    [Merge::Never, "ύϊ", "ύ-ϊ"],
+    // ui should support also splitting of υί
+    [Merge::Every, "υί", "υί"],
+    [Merge::Never, "υί", "υ-ί"],
     // But ei does not follow the same rules!
     [Merge::Every, "έι", "έι"],
     [Merge::Never, "έι", "έι"],
@@ -229,7 +241,7 @@ mktest_el_mode!(
 //
 // Some exceptions (for example αηδόνι) have been added in build.rs
 mktest_el!(
-    syllabify_el_merge_ai_oi_convention,
+    syllabify_el_merge_convention,
     // ai
     // 1. αη άη
     ["αηδόνι", "αη-δό-νι"],
@@ -251,6 +263,11 @@ mktest_el!(
     ["ρόιδι", "ρόι-δι"],
     ["ρολόι", "ρο-λό-ι"],
     ["μοιρολόι", "μοι-ρο-λό-ι"],
+    // ui
+    // -- as far as I know, they are always unmerged
+    ["δρύινος", "δρύ-ι-νος"],
+    ["βουίζω", "βου-ί-ζω"],
+    ["βουΐζω", "βου-ΐ-ζω"],
 );
 
 // Synizesis

@@ -243,20 +243,33 @@ fn move_coda(chs: &[char], pos: &mut usize, lang: &Lang) {
     }
 }
 
-const CANDIDATE_MERGING_DIPHTHONGS_EL: [(char, char); 12] = [
+// For completion it contains:
+// * archaic versions: άϊ, όϊ etc.
+// * υι, even though this should be (probably!) always unmerged
+const CANDIDATE_MERGING_DIPHTHONGS_EL: [(char, char); 19] = [
+    // ai
     ('α', 'η'),
     ('ά', 'η'),
     ('α', 'ϊ'),
     ('α', 'ΐ'),
     ('ά', 'ι'),
+    ('ά', 'ϊ'),
+    // oi
     ('ο', 'η'),
     ('ό', 'η'),
     ('ο', 'ϊ'),
     ('ο', 'ΐ'),
     ('ό', 'ι'),
-    // And the two archaic ones for completion
-    ('ά', 'ϊ'),
     ('ό', 'ϊ'),
+    // ui (covers υι and ουι)
+    ('υ', 'η'),
+    ('ύ', 'η'),
+    ('υ', 'ϊ'),
+    ('υ', 'ΐ'),
+    ('ύ', 'ι'),
+    ('ύ', 'ϊ'),
+    // Needs the extra υί to deal with ουί
+    ('υ', 'ί'),
 ];
 
 fn is_candidate_diphthong(chs: &[char]) -> bool {
