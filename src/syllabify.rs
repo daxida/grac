@@ -243,7 +243,7 @@ fn move_coda(chs: &[char], pos: &mut usize, lang: &Lang) {
     }
 }
 
-const CANDIDATE_MERGING_DIPHTHONGS_EL: [(char, char); 10] = [
+const CANDIDATE_MERGING_DIPHTHONGS_EL: [(char, char); 12] = [
     ('α', 'η'),
     ('ά', 'η'),
     ('α', 'ϊ'),
@@ -254,6 +254,9 @@ const CANDIDATE_MERGING_DIPHTHONGS_EL: [(char, char); 10] = [
     ('ο', 'ϊ'),
     ('ο', 'ΐ'),
     ('ό', 'ι'),
+    // And the two archaic ones for completion
+    ('ά', 'ϊ'),
+    ('ό', 'ϊ'),
 ];
 
 fn is_candidate_diphthong(chs: &[char]) -> bool {

@@ -192,6 +192,8 @@ mktest_el_mode!(
     [Merge::Never, "άι", "ά-ι"],
     [Merge::Every, "αϊ", "αϊ"],
     [Merge::Never, "αϊ", "α-ϊ"],
+    [Merge::Every, "άϊ", "άϊ"],
+    [Merge::Never, "άϊ", "ά-ϊ"],
     [Merge::Every, "γαϊ", "γαϊ"],
     [Merge::Never, "γαϊ", "γα-ϊ"],
     [Merge::Every, "φαΐ", "φαΐ"],
@@ -203,6 +205,8 @@ mktest_el_mode!(
     [Merge::Never, "όι", "ό-ι"],
     [Merge::Every, "οϊ", "οϊ"],
     [Merge::Never, "οϊ", "ο-ϊ"],
+    [Merge::Every, "όϊ", "όϊ"],
+    [Merge::Never, "όϊ", "ό-ϊ"],
     [Merge::Every, "ροΐ", "ροΐ"],
     [Merge::Never, "ροΐ", "ρο-ΐ"],
     // But ei does not follow the same rules!
