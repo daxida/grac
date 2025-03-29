@@ -6,8 +6,8 @@ t:
   python3 cmp.py
   python3 mono.py
 
-lint:
-  uvx ruff check --output-format=concise
+lint *args:
+  uvx ruff check {{args}} --output-format=concise
 
 clippy *args:
   cargo clippy {{args}} --all-targets --all-features -- -W clippy::nursery -W clippy::pedantic \
