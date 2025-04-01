@@ -98,13 +98,22 @@ IOS_ADJ_LEMMA = [
     "καινούρι",
     "καινούργι",
     "νι",
-    "ποι",
-    "τέτοι",
 ]
-ios_adj_endings = "ος ου ο ον ε οι ων ους α ας ες"
+ios_adj_endings = "ος ου ο ε οι ων ους α ας ες"
 IOS_ADJ = add_endings(IOS_ADJ_LEMMA, ios_adj_endings)
 other_ios_adj = load_from_path(ppath / "wiki_adj_ιος.txt")
 IOS_ADJ.extend(add_endings([word[:-2] for word in other_ios_adj], ios_adj_endings))
+
+# Pronoun ending in ιος / ια / ιο.
+# Ex. ποιος
+#
+# Same as adjectives in ιος / ια / ιο but includes ον αν endings
+IOS_PRON_LEMMA = [
+    "ποι",
+    "τέτοι",
+]
+ios_pron_endings = "ος ου ο ε οι ων ους α ας ες ον αν"
+IOS_PRON = add_endings(IOS_PRON_LEMMA, ios_pron_endings)
 
 # Noun (neuter) ending in ιο (singular in ιο, plural in ια).
 # Ex. μπάνιο
@@ -178,6 +187,7 @@ SYNIZESIS = [
     *VERBS,
     *IA_NOUN,
     *IOS_ADJ,
+    *IOS_PRON,
     *IO_NOUN,
     *IOS_NOUN,
     *IAS_NOUN,
