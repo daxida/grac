@@ -62,17 +62,17 @@ macro_rules! mktest_el {
 }
 
 macro_rules! mktest_el_mode {
-    ($group_name:ident, $([$synizesis:expr, $input:expr, $expected:expr]),* $(,)?) => {
+    ($group_name:ident, $([$merge:expr, $input:expr, $expected:expr]),* $(,)?) => {
         #[test]
         fn $group_name() {
             let test_cases = vec![
                 $(
-                    ($synizesis, $input, $expected),
+                    ($merge, $input, $expected),
                 )*
             ];
 
-            for (synizesis, input, expected) in test_cases {
-                let result = syllabify_el_mode(input, synizesis);
+            for (merge, input, expected) in test_cases {
+                let result = syllabify_el_mode(input, merge);
                 let tc_expected = expected.split('-').collect::<Vec<_>>();
                 assert_eq_dbg!(result, tc_expected, input);
             }
@@ -251,6 +251,7 @@ mktest_el!(
     // 2. άι αϊ
     ["γάιδαρος", "γάι-δα-ρος"],
     ["νεράιδα", "νε-ράι-δα"],
+    ["πλάι", "πλά-ι"],
     ["παϊδάκι", "πα-ϊ-δά-κι"],
     ["μαϊμού", "μαϊ-μού"],
     // oi
@@ -326,6 +327,15 @@ mktest_el!(
     ["ζαχαρένια", "ζα-χα-ρέ-νια"],
     ["γυναικάκιας", "γυ-ναι-κά-κιας"],
     ["γύμνια", "γύ-μνια"],
+    // The η versions are outdated:
+    // cf. https://el.wiktionary.org/wiki/πηρούνι
+    ["πιρούνια", "πι-ρού-νια"],
+    ["σπιρούνια", "σπι-ρού-νια"],
+    ["πηρούνια", "πη-ρού-νια"],
+    ["σπηρούνια", "σπη-ρού-νια"],
+    // The υ version is outdated
+    ["σιντριβάνια", "σι-ντρι-βά-νια"],
+    ["συντριβάνια", "συ-ντρι-βά-νια"],
     // All diminutives in κια take synizesis but it is sometimes ambiguous:
     // φυλάκια takes synizesis if from φυλάκι, but not if from φυλάκιο
     ["αστειάκια", "α-στει-ά-κια"],

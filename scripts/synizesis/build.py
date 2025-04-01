@@ -170,6 +170,10 @@ SYNIZESIS = [
     "γένεια",  # γένια
     "παλλικάρια",  # παλικάρια
     "μεντέρια",  # μεντέρια
+    # Obsolete or wrong (yet used) spellings
+    "πηρούνια",
+    "σπηρούνια",
+    "συντριβάνια",
     *MONOSYLLABLES,
     *VERBS,
     *IA_NOUN,
