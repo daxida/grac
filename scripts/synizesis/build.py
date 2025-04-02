@@ -19,6 +19,12 @@ def load_from_path(path: Path) -> list[str]:
         return sorted(set(f.read().splitlines()))
 
 
+def sort_key(word: str) -> tuple[str, str]:
+    # The only reason to add the word as a second element is
+    # to avoid παιδάκια / παϊδάκια from poluting the git diff
+    return (remove_all_diacritics(word), word)
+
+
 MONOSYLLABLES = [
     "δια",
     "πια",
@@ -171,6 +177,10 @@ SYNIZESIS = [
     "ψώνια",
     "μάγια",
     "σκέλια",
+    # rare - cf. https://www.greek-language.gr
+    "βρετίκια",
+    "βρεθίκια",
+    "αναδεξίμια",
     # synizesis at upsilon
     "δίχτυα",
     "στάχυα",
@@ -287,9 +297,7 @@ def generate_lookup_synizesis(f: TextIO) -> None:
             syllables_cap = str(_syls).replace("'", '"')
             mapping[word.capitalize()] = syllables_cap
 
-    for fr, to in sorted(
-        mapping.items(), key=lambda pair: remove_all_diacritics(pair[0])
-    ):
+    for fr, to in sorted(mapping.items(), key=lambda pair: sort_key(pair[0])):
         f.write(f'    "{fr}" => &{to},\n')
 
     f.write("};\n\n")
@@ -337,7 +345,7 @@ def write_registry(path: Path) -> None:
         for word in words:
             all_words.add(word)
 
-    all_words_sorted = sorted(all_words, key=remove_all_diacritics)
+    all_words_sorted = sorted(all_words, key=sort_key)
 
     with path.open("w") as f:
         for word in all_words_sorted:
