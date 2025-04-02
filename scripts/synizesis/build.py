@@ -141,6 +141,7 @@ IO_NOUN.extend(add_endings([word[:-1] for word in other_io_noun], io_noun_ending
 # Ex. γιος
 IOS_NOUN_LEMMA = [
     "γι",
+    "γυι",  # old writing of γιος
     "ίσκι",
     "ήσκι",
     "ήλι",
@@ -169,6 +170,7 @@ I_IA_NOUN = []
 I_IA_NOUN.extend(load_from_path(ppath / "neuters.txt"))
 
 SYNIZESIS = [
+    "βιο",
     "βιος",
     "βερεσέδια",
     "βράδια",
