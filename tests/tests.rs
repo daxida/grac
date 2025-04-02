@@ -373,6 +373,7 @@ mktest_el!(
     ["στάχυα", "στά-χυα"],
 );
 
+// pio
 mktest_el!(
     syllabify_verb,
     ["πιω", "πιω"],
@@ -380,6 +381,9 @@ mktest_el!(
     ["πιεις", "πιεις"],
     ["ήπιαν", "ή-πιαν"],
 );
+
+// katharevousa endings, cf. MONOSYL_REMOVE_ACCENT in monotonic.rs
+mktest_el!(syllabify_verb_old, ["πιη", "πιη"], ["πιης", "πιης"],);
 
 // Depends on the speaker. This can not be a general rule.
 // https://teachergeorgiasclass.weebly.com/uploads/4/5/0/7/45072177/Κάτω_απ_το_χιόνι_2.pdf

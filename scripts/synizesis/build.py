@@ -46,6 +46,8 @@ MONOSYLLABLES = [
 # Ex. πιω (from πίνω)
 VERBS = [
     *add_endings(["πι"], "ω εις ει ουν ες"),
+    # katharevousa endings
+    *add_endings(["πι"], "η ης"),
     *add_endings(["ήπι"], "α ες ε αν"),
 ]
 
