@@ -40,6 +40,9 @@ MONOSYLLABLES = [
     "για",
     "γιεν",
     "τζια",
+    "θιος",
+    "βιο",
+    "βιος",
 ]
 
 # Verb with synizesis at the last syllable.
@@ -170,8 +173,6 @@ I_IA_NOUN = []
 I_IA_NOUN.extend(load_from_path(ppath / "neuters.txt"))
 
 SYNIZESIS = [
-    "βιο",
-    "βιος",
     "βερεσέδια",
     "βράδια",
     "διακόσια",  # Should require a LOT of variations to be fully covered...
