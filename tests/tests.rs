@@ -275,6 +275,7 @@ mktest_el!(
 mktest_el!(
     syllabify_el_synizesis_monosyllable,
     ["δια", "δια"],
+    ["διω", "διω"],
     ["μια", "μια"],
     ["μιαν", "μιαν"],
     ["για", "για"],

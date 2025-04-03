@@ -52,6 +52,8 @@ VERBS = [
     # katharevousa endings
     *add_endings(["πι"], "η ης"),
     *add_endings(["ήπι"], "α ες ε αν"),
+    # https://el.wiktionary.org/wiki/διω
+    *add_endings(["δι"], "ω εις ει ες"),
 ]
 
 # Noun (feminine) ending in ια (singular in ια, genitive in ιας).
