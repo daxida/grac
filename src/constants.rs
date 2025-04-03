@@ -3,15 +3,21 @@
 /// Note that this does not include the dot or ellipsis, because, unlike
 /// those, apostrophes can only omit one letter.
 #[rustfmt::skip]
-pub const APOSTROPHES: &[char] = &[
+pub const APOSTROPHES: [char; 8] = [
     // Three main characters described by the Unicode consortium
     // cf. https://en.wikipedia.org/wiki/Apostrophe
     // * U+0027 ' APOSTROPHE
     // * U+2019 ’ RIGHT SINGLE QUOTATION MARK
     // * U+02BC ʼ MODIFIER LETTER APOSTROPHE
     '\u{0027}', '\u{2019}', '\u{02BC}',
+
     // (Wrong) variants
-    '᾽', '᾿', '‘'
+    // * U+1FBD ᾽ GREEK KORONIS
+    // * U+1FBF ᾿ GREEK PSILI
+    // * U+2018 ‘ LEFT SINGLE QUOTATION MARK
+    // * U+00B4 ´ ACUTE ACCENT
+    // * U+0384 ΄ GREEK TONOS
+    '\u{1FBD}', '\u{1FBF}', '\u{2018}', '\u{00B4}', '\u{0384}',
 ];
 
 /// Correctly accented monosyllables. Does not contain pronouns.
