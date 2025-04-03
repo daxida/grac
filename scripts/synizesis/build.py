@@ -25,14 +25,15 @@ def sort_key(word: str) -> tuple[str, str]:
     return (remove_all_diacritics(word), word)
 
 
+# Has a lot of variations
+PIO = [*add_endings(["π"], "ιο λιο ειο λειο"), "μπλιο"]
+PIA = [word.replace("ο", "α") for word in PIO]
+
+
 MONOSYLLABLES = [
     "δια",
-    "πια",
-    "πλια",
-    "μπλια",
-    "πιο",
-    "πλιο",
-    "μπλιο",
+    *PIO,
+    *PIA,
     "μια",
     "μιαν",
     "μιας",
@@ -43,6 +44,7 @@ MONOSYLLABLES = [
     "θιος",
     "βιο",
     "βιος",
+    "σιορ",
 ]
 
 # Verb with synizesis at the last syllable.

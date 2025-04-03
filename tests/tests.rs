@@ -1,5 +1,5 @@
+use grac::{Merge, syllabify_el_mode};
 use grac::{syllabify_el, syllabify_gr, syllabify_gr_ref};
-use grac::{syllabify_el_mode, Merge};
 use quickcheck::quickcheck;
 
 /// More informative than a simple `assert_eq!` macro.
@@ -281,6 +281,9 @@ mktest_el!(
     ["για", "για"],
     ["πια", "πια"],
     ["πλια", "πλια"],
+    // Some rare variations
+    ["πεια", "πεια"],
+    ["πλεια", "πλεια"],
     ["δυο", "δυο"],
     ["Δυο", "Δυο"],
     ["δύο", "δύ-ο"],
@@ -294,6 +297,7 @@ mktest_el!(
     ["βιος", "βιος"],
     ["χλιος", "χλιος"],
     ["θιος", "θιος"],
+    ["σιορ", "σιορ"],
 );
 
 mktest_el!(
