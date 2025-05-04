@@ -3,6 +3,10 @@
 //! Unicode Greek Ranges:
 //! - [Greek and Coptic](https://www.unicode.org/charts/PDF/U0370.pdf)
 //! - [Greek Extended](https://www.unicode.org/charts/PDF/U1F00.pdf)
+
+// Match statements usually try to benefit from some fast path.
+#![allow(clippy::match_same_arms)]
+
 use unicode_normalization::char::decompose_canonical;
 
 /// Check if a character is in the _Greek and Coptic_ range.
@@ -95,10 +99,11 @@ pub fn is_greek_word(s: &str) -> bool {
 /// assert_eq!(ends_with_diphthong("γάιδαρος"), false);
 /// ```
 pub fn ends_with_diphthong(s: &str) -> bool {
-    let vowels = extract_vowels(s);
     const DIPHTHONGS: [&str; 12] = [
         "όι", "Όι", "έι", "Έι", "άι", "Άι", "όυ", "Όυ", "έυ", "Έυ", "άυ", "Άυ",
     ];
+
+    let vowels = extract_vowels(s);
     DIPHTHONGS.iter().any(|&e| vowels.ends_with(e))
 }
 

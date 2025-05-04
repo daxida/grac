@@ -109,6 +109,7 @@ const fn copy_bytes(x: &[u8], mem: &mut [u8], k: &mut usize) {
     }
 }
 
+#[allow(clippy::many_single_char_names)]
 const fn copy_bytes_capitalized(x: &[u8], mem: &mut [u8], k: &mut usize) {
     assert!(x.len() >= 2); // Only support Greek
     let mut i = 0;
@@ -172,6 +173,7 @@ pub const fn __conc_populate_mem(
     }
 }
 
+#[allow(clippy::many_single_char_names)]
 pub const fn __cartesian_product_populate_mem(
     x: &[&str],
     y: &[&str],
@@ -263,8 +265,7 @@ const fn to_uppercase_gr_bytes(a: u8, b: u8) -> (u8, u8) {
         (207, 140) => (206, 140),
         (207, 128) => (206, 160),
         (207, 129) => (206, 161),
-        (207, 131) => (206, 163),
-        (207, 130) => (206, 163),
+        (207, 131 | 130) => (206, 163), // σς > Σ
         (207, 132) => (206, 164),
         (207, 133) => (206, 165),
         (207, 141) => (206, 142),

@@ -1,4 +1,4 @@
-use crate::accents::{has_diaeresis, Diacritic};
+use crate::accents::{Diacritic, has_diaeresis};
 use crate::chars::base_lower;
 use crate::synizesis::lookup_synizesis;
 

@@ -47,15 +47,19 @@ fn not_punct(ch: char) -> bool {
     is_greek_letter(ch) || (ch != '\u{02BC}' && ch.is_alphabetic())
 }
 
-/// Split string into (left_punct, core, right_punct)
+/// Split string into (left punctuation, core, right punctuation).
 ///
 /// Leaves punctuation inside the core untouched.
+#[allow(clippy::missing_panics_doc)]
+#[allow(clippy::option_if_let_else)]
 pub fn split_punctuation(s: &str) -> (&str, &str, &str) {
     let start = s
         .char_indices()
         .find_map(|(i, ch)| not_punct(ch).then_some(i));
 
     if let Some(start) = start {
+        // SAFETY: since we found some index "start" from the right, there
+        // must be some index (potentially start iself) from the left.
         let end = s
             .char_indices()
             .rev()
@@ -63,8 +67,7 @@ pub fn split_punctuation(s: &str) -> (&str, &str, &str) {
             .unwrap();
         (&s[..start], &s[start..end], &s[end..])
     } else {
-        // If there is not a single alphabetic char
-        // treat the word as left punctuation.
+        // If there are not alphabetic chars, treat the word as left punctuation.
         (s, "", "")
     }
 }
@@ -101,9 +104,9 @@ fn dbg_bytes(s: &str) {
 
 /// Remove ancient diacritics and convert grave and circumflex to acute
 /// in a single pass.
-///
-/// TODO:
-/// filter_map was performing a bit worse but remains to be tested.
+//
+// TODO:
+// filter_map was performing a bit worse but remains to be tested.
 fn convert_to_acute(s: &str) -> String {
     s.nfd()
         .filter(|ch| {
@@ -170,10 +173,11 @@ fn to_monotonic_word(s: &str) -> String {
 
     let mut out: String = convert_to_acute(core);
 
-    let ends_with_abbreviation = match right_punct.chars().next() {
-        Some(fst_rpunct) => APOSTROPHES.contains(&fst_rpunct),
-        None => false,
-    };
+    let ends_with_abbreviation = right_punct
+        .chars()
+        .next()
+        .is_some_and(|fst_rpunct| APOSTROPHES.contains(&fst_rpunct));
+
     log("Ends in abbreviation?", ends_with_abbreviation);
 
     let syllables = syllabify_el(&out);
