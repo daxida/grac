@@ -7,13 +7,8 @@ import time
 from pathlib import Path
 from typing import Callable
 
-from grac import syllabify_gr as syl3
-from grac import syllabify_gr_ref as syl2
-from greek_accentuation.syllabify import syllabify as syl1
-
-# Modern syllabification
 from modern_greek_accentuation.syllabify import modern_greek_syllabify as msyl1
-from grac import syllabify_el as msyl2
+from grac import syllabify as msyl2
 
 # IPATH = Path("tests/fixtures/dump.txt")
 IPATH = Path("scripts/synizesis/data/el_GR.dic")
@@ -58,28 +53,12 @@ def main() -> None:
 
     text = IPATH.read_text()
 
-    mono_diff = 0
+    n_diffs = 0
 
     for times in (1,):
         cur_text = text * times
         words = split_words(cur_text)
         print(f"Testing with {len(words)} words")
-
-        # Ancient Greek
-
-        # ref, el1 = timeit(syl1, words, "Py")
-        # res1, _ = timeit(syl2, words, "1", el1)
-        # res2, _ = timeit(syl3, words, "2", el1)
-        #
-        # for a, b, c, w in zip(ref, res1, res2, words):
-        #     if a != b and b:
-        #         print(f"{a} {b} '{w}' [comparing ref, res1]")
-        #         assert False
-        #     if a != c and c:
-        #         print(f"{a} {c} '{w}' [comparing ref res2]")
-        #         assert False
-
-        # Modern greek
 
         mref, mel1 = timeit(msyl1, words, "Py")
         mres1, _ = timeit(msyl2, words, "1", mel1)
@@ -88,10 +67,10 @@ def main() -> None:
             if a != b and b:
                 print(f"{a} {b} '{w}'")
                 print_rust_test(w, a)
-                mono_diff += 1
+                n_diffs += 1
                 # assert False
 
-    print(f"Mono diff: {mono_diff}")
+    print(f"number of diffs: {n_diffs}")
     elapsed = time.time() - start_time
     print(f"main took {elapsed:.4f}s")
 

@@ -5,11 +5,8 @@ test:
   cargo test
   cargo test --manifest-path py-grac/Cargo.toml
 
-# delete me?
-t1:
-  python3 syl.py
-  python3 cmp.py
-  python3 mono.py
+syl word:
+  python3 scripts/testing/syl.py {{word}}
 
 lint *args:
   uvx ruff check {{args}} --output-format=concise
