@@ -6,7 +6,7 @@ use crate::accents::{has_acute, remove_acute, remove_diacritic_at};
 use crate::chars::{ends_with_diphthong, is_greek_word};
 use crate::constants::{APOSTROPHES, MONOSYLLABLE_ACCENTED};
 use crate::is_greek_letter;
-use crate::syllabify::syllabify_el;
+use crate::syllabify::syllabify;
 
 // Intended to be run over the entire text, and not individual words.
 // When ran over words, the cost of building the automata is too big,
@@ -180,7 +180,7 @@ fn to_monotonic_word(s: &str) -> String {
 
     log("Ends in abbreviation?", ends_with_abbreviation);
 
-    let syllables = syllabify_el(&out);
+    let syllables = syllabify(&out);
     log("Syllabified word", &syllables);
 
     out = match syllables.as_slice() {

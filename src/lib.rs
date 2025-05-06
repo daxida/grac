@@ -29,12 +29,6 @@ pub use monotonic::split_punctuation;
 pub use monotonic::to_monotonic;
 
 pub use syllabify::Merge;
-pub use syllabify::is_vowel_el;
-pub use syllabify::syllabify_el;
-pub use syllabify::syllabify_el_mode;
-pub use syllabify::syllabify_gr;
-
-// For testing
 pub use syllabify::Syllables;
-pub use syllabify::syllabify_el_ref;
-pub use syllabify::syllabify_gr_ref;
+pub use syllabify::syllabify;
+pub use syllabify::syllabify_with_merge;

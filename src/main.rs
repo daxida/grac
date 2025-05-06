@@ -1,6 +1,6 @@
 // For profiling and testing.
 
-use grac::syllabify_el_mode;
+use grac::syllabify_with_merge;
 use std::fs::File;
 use std::io::{self, Read};
 
@@ -24,7 +24,7 @@ fn run(text: &str) {
         let _syls: Vec<_> = words
             .iter()
             .map(|cword| {
-                let syllables = syllabify_el_mode(cword, grac::Merge::Never);
+                let syllables = syllabify_with_merge(cword, grac::Merge::Never);
                 syllables
             })
             .collect();

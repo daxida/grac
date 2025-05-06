@@ -1,4 +1,4 @@
-use crate::syllabify::{is_vowel_el, syllabify_el};
+use crate::syllabify::{is_vowel, syllabify};
 use unicode_normalization::UnicodeNormalization;
 
 pub struct Diacritic;
@@ -103,7 +103,7 @@ where
 /// assert_eq!(diacritic_pos("τίποτα", Diacritic::GRAVE), []);
 /// ```
 pub fn diacritic_pos(s: &str, diacritic: char) -> Vec<usize> {
-    syllabify_el(s)
+    syllabify(s)
         .iter()
         .rev()
         .enumerate()
@@ -172,7 +172,7 @@ pub fn remove_acute(s: &str) -> String {
 /// assert_eq!(remove_diacritic_at("άνθρωπέ", 3, Diacritic::ACUTE), "ανθρωπέ");
 /// ```
 pub fn remove_diacritic_at(s: &str, pos: usize, diacritic: char) -> String {
-    let syllables = syllabify_el(s);
+    let syllables = syllabify(s);
 
     if pos == 0 || pos > syllables.len() {
         s.to_string()
@@ -217,7 +217,7 @@ pub fn add_acute_at(s: &str, pos: usize) -> String {
 }
 
 fn add_diacritic_at(s: &str, pos: usize, diacritic: char) -> String {
-    let syllables = syllabify_el(s);
+    let syllables = syllabify(s);
 
     if pos == 0 || pos > syllables.len() {
         s.to_string()
@@ -242,7 +242,7 @@ fn add_diacritic_at(s: &str, pos: usize, diacritic: char) -> String {
 /// This is not ideal and could not yield the expected result.
 fn add_diacritic_at_syllable(syllable: &str, diacritic: char) -> String {
     let mut chars: Vec<_> = syllable.chars().collect();
-    if let Some(pos) = chars.iter().rposition(|ch| is_vowel_el(*ch)) {
+    if let Some(pos) = chars.iter().rposition(|ch| is_vowel(*ch)) {
         chars[pos] = add_diacritic_to_char(chars[pos], diacritic);
     }
     chars.into_iter().collect()

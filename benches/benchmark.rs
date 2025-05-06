@@ -2,7 +2,7 @@
 
 use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use grac::Syllables;
-use grac::{is_greek_word, syllabify_el_mode, syllabify_gr, syllabify_gr_ref, to_monotonic};
+use grac::{is_greek_word, syllabify_with_merge, to_monotonic};
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
@@ -43,8 +43,8 @@ const PATHS: [&str; 4] = [
     "tests/fixtures/dump.txt",
 ];
 
-fn syllabify_el_merge_never(s: &str) -> Syllables {
-    syllabify_el_mode(s, grac::Merge::Never)
+fn syllabify_with_merge_never(s: &str) -> Syllables {
+    syllabify_with_merge(s, grac::Merge::Never)
 }
 
 fn benchmark_syllabify(c: &mut Criterion) {
@@ -55,18 +55,14 @@ fn benchmark_syllabify(c: &mut Criterion) {
 
     let hypher_word = "διαμερίσματα";
     group.bench_function("hypher_test", |b| {
-        b.iter(|| syllabify_el_merge_never(black_box(hypher_word)));
+        b.iter(|| syllabify_with_merge_never(black_box(hypher_word)));
     });
 
     for file_path in PATHS {
         let (content, stem) = read_file(file_path);
         let words: Vec<_> = content.split_whitespace().collect();
 
-        // bench_words!(group, words, stem, syllabify_gr);
-        // bench_words!(group, words, stem, syllabify_gr_ref);
-        // bench_words!(group, words, stem, syllabify_el);
-        // bench_words!(group, words, stem, syllabify_el_merge_every);
-        bench_words!(group, words, stem, syllabify_el_merge_never);
+        bench_words!(group, words, stem, syllabify_with_merge_never);
     }
 }
 

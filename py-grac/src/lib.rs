@@ -2,34 +2,26 @@ use ::grac as _grac;
 use pyo3::prelude::*;
 
 #[pyfunction]
-fn syllabify_el(word: &str) -> PyResult<Vec<&str>> {
-    Ok(_grac::syllabify_el(word))
+fn syllabify(word: &str) -> PyResult<Vec<&str>> {
+    Ok(_grac::syllabify(word).to_vec())
 }
 
 #[pyfunction]
-fn syllabify_el_mode(word: &str, merge: bool) -> PyResult<Vec<&str>> {
-    match merge {
-        true => Ok(_grac::syllabify_el_mode(word, _grac::Merge::Every)),
-        false => Ok(_grac::syllabify_el_mode(word, _grac::Merge::Never)),
-    }
+fn syllabify_with_merge(word: &str, merge: bool) -> PyResult<Vec<&str>> {
+    let merge = if merge {
+        _grac::Merge::Every
+    } else {
+        _grac::Merge::Never
+    };
+    let syllables = _grac::syllabify_with_merge(word, merge);
+    Ok(syllables.to_vec())
 }
 
 #[pyfunction]
-fn syllabify_el_mode_at(word: &str, indices: Vec<usize>) -> PyResult<Vec<&str>> {
-    Ok(_grac::syllabify_el_mode(
-        word,
-        _grac::Merge::Indices(&indices),
-    ))
-}
-
-#[pyfunction]
-fn syllabify_gr(word: &str) -> PyResult<Vec<&str>> {
-    Ok(_grac::syllabify_gr(word))
-}
-
-#[pyfunction]
-fn syllabify_gr_ref(word: &str) -> PyResult<Vec<&str>> {
-    Ok(_grac::syllabify_gr_ref(word))
+fn syllabify_with_merge_at(word: &str, indices: Vec<usize>) -> PyResult<Vec<&str>> {
+    let merge = _grac::Merge::Indices(indices);
+    let syllables = _grac::syllabify_with_merge(word, merge);
+    Ok(syllables.to_vec())
 }
 
 #[pyfunction]
@@ -59,11 +51,9 @@ fn to_monotonic(word: &str) -> PyResult<String> {
 
 #[pymodule]
 fn grac(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(syllabify_el, m)?)?;
-    m.add_function(wrap_pyfunction!(syllabify_el_mode, m)?)?;
-    m.add_function(wrap_pyfunction!(syllabify_el_mode_at, m)?)?;
-    m.add_function(wrap_pyfunction!(syllabify_gr, m)?)?;
-    m.add_function(wrap_pyfunction!(syllabify_gr_ref, m)?)?;
+    m.add_function(wrap_pyfunction!(syllabify, m)?)?;
+    m.add_function(wrap_pyfunction!(syllabify_with_merge, m)?)?;
+    m.add_function(wrap_pyfunction!(syllabify_with_merge_at, m)?)?;
     m.add_function(wrap_pyfunction!(has_diacritic, m)?)?;
     m.add_function(wrap_pyfunction!(remove_all_diacritics, m)?)?;
     m.add_function(wrap_pyfunction!(remove_diacritic_at, m)?)?;
