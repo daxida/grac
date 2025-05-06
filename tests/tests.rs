@@ -1,3 +1,4 @@
+use grac::Syllables;
 use grac::{Merge, syllabify_el_mode};
 use grac::{syllabify_el, syllabify_gr, syllabify_gr_ref};
 use quickcheck::quickcheck;
@@ -54,7 +55,7 @@ macro_rules! mktest_el {
 
             for (input, expected) in test_cases {
                 let result = syllabify_el(input);
-                let tc_expected = expected.split('-').collect::<Vec<_>>();
+                let tc_expected = expected.split('-').collect::<Syllables>();
                 assert_eq_dbg!(result, tc_expected, input);
             }
         }
@@ -73,7 +74,7 @@ macro_rules! mktest_el_mode {
 
             for (merge, input, expected) in test_cases {
                 let result = syllabify_el_mode(input, merge);
-                let tc_expected = expected.split('-').collect::<Vec<_>>();
+                let tc_expected = expected.split('-').collect::<Syllables>();
                 assert_eq_dbg!(result, tc_expected, input);
             }
         }
@@ -602,6 +603,13 @@ quickcheck! {
         let result_1 = syllabify_gr_ref(&word.0);
         let result_2 = syllabify_gr(&word.0);
         result_1 == result_2
+    }
+
+    fn test_syllabify_el_ref(word: GreekWord) -> bool {
+        let _ = grac::syllabify_el_ref(&word.0, Merge::Never);
+        let _ = grac::syllabify_el_ref(&word.0, Merge::Every);
+        let _ = grac::syllabify_el_ref(&word.0, Merge::Indices(&[1]));
+        true
     }
 }
 

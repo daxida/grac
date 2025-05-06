@@ -1,7 +1,8 @@
-use grac::{syllabify_gr, to_monotonic};
+// For profiling and testing.
+
+use grac::syllabify_el_mode;
 use std::fs::File;
 use std::io::{self, Read};
-use std::time::Instant;
 
 fn read_file(file_path: &str) -> io::Result<String> {
     let mut file = File::open(file_path)?;
@@ -18,17 +19,20 @@ fn run(text: &str) {
         words.len()
     );
 
-    let now = Instant::now();
-    let _syls: Vec<Vec<_>> = words.iter().map(|cword| syllabify_gr(cword)).collect();
-    println!("Syllabification took: {:?}", now.elapsed());
-
-    let now = Instant::now();
-    let _mono = to_monotonic(text);
-    println!("To monotonic took:    {:?}", now.elapsed());
+    let times = 100;
+    for _ in 0..times {
+        let _syls: Vec<_> = words
+            .iter()
+            .map(|cword| {
+                let syllables = syllabify_el_mode(cword, grac::Merge::Never);
+                syllables
+            })
+            .collect();
+    }
 }
 
 fn main() {
-    let file_path = "dump.txt";
+    let file_path = "tests/fixtures/dump.txt";
     match read_file(file_path) {
         Ok(content) => run(&content),
         Err(e) => eprintln!("Error reading file {file_path}: {e}"),

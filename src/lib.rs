@@ -35,4 +35,6 @@ pub use syllabify::syllabify_el_mode;
 pub use syllabify::syllabify_gr;
 
 // For testing
+pub use syllabify::Syllables;
+pub use syllabify::syllabify_el_ref;
 pub use syllabify::syllabify_gr_ref;

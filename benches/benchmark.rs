@@ -1,5 +1,8 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use grac::{is_greek_word, syllabify_el, syllabify_gr, syllabify_gr_ref, to_monotonic};
+#![allow(unused_imports)]
+
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
+use grac::Syllables;
+use grac::{is_greek_word, syllabify_el_mode, syllabify_gr, syllabify_gr_ref, to_monotonic};
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
@@ -33,11 +36,16 @@ fn read_file(file_path: &str) -> (String, String) {
 
 // const DUMP_PATH: &str = "tests/fixtures/dump.txt";
 const MONO_PATH: &str = "tests/fixtures/monotonic.txt";
-const PATHS: [&str; 3] = [
+const PATHS: [&str; 4] = [
     MONO_PATH,
     "tests/fixtures/polytonic.txt",
     "tests/fixtures/english.txt",
+    "tests/fixtures/dump.txt",
 ];
+
+fn syllabify_el_merge_never(s: &str) -> Syllables {
+    syllabify_el_mode(s, grac::Merge::Never)
+}
 
 fn benchmark_syllabify(c: &mut Criterion) {
     let mut group = c.benchmark_group("syllabify");
@@ -45,13 +53,20 @@ fn benchmark_syllabify(c: &mut Criterion) {
         .measurement_time(std::time::Duration::new(3, 0))
         .warm_up_time(std::time::Duration::new(2, 0));
 
+    let hypher_word = "διαμερίσματα";
+    group.bench_function("hypher_test", |b| {
+        b.iter(|| syllabify_el_merge_never(black_box(hypher_word)));
+    });
+
     for file_path in PATHS {
         let (content, stem) = read_file(file_path);
         let words: Vec<_> = content.split_whitespace().collect();
 
-        bench_words!(group, words, stem, syllabify_gr);
-        bench_words!(group, words, stem, syllabify_gr_ref);
-        bench_words!(group, words, stem, syllabify_el);
+        // bench_words!(group, words, stem, syllabify_gr);
+        // bench_words!(group, words, stem, syllabify_gr_ref);
+        // bench_words!(group, words, stem, syllabify_el);
+        // bench_words!(group, words, stem, syllabify_el_merge_every);
+        bench_words!(group, words, stem, syllabify_el_merge_never);
     }
 }
 
