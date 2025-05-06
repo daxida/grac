@@ -172,15 +172,23 @@ pub fn remove_acute(s: &str) -> String {
 /// assert_eq!(remove_diacritic_at("άνθρωπέ", 3, Diacritic::ACUTE), "ανθρωπέ");
 /// ```
 pub fn remove_diacritic_at(s: &str, pos: usize, diacritic: char) -> String {
-    let mut syllables = syllabify_el(s);
+    let syllables = syllabify_el(s);
 
     if pos == 0 || pos > syllables.len() {
         s.to_string()
     } else {
         let idx = syllables.len() - pos;
-        let replace_with = remove_diacritics(syllables[idx], &[diacritic]);
-        syllables[idx] = replace_with.as_str();
-        syllables.join("")
+        syllables
+            .iter()
+            .enumerate()
+            .map(|(i, syll)| {
+                if i == idx {
+                    remove_diacritics(syll, &[diacritic])
+                } else {
+                    (*syll).to_string()
+                }
+            })
+            .collect::<String>()
     }
 }
 
@@ -209,15 +217,23 @@ pub fn add_acute_at(s: &str, pos: usize) -> String {
 }
 
 fn add_diacritic_at(s: &str, pos: usize, diacritic: char) -> String {
-    let mut syllables = syllabify_el(s);
+    let syllables = syllabify_el(s);
 
     if pos == 0 || pos > syllables.len() {
         s.to_string()
     } else {
         let idx = syllables.len() - pos;
-        let replace_with = add_diacritic_at_syllable(syllables[idx], diacritic);
-        syllables[idx] = replace_with.as_str();
-        syllables.join("")
+        syllables
+            .iter()
+            .enumerate()
+            .map(|(i, syll)| {
+                if i == idx {
+                    add_diacritic_at_syllable(syll, diacritic)
+                } else {
+                    (*syll).to_string()
+                }
+            })
+            .collect::<String>()
     }
 }
 
@@ -248,9 +264,33 @@ mod tests {
     }
 
     #[test]
-    fn test_any_diacritics() {
+    fn test_diacritics_has_any() {
         assert!(!has_any_diacritic("τεστ"));
         assert!(has_any_diacritic("καλημέρα"));
         assert!(has_any_diacritic("ϊ"));
+    }
+
+    #[test]
+    fn test_diacritics_pos() {
+        assert_eq!(diacritic_pos("παϊδάκι", Diacritic::ACUTE), [2]);
+        assert_eq!(diacritic_pos("παϊδάκι", Diacritic::DIAERESIS), [3]);
+    }
+
+    #[test]
+    fn test_diacritics_remove() {
+        assert_eq!(remove_all_diacritics("παϊδάκι"), "παιδακι");
+    }
+
+    #[test]
+    fn test_diacritic_add_acute_at() {
+        assert_eq!(add_acute_at("κια", 0), "κια");
+        assert_eq!(add_acute_at("κια", 1), "κιά");
+        assert_eq!(add_acute_at("κια", 2), "κία");
+        assert_eq!(add_acute_at("κια", 9), "κια");
+    }
+
+    #[test]
+    fn test_diacritic_add_to_char() {
+        assert_eq!(add_diacritic_to_char('ω', Diacritic::ACUTE), 'ώ');
     }
 }
