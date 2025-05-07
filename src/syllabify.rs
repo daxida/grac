@@ -132,6 +132,20 @@ pub const fn is_vowel(ch: char) -> bool {
     }
 }
 
+#[rustfmt::skip]
+const fn is_consonant(ch: char) -> bool {
+    matches!(
+        ch,
+        // lowercase
+        'β' | 'γ' | 'δ' | 'ζ' | 'θ' | 'κ' | 'λ' | 'μ' | 'ν' | 'ξ' |
+        'π' | 'ρ' | 'σ' | 'ς' | 'τ' | 'φ' | 'χ' | 'ψ' |
+
+        // uppercase
+        'Β' | 'Γ' | 'Δ' | 'Ζ' | 'Θ' | 'Κ' | 'Λ' | 'Μ' | 'Ν' | 'Ξ' |
+        'Π' | 'Ρ' | 'Σ' | 'Τ' | 'Φ' | 'Χ' | 'Ψ'
+    )
+}
+
 pub fn is_diphthong(chs: &[char]) -> bool {
     match chs {
         [a, b] => {
@@ -152,20 +166,6 @@ fn is_candidate_diphthong(chs: &[char]) -> bool {
 fn is_consonant_cluster(a: char, b: char) -> bool {
     let pair = (base_lower(a), base_lower(b));
     CONS_CLUSTERS_EL.contains(&pair)
-}
-
-#[rustfmt::skip]
-const fn is_consonant(ch: char) -> bool {
-    matches!(
-        ch,
-        // lowercase
-        'β' | 'γ' | 'δ' | 'ζ' | 'θ' | 'κ' | 'λ' | 'μ' | 'ν' | 'ξ' |
-        'π' | 'ρ' | 'σ' | 'ς' | 'τ' | 'φ' | 'χ' | 'ψ' |
-
-        // uppercase
-        'Β' | 'Γ' | 'Δ' | 'Ζ' | 'Θ' | 'Κ' | 'Λ' | 'Μ' | 'Ν' | 'Ξ' |
-        'Π' | 'Ρ' | 'Σ' | 'Τ' | 'Φ' | 'Χ' | 'Ψ'
-    )
 }
 
 type S<'a> = &'a str;
@@ -232,7 +232,6 @@ fn syllabify_impl<'a>(s: &'a str, merge: Merge) -> Syllables<'a> {
     // We'll walk backwards using char_indices().rev(), and buffer recent chars
     let mut to_byte = s.len();
     let mut buffer: [(usize, char); 3] = [(0, '\0'); 3]; // for peeking ahead
-    let mut buf_len = 0;
 
     macro_rules! dump_at {
         ($fr_byte:expr) => {{
@@ -247,7 +246,6 @@ fn syllabify_impl<'a>(s: &'a str, merge: Merge) -> Syllables<'a> {
         // Slide buffer
         buffer.copy_within(0..2, 1);
         buffer[0] = (fr_byte, ch);
-        buf_len = buf_len.min(2) + 1;
 
         let vowel = is_vowel(ch);
 
@@ -269,19 +267,23 @@ fn syllabify_impl<'a>(s: &'a str, merge: Merge) -> Syllables<'a> {
             }
             State::FoundVowel => {
                 if vowel {
-                    debug_assert!(buf_len >= 2);
                     let (next_idx, next_ch) = buffer[1];
                     let icd = is_candidate_diphthong(&[ch, next_ch]);
-                    if cur_merge && (matches!(ch, 'ι' | 'υ' | 'η') || icd) {
-                        // merge
+                    if cur_merge && (icd || matches!(ch, 'ι' | 'υ' | 'η' | 'ϊ')) {
+                        if icd && !merge.to_bool(idx_syllable + 1) {
+                            // όια
+                            // dump the part after the iota
+                            dump_at!(next_idx);
+                        }
+                        // keep advancing (=merge)
                     } else if !icd && is_diphthong(&[ch, next_ch]) {
                         let (after_next_idx, after_next_ch) = buffer[2];
                         if after_next_ch == 'ι' && to_byte > after_next_idx {
-                            debug_assert!(buf_len >= 3);
+                            // ουι
                             // dump the part after the iota
                             dump_at!(after_next_idx);
                         }
-                        // merge
+                        // keep advancing (=merge)
                     } else {
                         dump_at!(next_idx);
                     }

@@ -59,7 +59,7 @@ macro_rules! mktest_el_mode {
 }
 
 mktest_el!(
-    syllabify_el_ancient,
+    syllabify_ancient,
     ["γυναικός", "γυ-ναι-κός"],
     ["Μελέτες", "Με-λέ-τες"],
     ["στρες", "στρες"],
@@ -74,7 +74,7 @@ mktest_el!(
 );
 
 mktest_el!(
-    syllabify_el_ancient_names,
+    syllabify_ancient_names,
     ["Πυθαγόρας", "Πυ-θα-γό-ρας"],
     ["Αλέξανδρος", "Α-λέ-ξαν-δρος"],
     ["Ἀθήνα", "Ἀ-θή-να"],
@@ -82,7 +82,7 @@ mktest_el!(
 );
 
 mktest_el!(
-    syllabify_el_basic,
+    syllabify_basic,
     ["ἄρουιν", "ἄ-ρου-ιν"],
     ["οιωνός", "οι-ω-νός"],
     // ["Δαυίδ", "Δαυ-ίδ"], // Hard
@@ -90,7 +90,7 @@ mktest_el!(
 
 // I have not decided yet on left punctuation...
 mktest_el!(
-    syllabify_el_punct,
+    syllabify_punct,
     // ["«τὸ", "«το"],
     ["Αθήνα.", "Α-θή-να."],
     ["φιλοσοφία,", "φι-λο-σο-φί-α,"],
@@ -98,14 +98,14 @@ mktest_el!(
 );
 
 mktest_el!(
-    syllabify_el_double_cons_same,
+    syllabify_double_cons_same,
     ["μέλισσα", "μέ-λισ-σα"],
     ["θάλασσα", "θά-λασ-σα"],
     ["Ελλάδα", "Ελ-λά-δα"],
 );
 
 mktest_el!(
-    syllabify_el_double_cons,
+    syllabify_double_cons,
     ["κόσμος", "κό-σμος"],
     ["δεσμός", "δε-σμός"],
     ["πάντα", "πά-ντα"],
@@ -122,14 +122,14 @@ mktest_el!(
 );
 
 mktest_el!(
-    syllabify_el_triple_cons,
+    syllabify_triple_cons,
     ["εχθρός", "ε-χθρός"],
     ["άσπρος", "ά-σπρος"],
     ["αντλώ", "α-ντλώ"],
 );
 
 mktest_el!(
-    syllabify_el_triple_vowel,
+    syllabify_triple_vowel,
     ["ωραιοπάθεια", "ω-ραι-ο-πά-θει-α"],
     ["ποίηση", "ποί-η-ση"],
     ["σημειώνω", "ση-μει-ώ-νω"],
@@ -145,13 +145,13 @@ mktest_el!(
 
 // Diaeresis
 mktest_el!(
-    syllabify_el_diaeresis,
+    syllabify_diaeresis,
     ["Αγλαΐα", "Α-γλα-ΐ-α"],
     ["αδενοϋπόφυση", "α-δε-νο-ϋ-πό-φυ-ση"]
 );
 
 mktest_el_mode!(
-    syllabify_el_merge_synizesis,
+    syllabify_merge_synizesis,
     [Merge::Every, "μάγια", "μά-για"],
     [Merge::Never, "μάγια", "μά-γι-α"],
     [Merge::Every, "μυαλό", "μυα-λό"],
@@ -161,7 +161,31 @@ mktest_el_mode!(
 );
 
 mktest_el_mode!(
-    syllabify_el_merge,
+    syllabify_merge_diphthongs,
+    [Merge::Never, "βόιδια", "βό-ι-δι-α"],
+    [Merge::Never, "ρόιδια", "ρό-ι-δι-α"],
+);
+
+mktest_el_mode!(
+    syllabify_merge_indices_diphthongs,
+    [Merge::Every, "όια", "όια"],
+    [Merge::Never, "όια", "ό-ι-α"],
+    [Merge::from_indices(&[1]), "όια", "ό-ια"],
+    [Merge::from_indices(&[1, 2]), "όια", "όια"],
+    [Merge::from_indices(&[2]), "όια", "ό-ι-α"],
+);
+
+mktest_el_mode!(
+    syllabify_merge_indices_diphthongs_bis,
+    [Merge::Never, "όϊα", "ό-ϊ-α"],
+    [Merge::Every, "όϊα", "όϊα"],
+    [Merge::from_indices(&[1]), "όϊα", "ό-ϊα"],
+    [Merge::from_indices(&[1]), "όιο", "ό-ιο"],
+    [Merge::from_indices(&[1]), "γυιο", "γυιο"],
+);
+
+mktest_el_mode!(
+    syllabify_merge,
     // ai
     [Merge::Every, "αι", "αι"],
     [Merge::Never, "αι", "αι"],
@@ -218,7 +242,7 @@ mktest_el_mode!(
 //
 // Some exceptions (for example αηδόνι) have been added in build.rs
 mktest_el!(
-    syllabify_el_merge_convention,
+    syllabify_merge_convention,
     // ai
     // 1. αη άη
     ["αηδόνι", "αη-δό-νι"],
@@ -250,7 +274,7 @@ mktest_el!(
 
 // Synizesis
 mktest_el!(
-    syllabify_el_synizesis_monosyllable,
+    syllabify_synizesis_monosyllable,
     ["δια", "δια"],
     ["διω", "διω"],
     ["μια", "μια"],
@@ -278,7 +302,7 @@ mktest_el!(
 );
 
 mktest_el!(
-    syllabify_el_no_synizesis,
+    syllabify_no_synizesis,
     ["δωμάτιο", "δω-μά-τι-ο"],
     ["σιτηρέσιο", "σι-τη-ρέ-σι-ο"],
     ["σχέδιο", "σχέ-δι-ο"],
@@ -290,14 +314,14 @@ mktest_el!(
 //
 // Not supported for the moment
 // mktest_el!(
-//     syllabify_el_synizesis_final_n,
+//     syllabify_synizesis_final_n,
 //     ["αστέριαν", "α-στέ-ριαν"],
 //     ["γένειαν", "γέ-νειαν"],
 //     ["τέτοιον", "τέ-τοιον"],
 // );
 
 mktest_el!(
-    syllabify_el_synizesis,
+    syllabify_synizesis,
     ["αστέρια", "α-στέ-ρια"],
     ["αλογίσιοι", "α-λο-γί-σιοι"],
     ["αχυρένιε", "α-χυ-ρέ-νιε"],
@@ -329,7 +353,7 @@ mktest_el!(
 );
 
 mktest_el!(
-    syllabify_el_synizesis_poursa,
+    syllabify_synizesis_poursa,
     ["καλάθια", "κα-λά-θια"],
     ["ντουλάπια", "ντου-λά-πια"],
     ["μάτια", "μά-τια"],
@@ -343,7 +367,7 @@ mktest_el!(
 );
 
 mktest_el!(
-    syllabify_el_synizesis_rare,
+    syllabify_synizesis_rare,
     ["βερεσέδια", "βε-ρε-σέ-δια"],
     ["βλαστήμια", "βλα-στή-μια"],
 );
@@ -373,7 +397,7 @@ mktest_el!(syllabify_verb_old, ["πιη", "πιη"], ["πιης", "πιης"],);
 // Depends on the speaker. This can not be a general rule.
 // https://teachergeorgiasclass.weebly.com/uploads/4/5/0/7/45072177/Κάτω_απ_το_χιόνι_2.pdf
 // mktests_el!(
-//     syllabify_el_gorgias,
+//     syllabify_gorgias,
 //     ["αηδόνι", "αη-δό-νι"],
 //     ["δουλειά", "δου-λειά"],
 //     ["κάποια", "κά-ποια"],
@@ -382,7 +406,7 @@ mktest_el!(syllabify_verb_old, ["πιη", "πιη"], ["πιης", "πιης"],);
 // http://ebooks.edu.gr/ebooks/v/html/8547/2009/Grammatiki_E-ST-Dimotikou_html-apli/index_B4a.html
 // https://melobytes.gr/el/app/syllavismos
 mktest_el!(
-    syllabify_el_dimotiko,
+    syllabify_dimotiko,
     // Rule 1: A consonant between two vowels is grouped with the second vowel.
     ["έχω", "έ-χω"],
     // Rule 2: Diphthongs, vowel combinations like αυ, ευ, ου, and diphthongs remain unbroken.
@@ -405,7 +429,7 @@ mktest_el!(
 );
 
 mktest_el!(
-    syllabify_el_sivas_grammar,
+    syllabify_sivas_grammar,
     // Rule 3: Three or more consonants between vowels
     ["αισχός", "αι-σχός"],
     ["εκστρατεία", "εκ-στρα-τεί-α"],
@@ -422,7 +446,7 @@ mktest_el!(
 
 // https://www.patakis.gr/files/1186890.pdf
 mktest_el!(
-    syllabify_el_patakis,
+    syllabify_patakis,
     ["γάτα", "γά-τα"],
     ["αγκάθι", "α-γκά-θι"],
     ["κουλούρι", "κου-λού-ρι"],
@@ -446,7 +470,7 @@ mktest_el!(
 
 // https://github.com/datio/grhyph/blob/master/grhyph_test.go
 mktest_el!(
-    syllabify_el_grhyph,
+    syllabify_grhyph,
     ["άκαμπτος", "ά-κα-μπτος"],
     ["άλμπατρος", "άλ-μπα-τρος"],
     ["έκθλιψη", "έκ-θλι-ψη"],
@@ -575,7 +599,7 @@ impl quickcheck::Arbitrary for GreekWord {
 }
 
 quickcheck! {
-    fn test_syllabify_el_ref(word: GreekWord) -> bool {
+    fn test_fuzz_merge(word: GreekWord) -> bool {
         let _ = grac::syllabify_with_merge(&word.0, Merge::Never);
         let _ = grac::syllabify_with_merge(&word.0, Merge::Every);
         let _ = grac::syllabify_with_merge(&word.0, Merge::from_indices(&[1]));

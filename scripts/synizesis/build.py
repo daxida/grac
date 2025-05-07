@@ -5,7 +5,7 @@ from itertools import takewhile
 from pathlib import Path
 from typing import TextIO
 
-from grac import remove_all_diacritics, syllabify_el_mode_at
+from grac import remove_all_diacritics, syllabify_with_merge_at
 
 ppath = Path("scripts/synizesis/data")
 
@@ -149,6 +149,7 @@ IO_NOUN.extend(add_endings([word[:-1] for word in other_io_noun], io_noun_ending
 IOS_NOUN_LEMMA = [
     "γι",
     "γυι",  # old writing of γιος
+    "υι",  # old writing of γιος
     "ίσκι",
     "ήσκι",
     "ήλι",
@@ -288,7 +289,7 @@ def generate_lookup_synizesis(f: TextIO) -> None:
         if word in MULTIPLE_PRONUNCIATION:
             continue
 
-        _syls = syllabify_el_mode_at(word, [1])
+        _syls = syllabify_with_merge_at(word, [1])
         syllables = str(_syls).replace("'", '"')
         mapping[word] = syllables
 
@@ -298,7 +299,7 @@ def generate_lookup_synizesis(f: TextIO) -> None:
 
     for words, accent_at in MERGE_AT:
         for word in words:
-            _syls = syllabify_el_mode_at(word, accent_at)
+            _syls = syllabify_with_merge_at(word, accent_at)
             syllables = str(_syls).replace("'", '"')
             mapping[word] = syllables
 

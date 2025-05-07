@@ -9,7 +9,7 @@ https://el.wiktionary.org/wiki/Κατηγορία:Ουσιαστικά_που_κ
 
 from pathlib import Path
 
-from grac import syllabify_el_mode
+from grac import syllabify_with_merge
 from grac import has_diacritic, Diacritic
 
 # Available here (iso-8859-7):
@@ -38,17 +38,25 @@ def load_words() -> list[str]:
     )
 
 
+def has_acute_at(syllables: list[str], pos: int) -> bool:
+    return len(syllables) >= pos and has_diacritic(
+        syllables[-pos], Diacritic.ACUTE.value
+    )
+
+
 def is_proparoxytone(word: str) -> bool:
-    syllables = syllabify_el_mode(word, synizesis=False)
-    return len(syllables) >= 3 and has_diacritic(syllables[-3], Diacritic.ACUTE.value)
+    syllables = syllabify_with_merge(word, merge=False)
+    # Although the accent can only fall on the last three syllables, our syllabify function
+    # does not know that sometimes it has to merge diphthongs to make this hold true.
+    # Therefore, for words like ρόιδια, the accent ends up falling at the -4 position.
+    return has_acute_at(syllables, 3) or has_acute_at(syllables, 4)
 
 
 def filter_neuter(words: list[str]) -> list[str]:
     """Extract neuter words that should carry synizesis.
 
     In particular:
-    * We only consider words that, without synizesis, should have been
-      proparoxytone.
+    * We only consider words that, without synizesis, should have been proparoxytone.
     * Nouns ending in ι (singular in ι / plural in ια)
       Ex. χιόνι / χιόνια (only the plural is added)
           καΐκι / καΐκια
