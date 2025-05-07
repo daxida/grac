@@ -30,5 +30,6 @@ pub use monotonic::to_monotonic;
 
 pub use syllabify::Merge;
 pub use syllabify::Syllables;
+pub use syllabify::is_vowel;
 pub use syllabify::syllabify;
 pub use syllabify::syllabify_with_merge;
