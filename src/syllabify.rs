@@ -114,7 +114,7 @@ pub fn syllabify(s: &str) -> Syllables<'_> {
 /// let idxs = Merge::from_indices(&[1, 2]);
 /// assert_eq!(syllabify_with_merge(word, idxs).join("-"), "α-στειά-κια");
 /// ```
-pub fn syllabify_with_merge<'a>(s: &'a str, merge: Merge) -> Syllables<'a> {
+pub fn syllabify_with_merge(s: &str, merge: Merge) -> Syllables<'_> {
     syllabify_impl(s, merge)
 }
 
@@ -146,21 +146,13 @@ const fn is_consonant(ch: char) -> bool {
     )
 }
 
-pub fn is_diphthong(chs: &[char]) -> bool {
-    match chs {
-        [a, b] => {
-            let pair = (base_lower(*a), base_lower(*b));
-            DIPHTHONGS_EL.contains(&pair) && !has_diaeresis(*b)
-        }
-        _ => false,
-    }
+pub fn is_diphthong(a: char, b: char) -> bool {
+    let pair = (base_lower(a), base_lower(b));
+    DIPHTHONGS_EL.contains(&pair) && !has_diaeresis(b)
 }
 
-fn is_candidate_diphthong(chs: &[char]) -> bool {
-    match chs {
-        [a, b] => CANDIDATE_MERGING_DIPHTHONGS_EL.contains(&(*a, *b)),
-        _ => false,
-    }
+fn is_candidate_diphthong(a: char, b: char) -> bool {
+    CANDIDATE_MERGING_DIPHTHONGS_EL.contains(&(a, b))
 }
 
 fn is_consonant_cluster(a: char, b: char) -> bool {
@@ -222,7 +214,7 @@ enum State {
 
 // Because we yield syllables in reverse order, we cannot refactor this into
 // returning only an iterator (we need to allocate the syllables somehow).
-fn syllabify_impl<'a>(s: &'a str, merge: Merge) -> Syllables<'a> {
+fn syllabify_impl(s: &str, merge: Merge) -> Syllables<'_> {
     let mut out = Ty::with_capacity(8); // Found experimentally
 
     let mut state = State::Start;
@@ -268,7 +260,7 @@ fn syllabify_impl<'a>(s: &'a str, merge: Merge) -> Syllables<'a> {
             State::FoundVowel => {
                 if vowel {
                     let (next_idx, next_ch) = buffer[1];
-                    let icd = is_candidate_diphthong(&[ch, next_ch]);
+                    let icd = is_candidate_diphthong(ch, next_ch);
                     if cur_merge && (icd || matches!(ch, 'ι' | 'υ' | 'η' | 'ϊ')) {
                         if icd && !merge.to_bool(idx_syllable + 1) {
                             // όια
@@ -276,7 +268,7 @@ fn syllabify_impl<'a>(s: &'a str, merge: Merge) -> Syllables<'a> {
                             dump_at!(next_idx);
                         }
                         // keep advancing (=merge)
-                    } else if !icd && is_diphthong(&[ch, next_ch]) {
+                    } else if !icd && is_diphthong(ch, next_ch) {
                         let (after_next_idx, after_next_ch) = buffer[2];
                         if after_next_ch == 'ι' && to_byte > after_next_idx {
                             // ουι
@@ -320,9 +312,9 @@ mod tests {
 
     #[test]
     fn test_is_diphthong() {
-        assert!(is_diphthong(&['α', 'ι']));
-        assert!(!is_diphthong(&['α', 'ε']));
-        assert!(!is_diphthong(&['α', 'ϋ']));
+        assert!(is_diphthong('α', 'ι'));
+        assert!(!is_diphthong('α', 'ε'));
+        assert!(!is_diphthong('α', 'ϋ'));
     }
 
     #[test]
@@ -372,11 +364,10 @@ mod tests {
     fn test_is_vowel_opt() {
         const VOWELS_LOWER: &str = "αειουωη";
         for code in 0x0370..=0x1FFF {
-            if let Some(ch) = char::from_u32(code) {
-                let base = base_lower(ch);
-                if VOWELS_LOWER.contains(base) {
-                    assert!(is_vowel(ch));
-                }
+            let ch = char::from_u32(code).unwrap();
+            let base = base_lower(ch);
+            if VOWELS_LOWER.contains(base) {
+                assert!(is_vowel(ch));
             }
         }
     }
