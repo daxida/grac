@@ -214,6 +214,9 @@ enum State {
 
 // Because we yield syllables in reverse order, we cannot refactor this into
 // returning only an iterator (we need to allocate the syllables somehow).
+//
+// Writing the reverse of this finite state automaton should be possible, but
+// I am unsure it deserves the effort.
 fn syllabify_impl(s: &str, merge: Merge) -> Syllables<'_> {
     let mut out = Ty::with_capacity(8); // Found experimentally
 

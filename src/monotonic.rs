@@ -102,24 +102,23 @@ fn dbg_bytes(s: &str) {
     );
 }
 
-/// Remove ancient diacritics and convert grave and circumflex to acute
-/// in a single pass.
-//
-// TODO:
-// filter_map was performing a bit worse but remains to be tested.
+/// Remove ancient diacritics and convert grave and circumflex to acute in a single pass.
 fn convert_to_acute(s: &str) -> String {
+    const DIACRITICS_TO_REMOVE: [char; 3] = [
+        Diacritic::IOTA_SUBSCRIPT,
+        Diacritic::ROUGH,
+        Diacritic::SMOOTH,
+    ];
+
     s.nfd()
-        .filter(|ch| {
-            ![
-                Diacritic::IOTA_SUBSCRIPT,
-                Diacritic::ROUGH,
-                Diacritic::SMOOTH,
-            ]
-            .contains(ch)
-        })
-        .map(|ch| match ch {
-            Diacritic::GRAVE | Diacritic::CIRCUMFLEX => Diacritic::ACUTE,
-            _ => ch,
+        .filter_map(|ch| {
+            if DIACRITICS_TO_REMOVE.contains(&ch) {
+                None
+            } else if matches!(ch, Diacritic::GRAVE | Diacritic::CIRCUMFLEX) {
+                Some(Diacritic::ACUTE)
+            } else {
+                Some(ch)
+            }
         })
         .nfc()
         .collect::<String>()
@@ -151,7 +150,7 @@ fn special_cases(s: &str) -> Option<&str> {
 /// Convert a string representing a word to monotonic Greek.
 fn to_monotonic_word(s: &str) -> String {
     // If the word is empty our segmentation logic is probably wrong.
-    assert!(!s.is_empty());
+    debug_assert!(!s.is_empty());
 
     // Do not remove accents if the word is not greek
     if !is_greek_word(s) {

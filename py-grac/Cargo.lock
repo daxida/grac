@@ -25,10 +25,11 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "grac"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "aho-corasick",
  "phf",
+ "smallvec",
  "unicode-normalization",
 ]
 
@@ -130,7 +131,7 @@ dependencies = [
 
 [[package]]
 name = "py-grac"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "grac",
  "pyo3",
@@ -228,6 +229,12 @@ name = "siphasher"
 version = "0.3.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "38b58827f4464d87d377d175e90bf58eb00fd8716ff0a62f80356b5e61555d0d"
+
+[[package]]
+name = "smallvec"
+version = "1.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8917285742e9f3e1683f0a9c4e6b57960b7314d0b08d30d1ecd426713ee2eee9"
 
 [[package]]
 name = "syn"
