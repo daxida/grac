@@ -1,8 +1,8 @@
 [package]
 name = "grac"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.90"
 repository = "https://github.com/daxida/grac"
 license = "MIT"
 

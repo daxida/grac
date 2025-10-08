@@ -171,7 +171,7 @@ pub struct Syllables<'a> {
 }
 
 impl Syllables<'_> {
-    pub fn as_slice(&self) -> &[S<'_>] {
+    pub const fn as_slice(&self) -> &[S<'_>] {
         self.inner.as_slice()
     }
 }
