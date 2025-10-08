@@ -1,5 +1,14 @@
 build:
+  just build-py
+  just build-synizesis
+
+# Build python bindings with maturin
+build-py:
   maturin develop --uv --release -m py-grac/Cargo.toml
+
+# Build synizesis.rs via a python script
+build-synizesis:
+  python3 scripts/synizesis/build.py
 
 test:
   cargo test

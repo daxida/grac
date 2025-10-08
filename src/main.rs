@@ -24,8 +24,8 @@ fn run(text: &str) {
         let _syls: Vec<_> = words
             .iter()
             .map(|cword| {
-                let syllables = syllabify_with_merge(cword, grac::Merge::Never);
-                syllables
+                
+                syllabify_with_merge(cword, grac::Merge::Never)
             })
             .collect();
     }
