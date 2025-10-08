@@ -174,7 +174,11 @@ IAS_NOUN.extend(add_endings([word[:-3] for word in other_ias_noun], ias_noun_end
 
 # Noun (neuter) ending in ι (singular in ι / plural in ια)
 # Ex. χιόνι / χιόνια (only the plural is added)
-I_IA_NOUN = []
+I_IA_NOUN_LEMMA = [
+    "φυτίλι"  # alt. writing of φιτίλι
+]
+i_ia_noun_endings = "α"
+I_IA_NOUN = add_endings(I_IA_NOUN_LEMMA, i_ia_noun_endings)
 I_IA_NOUN.extend(load_from_path(ppath / "neuters.txt"))
 
 SYNIZESIS = [
