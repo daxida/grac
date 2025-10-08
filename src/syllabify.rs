@@ -171,7 +171,7 @@ pub struct Syllables<'a> {
 }
 
 impl Syllables<'_> {
-    pub fn as_slice(&self) -> &[S] {
+    pub fn as_slice(&self) -> &[S<'_>] {
         self.inner.as_slice()
     }
 }
@@ -245,11 +245,13 @@ fn syllabify_impl(s: &str, merge: Merge) -> Syllables<'_> {
         let vowel = is_vowel(ch);
 
         // eprintln!(
-        //     "* {:<15} {} {} {} {} \n| Buf {:?}",
+        //     "* {:<15} {} {} {} -- {} {} -- {} \n| \x1b[33mBuf {:?}\x1b[0m",
         //     format!("{state:?}"),
         //     fr_byte,
         //     ch,
         //     vowel,
+        //     idx_syllable,
+        //     cur_merge,
         //     out.join("-"),
         //     buffer
         // );
@@ -264,10 +266,20 @@ fn syllabify_impl(s: &str, merge: Merge) -> Syllables<'_> {
                 if vowel {
                     let (next_idx, next_ch) = buffer[1];
                     let icd = is_candidate_diphthong(ch, next_ch);
-                    if cur_merge && (icd || matches!(ch, 'ι' | 'υ' | 'η' | 'ϊ')) {
-                        if icd && !merge.to_bool(idx_syllable + 1) {
+                    if cur_merge && matches!(ch, 'ι' | 'υ' | 'η' | 'ϊ') {
+                        // keep advancing (=merge)
+                    } else if cur_merge && icd {
+                        // Handles three consecutive vowel splitting depending on merge.
+                        // Effectively reads: if we found three consecutive vowels and we didn't
+                        // already dumped the last (further to the right) one into a syllable...
+                        let (_, after_next_ch) = buffer[2];
+                        if is_vowel(next_ch)
+                            && is_vowel(after_next_ch)
+                            && !matches!(out.last(), Some(after_next_ch))
+                            && !merge.to_bool(idx_syllable + 1)
+                        {
                             // όια
-                            // dump the part after the iota
+                            // dump the part after the iota/omega depending on merge
                             dump_at!(next_idx);
                         }
                         // keep advancing (=merge)
@@ -295,7 +307,7 @@ fn syllabify_impl(s: &str, merge: Merge) -> Syllables<'_> {
                     dump_at!(next_idx);
                     state = State::Start;
                 }
-                // keep advancing
+                // keep advancing (=merge)
             }
         }
     }

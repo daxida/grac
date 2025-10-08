@@ -9,7 +9,7 @@ macro_rules! assert_eq_dbg {
         assert_eq!(
             $result,
             $expected,
-            "\nMismatch for: '{}'\n'{:?}'\n'{:?}'",
+            "\nMismatch for: '{}'\n* {:?}\n* {:?}",
             $input,
             $input.chars(),
             $input
@@ -170,18 +170,37 @@ mktest_el_mode!(
     syllabify_merge_indices_diphthongs,
     [Merge::Every, "όια", "όια"],
     [Merge::Never, "όια", "ό-ι-α"],
-    [Merge::from_indices(&[1]), "όια", "ό-ια"],
-    [Merge::from_indices(&[1, 2]), "όια", "όια"],
-    [Merge::from_indices(&[2]), "όια", "ό-ι-α"],
 );
 
 mktest_el_mode!(
-    syllabify_merge_indices_diphthongs_bis,
-    [Merge::Never, "όϊα", "ό-ϊ-α"],
-    [Merge::Every, "όϊα", "όϊα"],
-    [Merge::from_indices(&[1]), "όϊα", "ό-ϊα"],
-    [Merge::from_indices(&[1]), "όιο", "ό-ιο"],
+    syllabify_merge_indices_diphthongs_from_indices,
+    [Merge::from_indices(&[1]), "όι", "όι"],
+    [Merge::from_indices(&[1]), "όια", "ό-ια"],
+    [Merge::from_indices(&[2]), "όια", "όι-α"],
+    [Merge::from_indices(&[2]), "μπόια", "μπόι-α"],
     [Merge::from_indices(&[1]), "γυιο", "γυιο"],
+);
+
+mktest_el_mode!(
+    syllabify_merge_indices_diphthongs_multiple,
+    [Merge::from_indices(&[1, 2]), "όια", "όια"],
+    [Merge::from_indices(&[1, 3]), "αηδονιού", "αη-δο-νιού"],
+);
+
+mktest_el_mode!(
+    syllabify_merge_indices_diphthongs_diaeresis,
+    [Merge::Every, "όϊα", "όϊα"],
+    [Merge::Never, "όϊα", "ό-ϊ-α"],
+    [Merge::from_indices(&[1]), "όϊα", "ό-ϊα"],
+);
+
+mktest_el_mode!(
+    syllabify_merge_indices_roloi,
+    [Merge::from_indices(&[1]), "ρολόι", "ρο-λόι"],
+    [Merge::from_indices(&[1]), "ρολοϊού", "ρο-λο-ϊού"],
+    [Merge::from_indices(&[2]), "ρολοϊού", "ρο-λοϊ-ού"],
+    [Merge::from_indices(&[1, 2]), "ρολοϊού", "ρο-λοϊού"],
+    [Merge::Every, "ρολοϊού", "ρο-λοϊού"],
 );
 
 mktest_el_mode!(
@@ -227,6 +246,14 @@ mktest_el_mode!(
     [Merge::Never, "έι", "έι"],
 );
 
+// Cf. candidate diphthongs
+mktest_el_mode!(
+    syllabify_merge_bis,
+    [Merge::Every, "αη", "αη"],
+    [Merge::Never, "αη", "α-η"],
+    [Merge::from_indices(&[1]), "αη", "αη"],
+);
+
 // While not perfect, we adopt the better convention of never merging,
 // that is coherent with our synizesis approach, and seems to hold true for
 // αη/οη occurrences.
@@ -240,7 +267,7 @@ mktest_el_mode!(
 // * Merged words (0)
 // * Not merged words (127)
 //
-// Some exceptions (for example αηδόνι) have been added in build.rs
+// Some exceptions (for example αηδόνι) have been added in build.py
 mktest_el!(
     syllabify_merge_convention,
     // ai
@@ -577,7 +604,7 @@ impl quickcheck::Arbitrary for GreekWord {
         let mut word = String::new();
         let letters: Vec<char> = GREEK_LETTERS
             .iter()
-            .flat_map(|&(start, end)| (start..=end))
+            .flat_map(|&(start, end)| start..=end)
             .filter_map(char::from_u32)
             .collect();
         for _ in 0..wlen {
