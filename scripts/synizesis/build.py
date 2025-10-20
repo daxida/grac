@@ -218,6 +218,25 @@ SYNIZESIS = [
     *I_IA_NOUN,
 ]
 
+# Add variants from words in SYNIZESIS.
+# Ex. σταυραδέρφια > σταυραδέλφια
+SUFFIX_VARIANTS = [
+    {"αδέρφια", "αδέλφια"},
+]
+
+for word in SYNIZESIS:
+    for variants in SUFFIX_VARIANTS:
+        for variant in variants:
+            if not word.endswith(variant):
+                continue
+
+            for other in variants - {variant}:
+                word_trimmed = word[: -len(variant)]
+                word_variant = f"{word_trimmed}{other}"
+                if word_variant not in SYNIZESIS:
+                    SYNIZESIS.append(word_variant)
+
+
 # Words with multiple accepted pronunciations.
 #
 # Only contains words with accent not on the last syllable,
