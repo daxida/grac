@@ -36,6 +36,14 @@ CATEGORY_URLS = [
 ]
 """(label, url)"""
 
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/120.0.0.0 Safari/537.36"
+    ),
+}
+
 
 def extract_category(url: str) -> str:
     return url.split("/")[-1].replace("_", " ")
@@ -47,7 +55,7 @@ def scrape_category(url: str) -> list[str]:
 
     while url:
         print(f"Requesting {urllib.parse.unquote(url)}")
-        response = requests.get(url)
+        response = requests.get(url, headers=HEADERS)
         if response.status_code != 200:
             print(f"Failed to fetch page: {response.status_code}")
             break
@@ -61,7 +69,7 @@ def scrape_category(url: str) -> list[str]:
         if category is None:
             category = extract_category(url)
 
-        next_page = soup.select_one(f"a[title='{category}']:contains('επόμενη σελίδα')")
+        next_page = soup.select_one(f"a[title='{category}']:-soup-contains('επόμενη σελίδα')")
         url = ""
         if next_page:
             url = f"{BASE_URL}{next_page['href']}"
@@ -129,7 +137,8 @@ def label_path(label: str) -> Path:
 
 
 def main() -> None:
-    download = False
+    download = True
+    print(f"Download set to {download}.")
 
     if download:
         print("Downloading")
