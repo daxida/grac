@@ -1,10 +1,9 @@
 Fast accentuation and syllabification library for modern Greek that (partially) takes synizesis into account.
 
-Consider using this if speed (over python implementations) and accuracy (over generic hyphenation libraries) are relevant to your task.
-
-It also provides some (unfinished) python bindings that can manually be installed by cloning the repo and running: `pip install py-grac/`
-
-Based originally on ideas from [greek-accentuation](https://github.com/jtauber/greek-accentuation), and [modern_greek_accentuation](https://github.com/PicusZeus/modern_greek_accentuation).
+While written in rust, it also provides python bindings that can be installed via: 
+```
+pip install "git+https://github.com/daxida/grac.git#subdirectory=py-grac"
+```
 
 ### Testing
 
@@ -20,8 +19,9 @@ cargo test
 cargo bench
 ```
 
-### TODO
+### Etc.
 
-- Wheels, crate, LICENCE
-- WIP: Finish modern greek syllabification (with no support for synizesis)
+- TODO: Wheels, crate
 - Explore [this](https://github.com/datio/grhyph) for synizesis
+- Originally based on ideas from [greek-accentuation](https://github.com/jtauber/greek-accentuation), and [modern_greek_accentuation](https://github.com/PicusZeus/modern_greek_accentuation).
+- Related projects @ [harper](https://github.com/automattic/harper)
